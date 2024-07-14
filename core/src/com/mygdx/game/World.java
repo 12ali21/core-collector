@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -42,6 +43,7 @@ public class World implements Drawable, Updatable {
         }
     }
 
+    private final AssetManager assets;
     private final Batch batch;
     private final OrthographicCamera camera;
 
@@ -51,11 +53,12 @@ public class World implements Drawable, Updatable {
 
     private final HoveredTile hoveredTile;
 
-    private final ArrayList<Updatable> updatableList = new ArrayList<Updatable>();
-    private final ArrayList<Drawable> drawableList = new ArrayList<Drawable>();
+    private final ArrayList<Updatable> updatableList = new ArrayList<>();
+    private final ArrayList<Drawable> drawableList = new ArrayList<>();
 
 
-    public World(Batch batch, OrthographicCamera camera) {
+    public World(AssetManager assets, Batch batch, OrthographicCamera camera) {
+        this.assets = assets;
         this.batch = batch;
         this.camera = camera;
         map = new Map(batch, camera, "testing");
