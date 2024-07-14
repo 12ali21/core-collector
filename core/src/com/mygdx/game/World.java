@@ -8,10 +8,9 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.entities.Drawable;
-import com.mygdx.game.entities.HoveredTile;
-import com.mygdx.game.entities.Updatable;
+import com.mygdx.game.entities.*;
 
 import java.util.ArrayList;
 
@@ -56,6 +55,8 @@ public class World implements Drawable, Updatable {
     private final ArrayList<Updatable> updatableList = new ArrayList<>();
     private final ArrayList<Drawable> drawableList = new ArrayList<>();
 
+    private Turret turret;
+
 
     public World(AssetManager assets, Batch batch, OrthographicCamera camera) {
         this.assets = assets;
@@ -67,15 +68,26 @@ public class World implements Drawable, Updatable {
 
         hoveredTile = new HoveredTile(batch);
         drawableList.add(hoveredTile);
+
+        turret = Turret.BasicTurret(assets, batch, new Vector2(2, 2));
     }
 
     @Override
     public void update(float delta) {
-        hoveredTile.findPosition(camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0)));
+        Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
+        hoveredTile.findPosition(mousePos);
+        if (Gdx.input.isTouched()){
+            turret.setTarget(mousePos.x, mousePos.y);
+        }
 
         for (Updatable updatable : updatableList) {
             updatable.update(delta);
         }
+        turret.update(delta);
+    }
+
+    private Vector3 unproject(float x, float y) {
+        return camera.unproject(new Vector3(x, y, 0));
     }
 
     @Override
@@ -85,6 +97,7 @@ public class World implements Drawable, Updatable {
         for (Drawable drawable : drawableList) {
             drawable.render();
         }
+        turret.render();
         batch.end();
     }
 }

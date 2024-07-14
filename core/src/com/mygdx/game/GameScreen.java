@@ -7,13 +7,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class GameScreen extends ScreenAdapter {
+    private boolean active;
     private SpriteBatch batch;
 
     private OrthographicCamera camera;
     private ScreenInputProcessor inputProcessor;
     private World world;
 
-    float VIEWPORT_SIZE = 20;
+    float VIEWPORT_SIZE = 50;
 
     private final AssetManager assets;
     public GameScreen(AssetManager assets) {
@@ -22,6 +23,8 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        active = true;
+
         batch = new SpriteBatch();
 
         camera = new OrthographicCamera(VIEWPORT_SIZE, VIEWPORT_SIZE);
@@ -53,6 +56,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void resize(int width, int height) {
+        if (!active) return;
         camera.viewportWidth = VIEWPORT_SIZE;
         camera.viewportHeight = VIEWPORT_SIZE * height/width;
         camera.update();
@@ -60,6 +64,8 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        if (!active) return;
         batch.dispose();
+        active = false;
     }
 }

@@ -15,7 +15,7 @@ public class HoveredTile implements Drawable {
     private int y;
     public HoveredTile(Batch batch) {
         this.batch = batch;
-        texture = new Texture(Gdx.files.internal("sprites/bot.png"));
+        texture = new Texture(Gdx.files.internal("sprites/hovered_tile.png"));
         sprite = new Sprite(texture);
         sprite.setSize(1, 1);
     }
