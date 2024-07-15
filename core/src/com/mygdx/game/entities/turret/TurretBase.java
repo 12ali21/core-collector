@@ -9,7 +9,6 @@ import com.mygdx.game.World;
 import com.mygdx.game.entities.Entity;
 
 public class TurretBase extends Entity {
-    private final Sprite sprite;
 
     public TurretBase(World world, Vector2 position) {
         super(world, position);

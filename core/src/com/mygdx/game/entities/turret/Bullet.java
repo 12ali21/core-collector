@@ -9,7 +9,6 @@ import com.mygdx.game.World;
 import com.mygdx.game.entities.Entity;
 
 public class Bullet extends Entity {
-    private final Sprite sprite;
     private final Vector2 velocity;
     private final float scale = 0.01f;
 

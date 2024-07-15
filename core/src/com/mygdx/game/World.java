@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.entities.*;
 import com.mygdx.game.entities.turret.Turret;
+import com.mygdx.game.entities.turret.TurretBase;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,6 +54,8 @@ public class World implements Drawable, Updatable {
     private final TiledMapTileLayer groundLayer;
     private final TiledMapTileLayer wallLayer;
 
+    private final StructureBuilder structureBuilder = new StructureBuilder(this);
+
     private final HoveredTile hoveredTile;
 
     private final ArrayList<Entity> entities = new ArrayList<>();
@@ -71,7 +74,7 @@ public class World implements Drawable, Updatable {
 
         hoveredTile = new HoveredTile(this);
 
-        turret = Turret.BasicTurret(this, new Vector2(2, 2));
+        turret = new Turret(this, new Vector2(2, 2), new TurretBase(this, new Vector2(2, 2)));
     }
 
     public Batch getBatch() {
@@ -91,6 +94,8 @@ public class World implements Drawable, Updatable {
 //            entities.add(new Bullet(assets, batch, turret.getPosition(), 1f, 50));
         }
 
+        structureBuilder.update(delta);
+
         for (Iterator<Entity> itr = entities.iterator(); itr.hasNext(); ) {
             Entity entity = itr.next();
             if (entity.isAlive()) {
@@ -103,7 +108,7 @@ public class World implements Drawable, Updatable {
         registerEntities();
     }
 
-    private Vector3 unproject(float x, float y) {
+    public Vector3 unproject(float x, float y) {
         return camera.unproject(new Vector3(x, y, 0));
     }
 
@@ -111,6 +116,8 @@ public class World implements Drawable, Updatable {
     public void render() {
         map.render();
         batch.begin();
+        structureBuilder.render();
+
         for (Iterator<Entity> itr = entities.iterator(); itr.hasNext(); ) {
             Entity entity = itr.next();
             if (entity.isAlive()) {
