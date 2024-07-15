@@ -11,8 +11,10 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.entities.*;
+import com.mygdx.game.entities.turret.Turret;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class World implements Drawable, Updatable {
     private static class Map {
@@ -25,10 +27,11 @@ public class World implements Drawable, Updatable {
             // Load the map
             map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
 
-            float unitScale = 1/64f;
+            float unitScale = 1 / 64f;
             renderer = new OrthogonalTiledMapRenderer(map, unitScale, batch);
             renderer.setView(camera);
         }
+
         public TiledMapTileLayer getGroundLayer() {
             return (TiledMapTileLayer) map.getLayers().get(GROUND_LAYER);
         }
@@ -52,8 +55,8 @@ public class World implements Drawable, Updatable {
 
     private final HoveredTile hoveredTile;
 
-    private final ArrayList<Updatable> updatableList = new ArrayList<>();
-    private final ArrayList<Drawable> drawableList = new ArrayList<>();
+    private final ArrayList<Entity> entities = new ArrayList<>();
+    private final ArrayList<Entity> entitiesToAdd = new ArrayList<>();
 
     private Turret turret;
 
@@ -66,24 +69,38 @@ public class World implements Drawable, Updatable {
         groundLayer = map.getGroundLayer();
         wallLayer = map.getWallLayer();
 
-        hoveredTile = new HoveredTile(batch);
-        drawableList.add(hoveredTile);
+        hoveredTile = new HoveredTile(this);
 
-        turret = Turret.BasicTurret(assets, batch, new Vector2(2, 2));
+        turret = Turret.BasicTurret(this, new Vector2(2, 2));
+    }
+
+    public Batch getBatch() {
+        return batch;
+    }
+
+    public AssetManager getAssets() {
+        return assets;
     }
 
     @Override
     public void update(float delta) {
         Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
         hoveredTile.findPosition(mousePos);
-        if (Gdx.input.isTouched()){
+        if (Gdx.input.isTouched()) {
             turret.setTarget(mousePos.x, mousePos.y);
+//            entities.add(new Bullet(assets, batch, turret.getPosition(), 1f, 50));
         }
 
-        for (Updatable updatable : updatableList) {
-            updatable.update(delta);
+        for (Iterator<Entity> itr = entities.iterator(); itr.hasNext(); ) {
+            Entity entity = itr.next();
+            if (entity.isAlive()) {
+                entity.update(delta);
+            } else {
+                itr.remove();
+            }
         }
-        turret.update(delta);
+
+        registerEntities();
     }
 
     private Vector3 unproject(float x, float y) {
@@ -94,10 +111,23 @@ public class World implements Drawable, Updatable {
     public void render() {
         map.render();
         batch.begin();
-        for (Drawable drawable : drawableList) {
-            drawable.render();
+        for (Iterator<Entity> itr = entities.iterator(); itr.hasNext(); ) {
+            Entity entity = itr.next();
+            if (entity.isAlive()) {
+                entity.render();
+            } else {
+                itr.remove();
+            }
         }
-        turret.render();
         batch.end();
+    }
+
+    public void addEntity(Entity entity) {
+        entitiesToAdd.add(entity);
+    }
+
+    public void registerEntities() {
+        entities.addAll(entitiesToAdd);
+        entitiesToAdd.clear();
     }
 }

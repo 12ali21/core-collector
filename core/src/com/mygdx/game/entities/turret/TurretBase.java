@@ -1,16 +1,18 @@
-package com.mygdx.game.entities;
+package com.mygdx.game.entities.turret;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.World;
+import com.mygdx.game.entities.Entity;
 
 public class TurretBase extends Entity {
     private final Sprite sprite;
 
-    public TurretBase(AssetManager assets, Batch batch, Vector2 position) {
-        super(assets, batch, position);
+    public TurretBase(World world, Vector2 position) {
+        super(world, position);
         Texture t = assets.get("sprites/turret_base.png", Texture.class);
 
         sprite = new Sprite(t);

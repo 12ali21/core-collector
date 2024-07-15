@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -26,10 +27,13 @@ public class GameScreen extends ScreenAdapter {
         active = true;
 
         batch = new SpriteBatch();
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-        camera = new OrthographicCamera(VIEWPORT_SIZE, VIEWPORT_SIZE);
+        camera = new OrthographicCamera();
         camera.position.set(5, 5, 0);
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
+
         world = new World(assets, batch, camera);
 
         // setup input processor
