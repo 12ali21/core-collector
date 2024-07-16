@@ -1,21 +1,23 @@
 package com.mygdx.game.entities.turret;
 
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.World;
+import com.mygdx.game.entities.World;
 import com.mygdx.game.entities.Entity;
 
 public class Bullet extends Entity {
+
+    private final Vector2 position;
     private final Vector2 velocity;
     private final float scale = 0.01f;
 
     private float lifetime = 2f;
 
     public Bullet(World world, Vector2 position, float direction, float speed) {
-        super(world, position);
+        super(world);
+        this.position = position.cpy();
+
         Texture t = assets.get("sprites/bullet.png", Texture.class);
         sprite = new Sprite(t);
 //        sprite.setSize(scale * t.getHeight(), scale * t.getWidth());

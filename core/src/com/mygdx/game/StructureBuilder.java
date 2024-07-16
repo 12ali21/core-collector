@@ -8,8 +8,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.entities.Drawable;
 import com.mygdx.game.entities.Entity;
 import com.mygdx.game.entities.Updatable;
+import com.mygdx.game.entities.World;
 import com.mygdx.game.entities.turret.BasicTurret;
-import com.mygdx.game.entities.turret.Turret;
 
 public class StructureBuilder implements Updatable, Drawable {
     private final World world;
@@ -38,7 +38,7 @@ public class StructureBuilder implements Updatable, Drawable {
         } else {
             Vector2 mousePos = getWorldMousePosition();
             if (Gdx.input.isTouched()) {
-                world.addEntity(new BasicTurret(world, mousePos));
+                new BasicTurret(world, mousePos).addToWorld(true);
                 inBuildMode = false;
             } else {
                 currentStructure.setOriginBasedPosition(mousePos.x, mousePos.y);

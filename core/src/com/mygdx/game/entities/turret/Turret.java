@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.World;
+import com.mygdx.game.entities.Bounds;
+import com.mygdx.game.entities.World;
 import com.mygdx.game.entities.Entity;
 
 public class Turret extends Entity {
@@ -41,7 +42,7 @@ public class Turret extends Entity {
     private float cooldownTimer = 0;
 
     public Turret(World world, Vector2 position, TurretBase base) {
-        super(world, position);
+        super(world, new Bounds((int) position.x, (int) position.y, 2, 2));
         this.base = base;
         Texture t = assets.get("sprites/turret_head.png", Texture.class);
 
@@ -111,6 +112,7 @@ public class Turret extends Entity {
             return;
         }
         Bullet bullet = new Bullet(world, getFiringPosition(), getRotation(), bulletSpeed);
+        bullet.addToWorld(false);
         cooldownTimer = bulletCooldown;
     }
 
