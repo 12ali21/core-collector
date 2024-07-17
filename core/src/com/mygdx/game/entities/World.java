@@ -8,14 +8,11 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.StructureBuilder;
-import com.mygdx.game.entities.*;
 import com.mygdx.game.entities.turret.Turret;
-import com.mygdx.game.entities.turret.TurretBase;
+import com.mygdx.game.entities.turret.Turrets;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -74,7 +71,7 @@ public class World implements Drawable, Updatable {
     private final ArrayList<Entity> entities = new ArrayList<>();
     private final ArrayList<Entity> entitiesToAdd = new ArrayList<>();
 
-    private Turret turret;
+    private final Turret testTurret;
 
 
     public World(AssetManager assets, Batch batch, OrthographicCamera camera) {
@@ -86,10 +83,11 @@ public class World implements Drawable, Updatable {
         wallLayer = map.getWallLayer();
 
         hoveredTile = new HoveredTile(this);
-        hoveredTile.addToWorld(false);
+        addEntity(hoveredTile);
 
-        turret = new Turret(this, new Vector2(2, 2), new TurretBase(this, new Vector2(2, 2)));
-        turret.addToWorld(true);
+        Turret.Builder builder = Turrets.basicTurret(this, 2, 2);
+        testTurret = builder.build();
+        addStructure(testTurret);
     }
 
     public Batch getBatch() {
@@ -105,7 +103,7 @@ public class World implements Drawable, Updatable {
         Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
         hoveredTile.findPosition(mousePos);
         if (Gdx.input.isTouched()) {
-            turret.setTarget(mousePos.x, mousePos.y);
+            testTurret.setTarget(mousePos.x, mousePos.y);
 //            entities.add(new Bullet(assets, batch, turret.getPosition(), 1f, 50));
         }
 
@@ -145,7 +143,7 @@ public class World implements Drawable, Updatable {
     }
 
     /**
-     * Add an entity to the world without adding it as structure to the map
+     * Add an entity to the world
      */
     public void addEntity(Entity entity) {
         entitiesToAdd.add(entity);
@@ -154,13 +152,8 @@ public class World implements Drawable, Updatable {
     /**
      * Add an entity to the world and add it as a structure to the map
      */
-    public void addStructure(Entity entity, Bounds bounds) {
-        entitiesToAdd.add(entity);
-        for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
-            for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
-                map.putEntity(entity, x, y);
-            }
-        }
+    public void addStructure(Structure structure) {
+        entitiesToAdd.add(structure);
     }
 
     private void registerEntities() {

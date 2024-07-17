@@ -1,60 +1,28 @@
 package com.mygdx.game.entities.turret;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entities.Bounds;
+import com.mygdx.game.entities.Structure;
 import com.mygdx.game.entities.World;
-import com.mygdx.game.entities.Entity;
 
-public class Turret extends Entity {
-
-    private static class MultiSprite extends Sprite{
-        private final Sprite base;
-        private final Sprite head;
-
-        public MultiSprite(Sprite base, Sprite head) {
-            this.base = base;
-            this.head = head;
-        }
-
-        @Override
-        public void draw(Batch batch) {
-            base.draw(batch);
-            head.draw(batch);
-        }
-
-        @Override
-        public void setOriginBasedPosition(float x, float y) {
-            base.setOriginBasedPosition(x, y);
-            head.setOriginBasedPosition(x, y);
-        }
-    }
-
-
-    private final TurretBase base;
-    private final float rotationSpeed = 50f;
+public class Turret extends Structure {
+    private final StructurePart base;
+    private final StructurePart head;
+    private final float rotationSpeed;
+    private final float bulletSpeed;
+    private final float bulletCooldown;
+    private float headRotation = 0;
     private Vector2 target;
-
-    private final float bulletSpeed = 30f;
-    private final float bulletCooldown = 0.5f;
     private float cooldownTimer = 0;
 
-    public Turret(World world, Vector2 position, TurretBase base) {
-        super(world, new Bounds((int) position.x, (int) position.y, 2, 2));
-        this.base = base;
-        Texture t = assets.get("sprites/turret_head.png", Texture.class);
-
-        sprite = new Sprite(t);
-        sprite.setSize(2, 2);
-        sprite.setOrigin(sprite.getWidth() / 2, 0.65f);
-        sprite.setOriginBasedPosition(position.x, position.y);
-    }
-
-    @Override
-    public Sprite getGhost() {
-        return new MultiSprite(base.getGhost(), super.getGhost());
+    private Turret(Builder builder) {
+        super(builder); // position is center, but bounds are bottom left
+        this.base = builder.base;
+        this.head = builder.head;
+        this.rotationSpeed = builder.rotationSpeed;
+        this.bulletSpeed = builder.bulletSpeed;
+        this.bulletCooldown = builder.cooldown;
+        head.sprite.setRotation(headRotation);
     }
 
     public void setTarget(float x, float y) {
@@ -65,24 +33,19 @@ public class Turret extends Entity {
         }
     }
 
-    private Vector2 getWorldOrigin() {
-        return new Vector2(sprite.getX() + sprite.getOriginX(), sprite.getY() + sprite.getOriginY());
-    }
-
-    private float getRotation() {
-        return sprite.getRotation() + 90;
+    private Vector2 getCenter() {
+        return new Vector2(bounds.x + (float) bounds.width / 2, bounds.y + (float) bounds.height / 2);
     }
 
     private boolean findTarget(float delta) {
-        final float targetEpsilon = 1f;
-        final float rotationEpsilon = 0.01f;
+        final float targetEpsilon = 1f; // for target inaccuracy
+        final float rotationEpsilon = 0.01f; // for floating point inaccuracy
 
-        Vector2 position = getWorldOrigin();
+        Vector2 position = getCenter();
         if (target != null) {
             Vector2 direction = target.cpy().sub(position);
             float angle = direction.angleDeg();
-            float currentAngle = getRotation();
-            float diff = (angle - currentAngle) % 360;
+            float diff = (angle - headRotation) % 360;
             if (diff > 180) {
                 diff -= 360;
             } else if (diff < -180) {
@@ -91,7 +54,8 @@ public class Turret extends Entity {
 
             if (Math.abs(diff) > rotationEpsilon) {
                 float rotation = Math.min(rotationSpeed * delta, Math.abs(diff)) * Math.signum(diff);
-                sprite.rotate(rotation);
+                head.sprite.rotate(rotation);
+                headRotation = head.sprite.getRotation();
             }
 
             // finding target
@@ -102,8 +66,8 @@ public class Turret extends Entity {
 
     private Vector2 getFiringPosition() {
         Vector2 offset = new Vector2(0, 1.2f);
-        offset.rotateDeg(sprite.getRotation());
-        return getWorldOrigin().add(offset);
+        offset.rotateDeg(headRotation);
+        return getCenter().add(offset);
     }
 
     private void fire(float delta) {
@@ -111,15 +75,9 @@ public class Turret extends Entity {
         if (cooldownTimer > 0) {
             return;
         }
-        Bullet bullet = new Bullet(world, getFiringPosition(), getRotation(), bulletSpeed);
-        bullet.addToWorld(false);
+        Bullet bullet = new Bullet(world, getFiringPosition(), headRotation, bulletSpeed);
+        world.addEntity(bullet);
         cooldownTimer = bulletCooldown;
-    }
-
-    @Override
-    public void render() {
-        base.render();
-        sprite.draw(batch);
     }
 
     @Override
@@ -129,6 +87,56 @@ public class Turret extends Entity {
         if (onTarget) {
             // shoot target
             fire(deltaTime);
+        }
+    }
+
+    public static class Builder extends Structure.Builder {
+
+        private StructurePart base;
+        private StructurePart head;
+        private float rotationSpeed = 50f;
+        private float bulletSpeed = 30f;
+        private float cooldown = 0.5f;
+
+        public Builder(World world) {
+            super(world);
+        }
+
+        public Builder setBase(StructurePart base) {
+            this.base = base;
+            addPart(base);
+            return this;
+        }
+
+        public Builder setHead(StructurePart head) {
+            this.head = head;
+            addPart(head);
+            return this;
+        }
+
+        public Builder setRotationSpeed(float rotationSpeed) {
+            this.rotationSpeed = rotationSpeed;
+            return this;
+        }
+
+        public Builder setBulletSpeed(float bulletSpeed) {
+            this.bulletSpeed = bulletSpeed;
+            return this;
+        }
+
+        public Builder setFireRate(float rate) {
+            this.cooldown = 60f / rate;
+            return this;
+        }
+
+        public Builder setBounds(int x, int y, int width, int height) {
+            super.setBounds(x, y, width, height); // set bounds (bottom left corner
+            return this;
+        }
+
+        @Override
+        public Turret build() {
+            return new Turret(this);
         }
     }
 }
