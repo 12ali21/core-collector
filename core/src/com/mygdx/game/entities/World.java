@@ -56,8 +56,14 @@ public class World implements Drawable, Updatable {
     public void update(float delta) {
         Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
         hoveredTile.findPosition(mousePos);
-        if (Gdx.input.isTouched()) {
-            testTurret.setTarget(mousePos.x, mousePos.y);
+        if (Gdx.input.justTouched()) {
+            for (Entity entity : entitiesUpdate) {
+                if (entity instanceof Turret) {
+                    Turret turret = (Turret) entity;
+                    turret.setTarget(mousePos.x, mousePos.y);
+                }
+            }
+//            testTurret.setTarget(mousePos.x, mousePos.y);
 //            entities.add(new Bullet(assets, batch, turret.getPosition(), 1f, 50));
         }
 

@@ -114,3 +114,4 @@ assets/
 /ios/xcode/native/
 /ios/IOSLauncher.app
 /ios/IOSLauncher.app.dSYM
+/core/src/com/mygdx/game/Test.java

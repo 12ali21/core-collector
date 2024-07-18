@@ -36,17 +36,20 @@ public class CoreGame extends ApplicationAdapter {
 			}
 			loaded = true;
 			gameScreen.render(Gdx.graphics.getDeltaTime());
+			Debug.render(Gdx.graphics.getDeltaTime());
 		}
 	}
 
 	@Override
 	public void resize(int width, int height) {
 		gameScreen.resize(width, height);
+		Debug.resize(width, height);
 	}
 
 	@Override
 	public void dispose () {
 		gameScreen.dispose();
+		Debug.dispose();
 	}
 
 }

@@ -31,6 +31,7 @@ public class GameScreen extends ScreenAdapter {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         camera = new OrthographicCamera();
+        Debug.setCamera(camera);
         camera.position.set(5, 5, 0);
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
