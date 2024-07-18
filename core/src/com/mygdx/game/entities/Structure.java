@@ -8,9 +8,12 @@ public abstract class Structure extends Entity {
     public abstract static class Builder {
         protected final World world;
         private final Color GHOST_COLOR = new Color(0.2f, 1, 0.2f, 0.5f);
+        private final Color GHOST_COLOR_INVALID = new Color(1, 0.2f, 0.2f, 0.5f);
         protected Bounds bounds;
         protected final Array<StructurePart> parts;
         private final Array<Sprite> ghostParts;
+        protected int width;
+        protected int height;
 
         public Builder(World world) {
             this.world = world;
@@ -31,18 +34,28 @@ public abstract class Structure extends Entity {
             }
         }
 
+        public void setGhostValid(boolean valid) {
+            for (Sprite ghost : ghostParts) {
+                ghost.setColor(valid ? GHOST_COLOR : GHOST_COLOR_INVALID);
+            }
+        }
+
         public void renderGhost() {
             for (Sprite ghost : ghostParts) {
                 ghost.draw(world.getBatch());
             }
         }
 
-        public Builder setBounds(int x, int y, int width, int height) {
+        public Builder setBounds(int x, int y) {
             bounds = new Bounds(x - width / 2, y - height / 2, width, height);
             for (StructurePart part: parts) {
                 part.sprite.setOriginBasedPosition(x, y);
             }
             return this;
+        }
+
+        public Bounds getBounds() {
+            return bounds;
         }
 
         public abstract Structure build();

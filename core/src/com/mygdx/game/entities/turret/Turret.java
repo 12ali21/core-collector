@@ -99,6 +99,8 @@ public class Turret extends Structure {
 
         public Builder(World world) {
             super(world);
+            this.width = 2;
+            this.height = 2;
         }
 
         public Builder setBase(StructurePart base) {
@@ -130,8 +132,8 @@ public class Turret extends Structure {
             return this;
         }
 
-        public Builder setBounds(int x, int y, int width, int height) {
-            super.setBounds(x, y, width, height); // set bounds (bottom left corner
+        public Builder setBounds(int x, int y) {
+            super.setBounds(x, y); // set bounds (bottom left corner
             return this;
         }
 

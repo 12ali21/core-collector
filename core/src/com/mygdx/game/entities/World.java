@@ -22,8 +22,6 @@ public class World implements Drawable, Updatable {
     private final Batch batch;
     private final OrthographicCamera camera;
     private final Map map;
-    private final TiledMapTileLayer groundLayer;
-    private final TiledMapTileLayer wallLayer;
     private final StructureBuilder structureBuilder = new StructureBuilder(this);
     private final HoveredTile hoveredTile;
     private final ArrayList<Entity> entitiesRender = new ArrayList<>();
@@ -37,8 +35,6 @@ public class World implements Drawable, Updatable {
         this.batch = batch;
         this.camera = camera;
         map = new Map(batch, camera, "testing");
-        groundLayer = map.getGroundLayer();
-        wallLayer = map.getWallLayer();
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
@@ -116,7 +112,21 @@ public class World implements Drawable, Updatable {
      * Add an entity to the world and add it as a structure to the map
      */
     public void addStructure(Structure structure) {
+        Bounds bounds = structure.getBounds();
+        map.putStructure(structure, bounds.x, bounds.y, bounds.width, bounds.height);
+
         entitiesToAdd.add(structure);
+    }
+
+    public boolean areTilesOccupied(int x, int y, int width, int height) {
+        for (int i = x; i < x + width; i++) {
+            for (int j = y; j < y + height; j++) {
+                if (map.isTileOccupied(i, j)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void registerEntities() {
@@ -144,11 +154,12 @@ public class World implements Drawable, Updatable {
         private final static String WALL_LAYER = "solid layer";
         private final TiledMap map;
         private final OrthogonalTiledMapRenderer renderer;
-        Entity[][] entities;
+        Structure[][] structures;
+
         public Map(Batch batch, OrthographicCamera camera, String mapName) {
             // Load the map
             map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
-            entities = new Entity[map.getProperties().get("width", Integer.class)][map.getProperties().get("height", Integer.class)];
+            structures = new Structure[map.getProperties().get("width", Integer.class)][map.getProperties().get("height", Integer.class)];
             float unitScale = 1 / 64f;
             renderer = new OrthogonalTiledMapRenderer(map, unitScale, batch);
             renderer.setView(camera);
@@ -162,12 +173,24 @@ public class World implements Drawable, Updatable {
             return (TiledMapTileLayer) map.getLayers().get(WALL_LAYER);
         }
 
-        public void putEntity(Entity entity, int x, int y) {
-            entities[x][y] = entity;
+        public boolean isTileOccupied(int x, int y) {
+            TiledMapTileLayer wallLayer = getWallLayer();
+            if (x < 0 || x >= structures.length || y < 0 || y >= structures[0].length) {
+                return true;
+            }
+            return wallLayer.getCell(x, y) != null || structures[x][y] != null;
         }
 
-        public Entity getEntity(int x, int y) {
-            return entities[x][y];
+        public void putStructure(Structure structure, int x, int y, int width, int height) {
+            for (int i = x; i < x + width; i++) {
+                for (int j = y; j < y + height; j++) {
+                    structures[i][j] = structure;
+                }
+            }
+        }
+
+        public Structure getStructure(int x, int y) {
+            return structures[x][y];
         }
 
         public void render() {

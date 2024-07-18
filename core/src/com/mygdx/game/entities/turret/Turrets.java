@@ -29,6 +29,6 @@ public class Turrets {
                 .setRotationSpeed(30f)
                 .setBulletSpeed(20f)
                 .setFireRate(80)
-                .setBounds(x, y, 2, 2);
+                .setBounds(x, y);
     }
 }

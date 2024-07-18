@@ -4,10 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.entities.Drawable;
-import com.mygdx.game.entities.Structure;
-import com.mygdx.game.entities.Updatable;
-import com.mygdx.game.entities.World;
+import com.mygdx.game.entities.*;
 import com.mygdx.game.entities.turret.Turrets;
 
 public class StructureBuilder implements Updatable, Drawable {
@@ -36,12 +33,27 @@ public class StructureBuilder implements Updatable, Drawable {
             }
         } else {
             GridPoint2 mousePos = getGridMousePosition();
-            if (Gdx.input.isTouched()) {
-                currentStructure.setBounds(mousePos.x, mousePos.y, 2, 2);
-                Structure structure = currentStructure.build();
-                world.addStructure(structure);
-                inBuildMode = false;
+
+            currentStructure.setBounds(mousePos.x, mousePos.y);
+            Bounds bounds = currentStructure.getBounds();
+            if (world.areTilesOccupied(bounds.x, bounds.y, bounds.width, bounds.height)) {
+                currentStructure.setGhostValid(false);
+                if (Gdx.input.justTouched()) {
+                    System.out.println("Cannot build here");
+                    inBuildMode = false;
+                    currentStructure = null;
+                }
             } else {
+                currentStructure.setGhostValid(true);
+                if (Gdx.input.justTouched()) {
+                    Structure structure = currentStructure.build();
+                    world.addStructure(structure);
+                    inBuildMode = false;
+                    currentStructure = null;
+                }
+            }
+
+             if (currentStructure != null) {
                 currentStructure.setGhostPosition(mousePos.x, mousePos.y);
             }
         }
