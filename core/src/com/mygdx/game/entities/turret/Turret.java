@@ -1,7 +1,6 @@
 package com.mygdx.game.entities.turret;
 
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.entities.Bounds;
 import com.mygdx.game.entities.Structure;
 import com.mygdx.game.entities.World;
 
@@ -104,12 +103,14 @@ public class Turret extends Structure {
 
         public Builder setBase(StructurePart base) {
             this.base = base;
+            base.setRenderPriority(1);
             addPart(base);
             return this;
         }
 
         public Builder setHead(StructurePart head) {
             this.head = head;
+            head.setRenderPriority(3);
             addPart(head);
             return this;
         }
