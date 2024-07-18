@@ -2,7 +2,6 @@ package com.mygdx.game.entities;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.utils.Array;
 
 public abstract class Structure extends Entity {

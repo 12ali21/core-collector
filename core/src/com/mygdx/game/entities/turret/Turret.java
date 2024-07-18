@@ -65,7 +65,7 @@ public class Turret extends Structure {
     }
 
     private Vector2 getFiringPosition() {
-        Vector2 offset = new Vector2(0, 1.2f);
+        Vector2 offset = new Vector2(1.2f, 0f);
         offset.rotateDeg(headRotation);
         return getCenter().add(offset);
     }
