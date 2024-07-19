@@ -27,7 +27,7 @@ public class Turrets {
                 .setBase(new Structure.StructurePart(world, baseSprite))
                 .setHead(new Structure.StructurePart(world, headSprite))
                 .setRotationSpeed(30f)
-                .setBulletSpeed(200f)
+                .setBulletSpeed(30f)
                 .setFireRate(80)
                 .setBounds(x, y);
     }

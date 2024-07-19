@@ -8,10 +8,13 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.StructureBuilder;
 import com.mygdx.game.entities.turret.Turret;
-import com.mygdx.game.entities.turret.Turrets;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,7 +31,6 @@ public class World implements Drawable, Updatable {
     private final ArrayList<Entity> entitiesUpdate = new ArrayList<>();
     private final ArrayList<Entity> entitiesToAdd = new ArrayList<>();
     private boolean isSorted = false;
-    private final Turret testTurret;
 
     public World(AssetManager assets, Batch batch, OrthographicCamera camera) {
         this.assets = assets;
@@ -38,10 +40,6 @@ public class World implements Drawable, Updatable {
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
-
-        Turret.Builder builder = Turrets.basicTurret(this, 2, 2);
-        testTurret = builder.build();
-        addStructure(testTurret);
     }
 
     public Batch getBatch() {
@@ -63,8 +61,6 @@ public class World implements Drawable, Updatable {
                     turret.setTarget(mousePos.x, mousePos.y);
                 }
             }
-//            testTurret.setTarget(mousePos.x, mousePos.y);
-//            entities.add(new Bullet(assets, batch, turret.getPosition(), 1f, 50));
         }
 
         structureBuilder.update(delta);
@@ -153,6 +149,33 @@ public class World implements Drawable, Updatable {
             isSorted = false;
         }
         entitiesToAdd.clear();
+    }
+
+    public Array<CollidedEntity> checkCollisions(Vector2 v1, Vector2 v2, Entity entity) {
+        Array<CollidedEntity> collisions = new Array<>();
+
+        TiledMapTileLayer wallLayer = map.getWallLayer();
+
+        int x1 = v2.x > v1.x ? (int) v1.x : (int) v2.x;
+        int y1 = v2.y > v1.y ? (int) v1.y : (int) v2.y;
+        int x2 = v2.x > v1.x ? (int) v2.x + 1: (int) v1.x + 1;
+        int y2 = v2.y > v1.y ? (int) v2.y + 1: (int) v1.y + 1;
+
+
+        for (int i = x1; i < x2; i++) {
+            for (int j = y1; j < y2; j++) {
+                if (wallLayer.getCell(i, j) != null) {
+                    Rectangle r = new Rectangle(i, j, 1, 1);
+//                    Debug.drawRect(r.toString(), r);
+                    if (r.contains(v1) || r.contains(v2) || Intersector.intersectSegmentRectangle(v1, v2, r)) {
+                        Vector2 center = new Vector2();
+                        r.getCenter(center);
+                        collisions.add(new CollidedEntity(center, EntityType.WALL));
+                    }
+                }
+            }
+        }
+        return collisions;
     }
 
     private static class Map {
