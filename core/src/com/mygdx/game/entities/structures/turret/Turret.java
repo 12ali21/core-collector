@@ -10,6 +10,7 @@ public class Turret extends Structure {
     private final float rotationSpeed;
     private final float bulletSpeed;
     private final float bulletCooldown;
+    private final Recoil recoil;
     private float headRotation = 0;
     private Vector2 target;
     private float cooldownTimer = 0;
@@ -22,6 +23,11 @@ public class Turret extends Structure {
         this.bulletSpeed = builder.bulletSpeed;
         this.bulletCooldown = builder.cooldown;
         head.sprite.setRotation(headRotation);
+        recoil = new Recoil(
+                builder.recoilImpulse,
+                builder.recoilStoppingPower,
+                builder.recoilMaxDistance,
+                builder.recoilReturnVelocity);
     }
 
     public void setTarget(float x, float y) {
@@ -77,6 +83,8 @@ public class Turret extends Structure {
         Bullet bullet = new Bullet(world, getFiringPosition(), headRotation, bulletSpeed);
         world.addEntity(bullet);
         cooldownTimer = bulletCooldown;
+
+        recoil.fire();
     }
 
     @Override
@@ -87,6 +95,11 @@ public class Turret extends Structure {
             // shoot target
             fire(deltaTime);
         }
+        float offset = recoil.updateOffset(deltaTime);
+        Vector2 headPos = getCenter();
+        Vector2 offsetVector = new Vector2(-1, 0).rotateDeg(headRotation).scl(offset);
+        headPos.add(offsetVector);
+        head.sprite.setOriginBasedPosition(headPos.x, headPos.y);
     }
 
     public static class Builder extends Structure.Builder {
@@ -96,6 +109,10 @@ public class Turret extends Structure {
         private float rotationSpeed = 50f;
         private float bulletSpeed = 30f;
         private float cooldown = 0.5f;
+        private float recoilImpulse = 4f;
+        private float recoilStoppingPower = 0.1f;
+        private float recoilMaxDistance = 0.1f;
+        private float recoilReturnVelocity = 0.2f;
 
         public Builder(World world) {
             super(world);
@@ -137,9 +154,72 @@ public class Turret extends Structure {
             return this;
         }
 
+        public Builder setRecoilImpulse(float impulse) {
+            this.recoilImpulse = impulse;
+            return this;
+        }
+
+        public Builder setRecoilStoppingPower(float stoppingPower) {
+            this.recoilStoppingPower = stoppingPower;
+            return this;
+        }
+
+        public Builder setRecoilMaxDistance(float maxDistance) {
+            this.recoilMaxDistance = maxDistance;
+            return this;
+        }
+
+        public Builder setRecoilReturnVelocity(float returnVelocity) {
+            this.recoilReturnVelocity = returnVelocity;
+            return this;
+        }
+
         @Override
         public Turret build() {
             return new Turret(this);
+        }
+    }
+
+    private static class Recoil {
+        private final float impulse;
+        private final float stoppingPower;
+        private final float maxDistance;
+        private final float returnVelocity;
+
+        private float velocity;
+        private float offset;
+
+        public Recoil(float impulse, float stoppingPower, float maxDistance, float returnVelocity) {
+            this.impulse = impulse;
+            this.stoppingPower = stoppingPower;
+            this.maxDistance = maxDistance;
+            this.returnVelocity = returnVelocity;
+        }
+
+        public void fire() {
+            velocity = impulse;
+        }
+
+        public float updateOffset(float delta) {
+            final float epsilon = 0.01f;
+
+            offset += velocity * delta;
+            if (offset >= maxDistance) {
+                offset = maxDistance;
+                velocity = -returnVelocity;
+            } else if (offset <= 0) {
+                offset = 0;
+                velocity = 0;
+            } else if (velocity > 0) {
+                velocity -= stoppingPower;
+            } else if (velocity <= 0) {
+                velocity = -returnVelocity;
+            }
+
+            if (Math.abs(offset) < epsilon) {
+                offset = 0;
+            }
+            return offset;
         }
     }
 }
