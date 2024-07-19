@@ -1,6 +1,7 @@
 package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -17,6 +18,8 @@ import com.mygdx.game.entities.CollidedEntity;
 import com.mygdx.game.entities.Entity;
 import com.mygdx.game.entities.EntityType;
 import com.mygdx.game.entities.HoveredTile;
+import com.mygdx.game.entities.enemies.Enemy;
+import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.turret.Turret;
@@ -37,14 +40,17 @@ public class World implements Drawable, Updatable {
     private final ArrayList<Entity> entitiesToAdd = new ArrayList<>();
     private boolean isSorted = false;
 
+    Enemy creep;
     public World(AssetManager assets, Batch batch, OrthographicCamera camera) {
         this.assets = assets;
         this.batch = batch;
         this.camera = camera;
-        map = new Map(batch, camera, "testing");
+        map = new Map(batch, camera, "maze");
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
+        creep = new RedCreep(this, new Vector2(1, 1));
+        addEntity(creep);
     }
 
     public Batch getBatch() {
@@ -181,5 +187,9 @@ public class World implements Drawable, Updatable {
             }
         }
         return collisions;
+    }
+
+    public DefaultGraphPath<MapNode> findPath(int startX, int startY, int endX, int endY) {
+        return map.findPath(startX, startY, endX, endY);
     }
 }
