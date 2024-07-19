@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.entities.*;
-import com.mygdx.game.entities.turret.Turrets;
+import com.mygdx.game.entities.structures.Bounds;
+import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.entities.structures.turret.Turrets;
+import com.mygdx.game.world.World;
 
 public class StructureBuilder implements Updatable, Drawable {
     private final World world;

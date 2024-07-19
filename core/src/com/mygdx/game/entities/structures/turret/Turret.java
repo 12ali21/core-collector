@@ -1,8 +1,8 @@
-package com.mygdx.game.entities.turret;
+package com.mygdx.game.entities.structures.turret;
 
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.entities.Structure;
-import com.mygdx.game.entities.World;
+import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.world.World;
 
 public class Turret extends Structure {
     private final StructurePart base;

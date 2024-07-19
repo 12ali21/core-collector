@@ -1,4 +1,4 @@
-package com.mygdx.game.entities;
+package com.mygdx.game;
 
 public interface Updatable {
     void update(float deltaTime);

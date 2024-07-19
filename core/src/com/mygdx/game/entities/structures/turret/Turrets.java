@@ -1,9 +1,9 @@
-package com.mygdx.game.entities.turret;
+package com.mygdx.game.entities.structures.turret;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.mygdx.game.entities.Structure;
-import com.mygdx.game.entities.World;
+import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.world.World;
 
 public class Turrets {
     public static Turret.Builder basicTurret(World world, int x, int y) {

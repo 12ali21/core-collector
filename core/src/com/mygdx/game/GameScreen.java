@@ -6,7 +6,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mygdx.game.entities.World;
+import com.mygdx.game.world.World;
 
 public class GameScreen extends ScreenAdapter {
     private boolean active;

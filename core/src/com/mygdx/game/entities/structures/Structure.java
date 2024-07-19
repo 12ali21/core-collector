@@ -1,8 +1,10 @@
-package com.mygdx.game.entities;
+package com.mygdx.game.entities.structures;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.entities.Entity;
+import com.mygdx.game.world.World;
 
 public abstract class Structure extends Entity {
     public abstract static class Builder {

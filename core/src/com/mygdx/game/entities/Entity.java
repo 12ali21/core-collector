@@ -1,12 +1,11 @@
 package com.mygdx.game.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Octree;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.Drawable;
+import com.mygdx.game.Updatable;
+import com.mygdx.game.world.World;
 
 public abstract class Entity implements Drawable, Updatable, Disposable {
 

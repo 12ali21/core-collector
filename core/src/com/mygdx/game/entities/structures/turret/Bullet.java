@@ -1,4 +1,4 @@
-package com.mygdx.game.entities.turret;
+package com.mygdx.game.entities.structures.turret;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entities.CollidedEntity;
 import com.mygdx.game.entities.EntityObj;
-import com.mygdx.game.entities.World;
+import com.mygdx.game.world.World;
 
 public class Bullet extends EntityObj {
     private static final float SCALE = 0.01f;

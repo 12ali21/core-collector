@@ -1,4 +1,4 @@
-package com.mygdx.game.entities;
+package com.mygdx.game.entities.structures;
 
 public class Bounds {
     public int x;
