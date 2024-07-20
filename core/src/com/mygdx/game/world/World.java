@@ -24,7 +24,6 @@ import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.turret.Turret;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 public class World implements Drawable, Updatable {
@@ -36,9 +35,10 @@ public class World implements Drawable, Updatable {
     private final OrthographicCamera camera;
     private final StructureBuilder structureBuilder = new StructureBuilder(this);
     private final HoveredTile hoveredTile;
-    private final ArrayList<Entity> entitiesRender = new ArrayList<>();
-    private final ArrayList<Entity> entitiesUpdate = new ArrayList<>();
-    private final ArrayList<Entity> entitiesToAdd = new ArrayList<>();
+    private final Array<Entity> entitiesRender = new Array<>();
+    private final Array<Entity> entitiesUpdate = new Array<>();
+    private final Array<Entity> entitiesToAdd = new Array<>();
+    private final Array<Enemy> enemies = new Array<>();
     private boolean isSorted = false;
 
     Enemy creep;
@@ -52,6 +52,7 @@ public class World implements Drawable, Updatable {
         addEntity(hoveredTile);
         creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
         addEntity(creep);
+        enemies.add(creep);
     }
 
     public Batch getBatch() {
@@ -62,18 +63,22 @@ public class World implements Drawable, Updatable {
         return assets;
     }
 
+    public Array<Enemy> getEnemies() {
+        return enemies;
+    }
+
     @Override
     public void update(float delta) {
         Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
         hoveredTile.findPosition(mousePos);
-        if (Gdx.input.justTouched()) {
-            for (Entity entity : entitiesUpdate) {
-                if (entity instanceof Turret) {
-                    Turret turret = (Turret) entity;
-                    turret.setTarget(mousePos.x, mousePos.y);
-                }
-            }
-        }
+//        if (Gdx.input.justTouched()) {
+//            for (Entity entity : entitiesUpdate) {
+//                if (entity instanceof Turret) {
+//                    Turret turret = (Turret) entity;
+//                    turret.setTarget(mousePos.x, mousePos.y);
+//                }
+//            }
+//        }
 
         structureBuilder.update(delta);
 
@@ -168,6 +173,23 @@ public class World implements Drawable, Updatable {
         entitiesToAdd.clear();
     }
 
+    public CollidedEntity rayCastWalls(Vector2 start, Vector2 end) {
+        Array<CollidedEntity> collisions = checkCollisions(start, end, null);
+        CollidedEntity closest = null;
+        float closestDist = Float.MAX_VALUE;
+        for (CollidedEntity collision : collisions) {
+            if (collision.type != EntityType.WALL)
+                continue;
+            float dist = start.dst(collision.position);
+            if (dist < closestDist) {
+                closest = collision;
+                closestDist = dist;
+            }
+        }
+        return closest;
+    }
+
+    // TODO: Check for enemies collision
     public Array<CollidedEntity> checkCollisions(Vector2 v1, Vector2 v2, Entity entity) {
         Array<CollidedEntity> collisions = new Array<>();
 

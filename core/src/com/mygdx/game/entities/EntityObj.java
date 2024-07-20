@@ -15,4 +15,9 @@ public abstract class EntityObj extends Entity{
     public Vector2 getPosition() {
         return position;
     }
+
+    @Override
+    public Vector2 getCenter() {
+        return new Vector2(position.x, position.y);
+    }
 }

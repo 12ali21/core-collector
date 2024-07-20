@@ -3,6 +3,7 @@ package com.mygdx.game.entities;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.world.World;
 
@@ -25,6 +26,11 @@ public class HoveredTile extends Entity {
     public void findPosition(Vector3 unprojected) {
         x = (int) Math.floor(unprojected.x);
         y = (int) Math.floor(unprojected.y);
+    }
+
+    @Override
+    public Vector2 getCenter() {
+        return new Vector2(x + 0.5f, y + 0.5f);
     }
 
     @Override

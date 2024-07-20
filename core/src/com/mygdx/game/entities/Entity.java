@@ -2,6 +2,7 @@ package com.mygdx.game.entities;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
@@ -33,6 +34,8 @@ public abstract class Entity implements Drawable, Updatable, Disposable {
     public boolean isAlive() {
         return alive;
     }
+
+    public abstract Vector2 getCenter();
 
     public void kill() {
         alive = false;

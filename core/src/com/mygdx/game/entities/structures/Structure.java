@@ -118,6 +118,11 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
         }
 
         @Override
+        public Vector2 getCenter() {
+            return new Vector2(sprite.getX() + sprite.getOriginX(), sprite.getY() + sprite.getOriginY());
+        }
+
+        @Override
         public void render() {
             sprite.draw(batch);
         }

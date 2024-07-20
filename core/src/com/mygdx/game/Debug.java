@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -26,6 +27,7 @@ public class Debug {
     private static final GLProfiler profiler;
     private static final HashMap<String, Label> logs;
     private static final HashMap<String, Rectangle> rects;
+    private static final HashMap<String, Vector2> points;
     private static final Runtime runtime;
     private static Camera gameCamera;
     private static final ShapeRenderer shapeRenderer;
@@ -46,6 +48,7 @@ public class Debug {
 
         logs = new HashMap<>();
         rects = new HashMap<>();
+        points = new HashMap<>();
         shapeRenderer = new ShapeRenderer();
 
         log(FPS_TAG, "");
@@ -55,13 +58,8 @@ public class Debug {
         stage.addActor(table);
     }
 
-    public static void drawPoint(float x, float y) {
-        ShapeRenderer shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(gameCamera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.RED);
-        shapeRenderer.circle(x, y, 0.1f, 90);
-        shapeRenderer.end();
+    public static void drawPoint(String tag, float x, float y) {
+        points.put(tag, new Vector2(x, y));
     }
 
     public static void drawRect(String tag, int x, int y, int width, int height) {
@@ -119,11 +117,17 @@ public class Debug {
 
         if (gameCamera != null) {
             shapeRenderer.setProjectionMatrix(gameCamera.combined);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            for (String tag : rects.keySet()) {
-                Rectangle rect = rects.get(tag);
-                shapeRenderer.setColor(Color.GREEN);
+            shapeRenderer.setAutoShapeType(true);
+            shapeRenderer.begin();
+            shapeRenderer.setColor(Color.GREEN);
+            for (Rectangle rect : rects.values()) {
                 shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+            }
+
+            shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(Color.RED);
+            for (Vector2 point : points.values()) {
+                shapeRenderer.circle(point.x, point.y, 0.1f, 90);
             }
             shapeRenderer.end();
 

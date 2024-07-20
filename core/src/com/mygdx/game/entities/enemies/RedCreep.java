@@ -31,10 +31,10 @@ public class RedCreep extends Enemy {
     private final StateMachine<RedCreep, RedCreepState> stateMachine;
 
     public RedCreep(World world, Vector2 position) {
-        super(world, position);
+        super(world, position, 1f, 1f);
         Texture t = assets.get("sprites/enemy_small.png", Texture.class);
         sprite = new Sprite(t);
-        sprite.setSize(1, 1);
+        sprite.setSize(width, height);
         sprite.setOriginCenter();
         sprite.setOriginBasedPosition(position.x + 0.5f, position.y + 0.5f);
 

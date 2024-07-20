@@ -1,24 +1,37 @@
 package com.mygdx.game.entities.structures.turret;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
+import com.badlogic.gdx.ai.fsm.State;
+import com.badlogic.gdx.ai.fsm.StateMachine;
+import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Debug;
+import com.mygdx.game.entities.CollidedEntity;
+import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.World;
 
 public class Turret extends Structure {
     private final StructurePart base;
     private final StructurePart head;
+    private final float rangeRadius;
     private final float rotationSpeed;
     private final float bulletSpeed;
     private final float bulletCooldown;
     private final Recoil recoil;
     private float headRotation = 0;
-    private Vector2 target;
+    private Enemy target;
     private float cooldownTimer = 0;
+
+    private final StateMachine<Turret, TurretState> stateMachine;
 
     private Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
         this.base = builder.base;
         this.head = builder.head;
+        this.rangeRadius = builder.rangeRadius;
         this.rotationSpeed = builder.rotationSpeed;
         this.bulletSpeed = builder.bulletSpeed;
         this.bulletCooldown = builder.cooldown;
@@ -28,41 +41,70 @@ public class Turret extends Structure {
                 builder.recoilStoppingPower,
                 builder.recoilMaxDistance,
                 builder.recoilReturnVelocity);
+
+        stateMachine = new DefaultStateMachine<>(this, TurretState.SEARCHING);
     }
 
-    public void setTarget(float x, float y) {
-        if (target == null) {
-            target = new Vector2(x, y);
-        } else {
-            target.set(x, y);
+    private boolean checkLOS(Vector2 targetPos) {
+        float distance = targetPos.dst(getCenter());
+        Vector2 center = getCenter();
+        CollidedEntity collision = world.rayCastWalls(center, targetPos);
+        if (collision != null) {
+            return !(center.dst(collision.position) < distance); // no line of sight
+        }
+        return true;
+    }
+
+    private void searchTarget() {
+        Array<Enemy> enemies = world.getEnemies();
+        Enemy closest = null;
+        float closestDistance = Float.MAX_VALUE;
+
+        Vector2 center = getCenter();
+
+        for (Enemy enemy : enemies) {
+            Vector2 enemyPos = enemy.getCenter();
+            float distance = enemyPos.dst(getCenter());
+            if (distance < rangeRadius && distance < closestDistance) {
+                // check for line of sight
+                if (!checkLOS(enemyPos)) {
+                    continue;
+                }
+                // enemy is a candidate
+                closest = enemy;
+                closestDistance = distance;
+            }
+        }
+        if (closest != null) {
+            target = closest;
         }
     }
 
-    private boolean findTarget(float delta) {
+    private boolean faceTarget(float delta) {
         final float targetEpsilon = 1f; // for target inaccuracy
         final float rotationEpsilon = 0.01f; // for floating point inaccuracy
 
+        Vector2 targetPos = target.getCenter();
+        Debug.drawPoint("Enemy pos", targetPos.x, targetPos.y);
+
         Vector2 position = getCenter();
-        if (target != null) {
-            Vector2 direction = target.cpy().sub(position);
-            float angle = direction.angleDeg();
-            float diff = (angle - headRotation) % 360;
-            if (diff > 180) {
-                diff -= 360;
-            } else if (diff < -180) {
-                diff += 360;
-            }
-
-            if (Math.abs(diff) > rotationEpsilon) {
-                float rotation = Math.min(rotationSpeed * delta, Math.abs(diff)) * Math.signum(diff);
-                head.sprite.rotate(rotation);
-                headRotation = head.sprite.getRotation();
-            }
-
-            // finding target
-            return Math.abs(diff) < targetEpsilon; // on target
+        Vector2 direction = targetPos.cpy().sub(position);
+        float angle = direction.angleDeg();
+        float diff = (angle - headRotation) % 360;
+        if (diff > 180) {
+            diff -= 360;
+        } else if (diff < -180) {
+            diff += 360;
         }
-        return false; // no target
+
+        if (Math.abs(diff) > rotationEpsilon) {
+            float rotation = Math.min(rotationSpeed * delta, Math.abs(diff)) * Math.signum(diff);
+            head.sprite.rotate(rotation);
+            headRotation = head.sprite.getRotation();
+        }
+
+        // finding target
+        return Math.abs(diff) < targetEpsilon; // on target
     }
 
     private Vector2 getFiringPosition() {
@@ -85,12 +127,11 @@ public class Turret extends Structure {
 
     @Override
     public void update(float deltaTime) {
-        boolean onTarget = findTarget(deltaTime);
+        stateMachine.update();
+        updateHead(deltaTime);
+    }
 
-        if (onTarget) {
-            // shoot target
-            fire(deltaTime);
-        }
+    private void updateHead(float deltaTime) {
         float offset = recoil.updateOffset(deltaTime);
         Vector2 headPos = getCenter();
         Vector2 offsetVector = new Vector2(-1, 0).rotateDeg(headRotation).scl(offset);
@@ -98,10 +139,58 @@ public class Turret extends Structure {
         head.sprite.setOriginBasedPosition(headPos.x, headPos.y);
     }
 
+    private enum TurretState implements State<Turret> {
+        SEARCHING() {
+            @Override
+            public void update(Turret entity) {
+                entity.searchTarget();
+                if (entity.target != null) {
+                    entity.stateMachine.changeState(ATTACKING);
+                }
+            }
+        },
+        ATTACKING() {
+            @Override
+            public void update(Turret entity) {
+                if (entity.isAlive() && entity.checkLOS(entity.target.getCenter())) {
+                    if (entity.faceTarget(Gdx.graphics.getDeltaTime())) {
+                        entity.fire(Gdx.graphics.getDeltaTime());
+                    }
+                } else { // lost sight
+                    entity.target = null;
+                    entity.stateMachine.changeState(SEARCHING);
+                }
+            }
+        };
+
+
+
+        @Override
+        public void enter(Turret entity) {
+
+        }
+
+        @Override
+        public void update(Turret entity) {
+
+        }
+
+        @Override
+        public void exit(Turret entity) {
+
+        }
+
+        @Override
+        public boolean onMessage(Turret entity, Telegram telegram) {
+            return false;
+        }
+    }
+
     public static class Builder extends Structure.Builder {
 
         private StructurePart base;
         private StructurePart head;
+        private float rangeRadius = 10f;
         private float rotationSpeed = 50f;
         private float bulletSpeed = 30f;
         private float cooldown = 0.5f;
@@ -128,6 +217,11 @@ public class Turret extends Structure {
             this.head = head;
             head.setRenderPriority(3);
             addPart(head);
+            return this;
+        }
+
+        public Builder setRangeRadius(float rangeRadius) {
+            this.rangeRadius = rangeRadius;
             return this;
         }
 
