@@ -11,4 +11,8 @@ public abstract class EntityObj extends Entity{
         super(world);
         this.position = position.cpy();
     }
+
+    public Vector2 getPosition() {
+        return position;
+    }
 }

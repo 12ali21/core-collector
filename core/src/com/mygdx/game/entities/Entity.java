@@ -38,4 +38,8 @@ public abstract class Entity implements Drawable, Updatable, Disposable {
     public void dispose() {
         alive = false;
     }
+
+    public World getWorld() {
+        return world;
+    }
 }
