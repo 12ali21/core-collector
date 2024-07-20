@@ -29,10 +29,11 @@ import java.util.Iterator;
 
 public class World implements Drawable, Updatable {
 
+    public final Map map;
+
     private final AssetManager assets;
     private final Batch batch;
     private final OrthographicCamera camera;
-    private final Map map;
     private final StructureBuilder structureBuilder = new StructureBuilder(this);
     private final HoveredTile hoveredTile;
     private final ArrayList<Entity> entitiesRender = new ArrayList<>();
@@ -126,7 +127,7 @@ public class World implements Drawable, Updatable {
      */
     public void addStructure(Structure structure) {
         Bounds bounds = structure.getBounds();
-        map.putStructure(structure, bounds.x, bounds.y, bounds.width, bounds.height);
+        map.putNewStructure(structure, bounds.x, bounds.y, bounds.width, bounds.height);
 
         entitiesToAdd.add(structure);
     }

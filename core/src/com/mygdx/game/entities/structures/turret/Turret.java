@@ -38,10 +38,6 @@ public class Turret extends Structure {
         }
     }
 
-    private Vector2 getCenter() {
-        return new Vector2(bounds.x + (float) bounds.width / 2, bounds.y + (float) bounds.height / 2);
-    }
-
     private boolean findTarget(float delta) {
         final float targetEpsilon = 1f; // for target inaccuracy
         final float rotationEpsilon = 0.01f; // for floating point inaccuracy

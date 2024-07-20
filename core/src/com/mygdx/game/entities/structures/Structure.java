@@ -2,6 +2,7 @@ package com.mygdx.game.entities.structures;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entities.Entity;
 import com.mygdx.game.world.World;
@@ -78,6 +79,10 @@ public abstract class Structure extends Entity {
 
     public Bounds getBounds() {
         return bounds;
+    }
+
+    public Vector2 getCenter() {
+        return new Vector2(bounds.x + (float) bounds.width / 2, bounds.y + (float) bounds.height / 2);
     }
 
     @Override

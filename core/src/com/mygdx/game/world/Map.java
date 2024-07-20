@@ -18,7 +18,7 @@ public class Map implements IndexedGraph<MapNode> {
     private final static String WALL_LAYER = "solid layer";
     private final TiledMap map;
     private final OrthogonalTiledMapRenderer renderer;
-    Structure[][] structures;
+    private final Array<Structure> structures;
 
     private final IndexedAStarPathFinder<MapNode> pathFinder;
     private final Array<MapNode> nodesList = new Array<>();
@@ -28,12 +28,12 @@ public class Map implements IndexedGraph<MapNode> {
     public Map(Batch batch, OrthographicCamera camera, String mapName) {
         // Load the map
         map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
-        structures = new Structure[map.getProperties().get("width", Integer.class)][map.getProperties().get("height", Integer.class)];
         float unitScale = 1 / 64f;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale, batch);
         renderer.setView(camera);
-        heuristic = new EuclideanHeuristic();
+        structures = new Array<>();
 
+        heuristic = new EuclideanHeuristic();
         TiledMapTileLayer groundLayer = getGroundLayer();
         nodes = new MapNode[groundLayer.getWidth()][groundLayer.getHeight()];
 
@@ -81,23 +81,23 @@ public class Map implements IndexedGraph<MapNode> {
     }
 
     public boolean isTileOccupied(int x, int y) {
-        TiledMapTileLayer wallLayer = getWallLayer();
-        if (x < 0 || x >= structures.length || y < 0 || y >= structures[0].length) {
+        if (x < 0 || x >= nodes.length || y < 0 || y >= nodes[0].length) {
             return true;
         }
-        return wallLayer.getCell(x, y) != null || structures[x][y] != null;
+        return nodes[x][y] == null || nodes[x][y].hasStructure();
     }
 
-    public void putStructure(Structure structure, int x, int y, int width, int height) {
+    public void putNewStructure(Structure structure, int x, int y, int width, int height) {
         for (int i = x; i < x + width; i++) {
             for (int j = y; j < y + height; j++) {
-                structures[i][j] = structure;
+                nodes[x][y].putStructure(structure);
             }
         }
+        structures.add(structure);
     }
 
-    public Structure getStructure(int x, int y) {
-        return structures[x][y];
+    public Array<Structure> getStructures() {
+        return structures;
     }
 
     public void render() {
