@@ -19,6 +19,8 @@ public class MapNode {
     }
 
     public void putStructure(Structure structure) {
+        if (this.hasStructure() && structure != null)
+            throw new IllegalStateException("(" + x + ", " + y + ") already has a structure.");
         this.structure = structure;
     }
 

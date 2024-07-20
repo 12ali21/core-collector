@@ -90,7 +90,7 @@ public class Map implements IndexedGraph<MapNode> {
     public void putNewStructure(Structure structure, int x, int y, int width, int height) {
         for (int i = x; i < x + width; i++) {
             for (int j = y; j < y + height; j++) {
-                nodes[x][y].putStructure(structure);
+                nodes[i][j].putStructure(structure);
             }
         }
         structures.add(structure);
@@ -100,7 +100,7 @@ public class Map implements IndexedGraph<MapNode> {
     public void removeStructure(Structure structure, int x, int y, int width, int height) {
         for (int i = x; i < x + width; i++) {
             for (int j = y; j < y + height; j++) {
-                nodes[x][y].putStructure(null);
+                nodes[i][j].putStructure(null);
             }
         }
         structures.removeValue(structure, true);
