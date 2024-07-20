@@ -9,6 +9,7 @@ public abstract class Enemy extends EntityObj {
 
     public Enemy(World world, Vector2 position) {
         super(world, position);
+        setRenderPriority(2);
     }
 
     protected boolean moveTo(float x, float y, float delta) {
@@ -29,7 +30,7 @@ public abstract class Enemy extends EntityObj {
 
     @Override
     public void update(float deltaTime) {
-        sprite.setOriginBasedPosition(position.x + 0.5f, position.y + 0.5f);
+        sprite.setOriginBasedPosition(position.x, position.y);
 
     }
 }

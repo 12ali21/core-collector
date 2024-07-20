@@ -23,7 +23,7 @@ public class Turrets {
         headSprite.setOriginBasedPosition(x, y);
 
 
-        return new Turret.Builder(world)
+        return new Turret.Builder(world, 100)
                 .setBase(new Structure.StructurePart(world, baseSprite))
                 .setHead(new Structure.StructurePart(world, headSprite))
                 .setRotationSpeed(30f)

@@ -19,12 +19,16 @@ import java.util.Iterator;
 
 public class RedCreep extends Enemy {
 
-    private final float attackingRange = 2;
+    private final float attackingRange = 1;
+    private final float damage = 50;
+    private final float DAMAGE_COOLDOWN = 1f;
+    private float timer = 0f;
+
     private DefaultGraphPath<MapNode> path;
     private Iterator<MapNode> pathIterator;
     private MapNode currentDest;
     private Structure target;
-    private StateMachine<RedCreep, RedCreepState> stateMachine;
+    private final StateMachine<RedCreep, RedCreepState> stateMachine;
 
     public RedCreep(World world, Vector2 position) {
         super(world, position);
@@ -56,22 +60,27 @@ public class RedCreep extends Enemy {
                 currentDest = pathIterator.next();
             }
         } else {
-            boolean res = moveTo(currentDest.x, currentDest.y, Gdx.graphics.getDeltaTime());
+            // move to the center of the destination tile
+            boolean res = moveTo(currentDest.x + 0.5f, currentDest.y+ 0.5f, Gdx.graphics.getDeltaTime());
             if (res)
                 currentDest = null;
         }
     }
 
     private boolean targetWithinRange() {
+        Debug.log("enemy position", "" + getPosition());
+        Debug.log("turret center", "" + target.getCenter());
         float dist = target.getCenter().dst(this.getPosition());
-        if (dist < attackingRange) {
-            return true;
-        }
-        return false;
+        return dist < attackingRange;
     }
 
     private void attackTarget() {
-        //TODO: attack target
+        float delta = Gdx.graphics.getDeltaTime();
+        timer -= delta;
+        if (timer < 0) {
+            target.getHealth().damage(damage);
+            timer = DAMAGE_COOLDOWN;
+        }
     }
 
     @Override
@@ -131,8 +140,10 @@ public class RedCreep extends Enemy {
                 }
 
                 // if reached the attacking range, go to attacking
-                if (entity.targetWithinRange())
+                if (entity.targetWithinRange()) {
+                    entity.currentDest = null;
                     entity.stateMachine.changeState(ATTACKING);
+                }
             }
         },
 
@@ -142,6 +153,7 @@ public class RedCreep extends Enemy {
                 if (entity.target.isAlive()) {
                     entity.attackTarget();
                 } else {
+                    entity.target = null;
                     entity.stateMachine.changeState(IDLE);
                 }
             }

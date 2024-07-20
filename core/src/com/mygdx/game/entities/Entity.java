@@ -34,6 +34,10 @@ public abstract class Entity implements Drawable, Updatable, Disposable {
         return alive;
     }
 
+    public void kill() {
+        alive = false;
+    }
+
     @Override
     public void dispose() {
         alive = false;

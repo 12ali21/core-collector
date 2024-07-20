@@ -55,15 +55,13 @@ public class Debug {
         stage.addActor(table);
     }
 
-    public static void drawPoint(Batch batch, Camera camera, int x, int y) {
-        batch.end();
+    public static void drawPoint(float x, float y) {
         ShapeRenderer shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(gameCamera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.RED);
         shapeRenderer.circle(x, y, 0.1f, 90);
         shapeRenderer.end();
-        batch.begin();
     }
 
     public static void drawRect(String tag, int x, int y, int width, int height) {

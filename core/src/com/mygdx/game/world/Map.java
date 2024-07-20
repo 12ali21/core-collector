@@ -96,6 +96,16 @@ public class Map implements IndexedGraph<MapNode> {
         structures.add(structure);
     }
 
+
+    public void removeStructure(Structure structure, int x, int y, int width, int height) {
+        for (int i = x; i < x + width; i++) {
+            for (int j = y; j < y + height; j++) {
+                nodes[x][y].putStructure(null);
+            }
+        }
+        structures.removeValue(structure, true);
+    }
+
     public Array<Structure> getStructures() {
         return structures;
     }
@@ -137,4 +147,5 @@ public class Map implements IndexedGraph<MapNode> {
     public Array<Connection<MapNode>> getConnections(MapNode fromNode) {
         return fromNode.getConnections();
     }
+
 }

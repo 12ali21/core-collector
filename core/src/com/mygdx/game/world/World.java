@@ -50,7 +50,7 @@ public class World implements Drawable, Updatable {
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
-        creep = new RedCreep(this, new Vector2(1, 1));
+        creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
         addEntity(creep);
     }
 
@@ -82,6 +82,11 @@ public class World implements Drawable, Updatable {
             if (entity.isAlive()) {
                 entity.update(delta);
             } else {
+                if (entity instanceof Structure) {
+                    Structure s = (Structure) entity;
+                    Bounds bounds = s.getBounds();
+                    map.removeStructure(s, bounds.x, bounds.y, bounds.width, bounds.height);
+                }
                 itr.remove();
             }
         }

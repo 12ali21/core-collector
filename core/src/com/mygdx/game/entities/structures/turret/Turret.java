@@ -110,10 +110,11 @@ public class Turret extends Structure {
         private float recoilMaxDistance = 0.1f;
         private float recoilReturnVelocity = 0.2f;
 
-        public Builder(World world) {
+        public Builder(World world, float hitPoints) {
             super(world);
             this.width = 2;
             this.height = 2;
+            this.maxHp = hitPoints;
         }
 
         public Builder setBase(StructurePart base) {
