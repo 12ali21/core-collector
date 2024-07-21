@@ -57,9 +57,11 @@ public class Debug {
 
         stage.addActor(table);
     }
-
+    public static void drawPoint(String tag, Vector2 v) {
+        points.put(tag, v);
+    }
     public static void drawPoint(String tag, float x, float y) {
-        points.put(tag, new Vector2(x, y));
+        drawPoint(tag, new Vector2(x, y));
     }
 
     public static void drawRect(String tag, int x, int y, int width, int height) {

@@ -7,8 +7,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.entities.CollidedEntity;
 import com.mygdx.game.entities.EntityObj;
 import com.mygdx.game.world.Game;
 
@@ -49,15 +47,16 @@ public class Bullet extends EntityObj {
         bodyDef.angle = (float) Math.toRadians(direction);
         bodyDef.bullet = true;
 
-        body = game.world.createBody(bodyDef);
+        body = game.getWorld().createBody(bodyDef);
         body.setLinearDamping(1f);
         body.setFixedRotation(true);
+        body.setUserData(this);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 10f;
         fixtureDef.restitution = 0f;
-        body.createFixture(fixtureDef);
+        body.createFixture(fixtureDef).setUserData(this);
         return body;
     }
 

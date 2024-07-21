@@ -4,8 +4,6 @@ import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -18,7 +16,6 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entities.structures.Structure;
 
 public class Map implements IndexedGraph<MapNode> {
-
 
     private final static String GROUND_LAYER = "ground layer";
     private final static String WALL_LAYER = "solid layer";
@@ -37,8 +34,8 @@ public class Map implements IndexedGraph<MapNode> {
         // Load the map
         map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
         float unitScale = 1 / 64f;
-        renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.batch);
-        renderer.setView(game.camera);
+        renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.getBatch());
+        renderer.setView(game.getCamera());
         structures = new Array<>();
 
         createBodies();
@@ -62,11 +59,12 @@ public class Map implements IndexedGraph<MapNode> {
             for (int y = 0; y < wallLayer.getHeight(); y++) {
                 if (wallLayer.getCell(x, y) != null) {
                     bodyDef.position.set(x + 0.5f, y + 0.5f);
-                    Body wallBody = game.world.createBody(bodyDef);
+                    Body wallBody = game.getWorld().createBody(bodyDef);
+                    wallBody.setUserData(CellBodyType.WALL);
                     FixtureDef fixtureDef = new FixtureDef();
                     fixtureDef.shape = shape;
                     fixtureDef.restitution = 0f;
-                    wallBody.createFixture(fixtureDef);
+                    wallBody.createFixture(fixtureDef).setUserData(CellBodyType.WALL);
                 }
             }
         }
@@ -185,6 +183,10 @@ public class Map implements IndexedGraph<MapNode> {
     @Override
     public Array<Connection<MapNode>> getConnections(MapNode fromNode) {
         return fromNode.getConnections();
+    }
+
+    public enum CellBodyType {
+        WALL, STRUCTURE
     }
 
 }

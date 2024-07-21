@@ -7,11 +7,12 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.OrderedSet;
 import com.mygdx.game.Debug;
-import com.mygdx.game.entities.CollidedEntity;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
+import com.mygdx.game.world.Map;
 
 public class Turret extends Structure {
     private final StructurePart base;
@@ -25,6 +26,7 @@ public class Turret extends Structure {
     private Enemy target;
     private float cooldownTimer = 0;
 
+    private final OrderedSet<Enemy> targetCandidates = new OrderedSet<>();
     private final StateMachine<Turret, TurretState> stateMachine;
 
     private Turret(Builder builder) {
@@ -45,39 +47,54 @@ public class Turret extends Structure {
         stateMachine = new DefaultStateMachine<>(this, TurretState.SEARCHING);
     }
 
-    private boolean checkLOS(Vector2 targetPos) {
-        float distance = targetPos.dst(getCenter());
-        Vector2 center = getCenter();
-        CollidedEntity collision = game.rayCastWalls(center, targetPos);
-        if (collision != null) {
-            return !(center.dst(collision.position) < distance); // no line of sight
-        }
-        return true;
+    /**
+     * Checks if the target is in line of sight, and if not, forgets target
+     */
+    private void checkTargetSight() {
+        Debug.drawPoint("turret center", getCenter());
+        Debug.drawPoint("enemy center", target.getCenter());
+
+        game.getWorld().rayCast((fixture, point, normal, fraction) -> {
+            Object userData = fixture.getBody().getUserData();
+            if (userData == null) return -1;
+            if (userData.equals(Map.CellBodyType.WALL)) { // if there is a wall, there is no LOS
+                target = null;
+                return 0;
+            }
+            return -1;
+        }, getCenter(), target.getCenter());
     }
 
-    private void searchTarget() {
-        Array<Enemy> enemies = game.getEnemies();
-        Enemy closest = null;
-        float closestDistance = Float.MAX_VALUE;
-
+    private void searchForTarget() {
         Vector2 center = getCenter();
 
+        Enemy closest = null;
+        float closestDist = Float.MAX_VALUE;
+
+        Array<Enemy> enemies = game.getEnemies();
         for (Enemy enemy : enemies) {
             Vector2 enemyPos = enemy.getCenter();
-            float distance = enemyPos.dst(getCenter());
-            if (distance < rangeRadius && distance < closestDistance) {
+            float distance = enemyPos.dst(center);
+            // if the enemy is within range
+            if (distance < closestDist && distance < rangeRadius) {
+                final boolean[] inSight = {true};
                 // check for line of sight
-                if (!checkLOS(enemyPos)) {
-                    continue;
+                game.getWorld().rayCast((fixture, point, normal, fraction) -> {
+                    Object userData = fixture.getBody().getUserData();
+                    if (userData.equals(Map.CellBodyType.WALL)) {
+                        inSight[0] = false;
+                        return 0; // no sight, stop ray
+                    }
+                    return -1;
+                }, center, enemyPos);
+                if (inSight[0]) {
+                    closest = enemy;
+                    closestDist = distance;
                 }
-                // enemy is a candidate
-                closest = enemy;
-                closestDistance = distance;
             }
         }
-        if (closest != null) {
-            target = closest;
-        }
+
+        target = closest;
     }
 
     private boolean faceTarget(float delta) {
@@ -85,7 +102,6 @@ public class Turret extends Structure {
         final float rotationEpsilon = 0.01f; // for floating point inaccuracy
 
         Vector2 targetPos = target.getCenter();
-        Debug.drawPoint("Enemy pos", targetPos.x, targetPos.y);
 
         Vector2 position = getCenter();
         Vector2 direction = targetPos.cpy().sub(position);
@@ -143,7 +159,7 @@ public class Turret extends Structure {
         SEARCHING() {
             @Override
             public void update(Turret entity) {
-                entity.searchTarget();
+                entity.searchForTarget();
                 if (entity.target != null) {
                     entity.stateMachine.changeState(ATTACKING);
                 }
@@ -152,13 +168,18 @@ public class Turret extends Structure {
         ATTACKING() {
             @Override
             public void update(Turret entity) {
-                if (entity.isAlive() && entity.checkLOS(entity.target.getCenter())) {
-                    if (entity.faceTarget(Gdx.graphics.getDeltaTime())) {
-                        entity.fire(Gdx.graphics.getDeltaTime());
-                    }
-                } else { // lost sight
-                    entity.target = null;
+                entity.checkTargetSight();
+                if (entity.target == null) { // lost target
                     entity.stateMachine.changeState(SEARCHING);
+                } else {
+                    if (entity.target.isAlive()) {
+                        if (entity.faceTarget(Gdx.graphics.getDeltaTime())) {
+                            entity.fire(Gdx.graphics.getDeltaTime());
+                        }
+                    } else { // target died
+                        entity.target = null;
+                        entity.stateMachine.changeState(SEARCHING);
+                    }
                 }
             }
         };

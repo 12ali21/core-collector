@@ -56,16 +56,17 @@ public class RedCreep extends Enemy {
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position.x, position.y);
 
-        body = game.world.createBody(bodyDef);
+        body = game.getWorld().createBody(bodyDef);
         body.setLinearDamping(1f);
         body.setFixedRotation(true);
+        body.setUserData(this);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
         fixtureDef.friction = 0.3f;
         fixtureDef.restitution = 0.5f;
-        body.createFixture(fixtureDef);
+        body.createFixture(fixtureDef).setUserData(this);
         return body;
     }
 
