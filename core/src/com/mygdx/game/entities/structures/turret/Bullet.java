@@ -69,8 +69,14 @@ public class Bullet extends EntityObj {
     public void update(float deltaTime) {
         lifetime -= deltaTime;
         if (lifetime < 0) {
-            dispose();
+            kill();
         }
         sprite.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
+    }
+
+    @Override
+    public void kill() {
+        super.kill();
+        game.getWorld().destroyBody(body);
     }
 }
