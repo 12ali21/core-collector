@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entities.Entity;
 import com.mygdx.game.entities.HealthPoints;
-import com.mygdx.game.world.World;
+import com.mygdx.game.world.Game;
 
 public abstract class Structure extends Entity implements HealthPoints.Callback {
     protected final Array<StructurePart> parts;
@@ -14,7 +14,7 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
     protected final HealthPoints health;
 
     public Structure(Builder builder) {
-        super(builder.world);
+        super(builder.game);
         this.bounds = builder.bounds;
         this.parts = builder.parts;
         health = new HealthPoints(builder.maxHp, this);
@@ -52,7 +52,7 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
     }
 
     public abstract static class Builder {
-        protected final World world;
+        protected final Game game;
         protected final Array<StructurePart> parts;
         protected float maxHp;
         protected Bounds bounds;
@@ -63,8 +63,8 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
         private final Color GHOST_COLOR_INVALID = new Color(1, 0.2f, 0.2f, 0.5f);
         private final Array<Sprite> ghostParts;
 
-        public Builder(World world) {
-            this.world = world;
+        public Builder(Game game) {
+            this.game = game;
             parts = new Array<>();
             ghostParts = new Array<>();
         }
@@ -90,7 +90,7 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
 
         public void renderGhost() {
             for (Sprite ghost : ghostParts) {
-                ghost.draw(world.getBatch());
+                ghost.draw(game.getBatch());
             }
         }
 
@@ -112,8 +112,8 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
     public static class StructurePart extends Entity {
         public Sprite sprite;
 
-        public StructurePart(World world, Sprite sprite) {
-            super(world);
+        public StructurePart(Game game, Sprite sprite) {
+            super(game);
             this.sprite = sprite;
         }
 

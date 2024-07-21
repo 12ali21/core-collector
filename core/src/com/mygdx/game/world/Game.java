@@ -10,6 +10,8 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.StructureBuilder;
@@ -22,17 +24,18 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.entities.structures.turret.Turret;
 
 import java.util.Iterator;
 
-public class World implements Drawable, Updatable {
+public class Game implements Drawable, Updatable {
 
+    public final World world;
     public final Map map;
+    public final Batch batch;
+    public final OrthographicCamera camera;
+    public final AssetManager assets;
 
-    private final AssetManager assets;
-    private final Batch batch;
-    private final OrthographicCamera camera;
+    private final Box2DDebugRenderer debugRenderer;
     private final StructureBuilder structureBuilder = new StructureBuilder(this);
     private final HoveredTile hoveredTile;
     private final Array<Entity> entitiesRender = new Array<>();
@@ -42,11 +45,13 @@ public class World implements Drawable, Updatable {
     private boolean isSorted = false;
 
     Enemy creep;
-    public World(AssetManager assets, Batch batch, OrthographicCamera camera) {
+    public Game(AssetManager assets, Batch batch, OrthographicCamera camera) {
+        this.world = new World(new Vector2(0, 0), true);
+        this.debugRenderer = new Box2DDebugRenderer();
         this.assets = assets;
         this.batch = batch;
         this.camera = camera;
-        map = new Map(batch, camera, "maze");
+        map = new Map(this, "maze");
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
@@ -123,6 +128,8 @@ public class World implements Drawable, Updatable {
             }
         }
         batch.end();
+        debugRenderer.render(world, camera.combined);
+        world.step(1/60f, 6, 2);
     }
 
     /**

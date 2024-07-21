@@ -6,7 +6,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mygdx.game.world.World;
+import com.mygdx.game.world.Game;
 
 public class GameScreen extends ScreenAdapter {
     private boolean active;
@@ -14,7 +14,7 @@ public class GameScreen extends ScreenAdapter {
 
     private OrthographicCamera camera;
     private ScreenInputProcessor inputProcessor;
-    private World world;
+    private Game game;
 
     float VIEWPORT_SIZE = 50;
 
@@ -36,7 +36,7 @@ public class GameScreen extends ScreenAdapter {
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
 
-        world = new World(assets, batch, camera);
+        game = new Game(assets, batch, camera);
 
         // setup input processor
         inputProcessor = new ScreenInputProcessor();
@@ -46,7 +46,7 @@ public class GameScreen extends ScreenAdapter {
 
     private void update(float delta) {
         inputProcessor.update(delta);
-        world.update(delta);
+        game.update(delta);
 
         camera.zoom = inputProcessor.getZoom();
         camera.position.set(inputProcessor.getCameraPosition(), 0);
@@ -57,7 +57,7 @@ public class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         update(delta);
         batch.setProjectionMatrix(camera.combined);
-        world.render();
+        game.render();
     }
 
     @Override

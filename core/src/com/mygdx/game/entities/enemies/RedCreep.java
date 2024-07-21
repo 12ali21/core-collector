@@ -9,11 +9,15 @@ import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Debug;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.world.Game;
 import com.mygdx.game.world.MapNode;
-import com.mygdx.game.world.World;
 
 import java.util.Iterator;
 
@@ -22,25 +26,47 @@ public class RedCreep extends Enemy {
     private final float attackingRange = 1;
     private final float damage = 50;
     private final float DAMAGE_COOLDOWN = 1f;
+    private final StateMachine<RedCreep, RedCreepState> stateMachine;
     private float timer = 0f;
-
     private DefaultGraphPath<MapNode> path;
     private Iterator<MapNode> pathIterator;
     private MapNode currentDest;
     private Structure target;
-    private final StateMachine<RedCreep, RedCreepState> stateMachine;
 
-    public RedCreep(World world, Vector2 position) {
-        super(world, position, 1f, 1f);
+    public RedCreep(Game game, Vector2 position) {
+        super(game);
         Texture t = assets.get("sprites/enemy_small.png", Texture.class);
         sprite = new Sprite(t);
-        sprite.setSize(width, height);
+        sprite.setSize(1, 1);
         sprite.setOriginCenter();
         sprite.setOriginBasedPosition(position.x + 0.5f, position.y + 0.5f);
+
+        body = makeBody(position);
 
         stateMachine = new DefaultStateMachine<>(this, RedCreepState.IDLE);
 
         movementSpeed = 2;
+    }
+
+    private Body makeBody(Vector2 position) {
+        final Body body;
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(0.2f, 0.4f);
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(position.x, position.y);
+
+        body = game.world.createBody(bodyDef);
+        body.setLinearDamping(1f);
+        body.setFixedRotation(true);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.density = 1f;
+        fixtureDef.friction = 0.3f;
+        fixtureDef.restitution = 0.5f;
+        body.createFixture(fixtureDef);
+        return body;
     }
 
     @Override
@@ -49,9 +75,31 @@ public class RedCreep extends Enemy {
     }
 
     public void setTarget(Structure target) {
+        Vector2 position = body.getPosition();
         this.target = target;
-        path = world.findPath((int) position.x, (int) position.y, (int) target.getCenter().x, (int) target.getCenter().y);
+        path = game.findPath((int) position.x, (int) position.y, (int) target.getCenter().x, (int) target.getCenter().y);
         pathIterator = path.iterator();
+    }
+
+    private void rotateTo(float angle) {
+        if (Math.abs(angle - body.getAngle()) > 0.05f) {
+            // rotate towards the target (clockwise or counter-clockwise depending on the shortest path
+            float rotationSpeed = 5 * Math.signum(angle - body.getAngle());
+            body.setAngularVelocity(rotationSpeed);
+        } else {
+            body.setAngularVelocity(0f);
+        }
+    }
+
+    private boolean moveTo(float x, float y) {
+        Debug.log("Moving to", x + ", " + y);
+        Debug.log("Current position", body.getPosition());
+        Vector2 position = body.getPosition();
+        Vector2 target = new Vector2(x, y);
+        Vector2 direction = target.cpy().sub(position).nor();
+        body.setLinearVelocity(direction.scl(movementSpeed));
+        rotateTo(direction.angleRad() + (float) Math.PI / 2);
+        return position.dst(target) < 0.1f;
     }
 
     private void moveTowardsTarget() {
@@ -61,16 +109,22 @@ public class RedCreep extends Enemy {
             }
         } else {
             // move to the center of the destination tile
-            boolean res = moveTo(currentDest.x + 0.5f, currentDest.y+ 0.5f, Gdx.graphics.getDeltaTime());
+            boolean res = moveTo(currentDest.x + 0.5f, currentDest.y + 0.5f);
             if (res)
                 currentDest = null;
         }
     }
 
+    private void stopMoving() {
+        body.setLinearVelocity(0, 0);
+        body.setAngularVelocity(0);
+    }
+
     private boolean targetWithinRange() {
-        Debug.log("enemy position", "" + getPosition());
+        Vector2 position = body.getPosition();
+        Debug.log("enemy position", "" + position);
         Debug.log("turret center", "" + target.getCenter());
-        float dist = target.getCenter().dst(this.getPosition());
+        float dist = target.getCenter().dst(position);
         return dist < attackingRange;
     }
 
@@ -100,7 +154,7 @@ public class RedCreep extends Enemy {
             public void update(RedCreep entity) {
                 // find the closest structure and the path to it
                 Array<Structure> structures = entity.getWorld().map.getStructures();
-                Vector2 position = entity.getPosition();
+                Vector2 position = entity.body.getPosition();
 
                 Structure target = null;
                 float closest = Float.MAX_VALUE;
@@ -144,6 +198,11 @@ public class RedCreep extends Enemy {
                     entity.currentDest = null;
                     entity.stateMachine.changeState(ATTACKING);
                 }
+            }
+
+            @Override
+            public void exit(RedCreep entity) {
+                entity.stopMoving();
             }
         },
 

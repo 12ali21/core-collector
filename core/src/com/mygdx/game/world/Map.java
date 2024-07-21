@@ -10,12 +10,19 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entities.structures.Structure;
 
 public class Map implements IndexedGraph<MapNode> {
+
+
     private final static String GROUND_LAYER = "ground layer";
     private final static String WALL_LAYER = "solid layer";
+    private final Game game;
     private final TiledMap map;
     private final OrthogonalTiledMapRenderer renderer;
     private final Array<Structure> structures;
@@ -25,18 +32,51 @@ public class Map implements IndexedGraph<MapNode> {
     private final MapNode[][] nodes;
     private final EuclideanHeuristic heuristic;
 
-    public Map(Batch batch, OrthographicCamera camera, String mapName) {
+    public Map(Game game, String mapName) {
+        this.game = game;
         // Load the map
         map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
         float unitScale = 1 / 64f;
-        renderer = new OrthogonalTiledMapRenderer(map, unitScale, batch);
-        renderer.setView(camera);
+        renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.batch);
+        renderer.setView(game.camera);
         structures = new Array<>();
 
-        heuristic = new EuclideanHeuristic();
-        TiledMapTileLayer groundLayer = getGroundLayer();
-        nodes = new MapNode[groundLayer.getWidth()][groundLayer.getHeight()];
+        createBodies();
 
+        TiledMapTileLayer groundLayer = getGroundLayer();
+        heuristic = new EuclideanHeuristic();
+        nodes = new MapNode[groundLayer.getWidth()][groundLayer.getHeight()];
+        createGroundNodes();
+        pathFinder = new IndexedAStarPathFinder<>(this, true);
+
+    }
+    private void createBodies() {
+        TiledMapTileLayer wallLayer = getWallLayer();
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(0.5f, 0.5f);
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+
+        for (int x = 0; x < wallLayer.getWidth(); x++) {
+            for (int y = 0; y < wallLayer.getHeight(); y++) {
+                if (wallLayer.getCell(x, y) != null) {
+                    bodyDef.position.set(x + 0.5f, y + 0.5f);
+                    Body wallBody = game.world.createBody(bodyDef);
+                    FixtureDef fixtureDef = new FixtureDef();
+                    fixtureDef.shape = shape;
+                    fixtureDef.restitution = 0f;
+                    wallBody.createFixture(fixtureDef);
+                }
+            }
+        }
+        shape.dispose();
+    }
+
+    private void createGroundNodes() {
+        TiledMapTileLayer groundLayer = getGroundLayer();
+
+        // create the nodes
         int index = 0;
         for (int y = 0; y < groundLayer.getWidth(); y++) {
             for (int x = 0; x < groundLayer.getHeight(); x++) {
@@ -48,6 +88,7 @@ public class Map implements IndexedGraph<MapNode> {
             }
         }
 
+        // create the connections between nodes
         for (MapNode node : nodesList) {
             int x = node.x;
             int y = node.y;
@@ -68,8 +109,6 @@ public class Map implements IndexedGraph<MapNode> {
             if (nodes[x+1][y] != null && nodes[x][y-1] != null)
                 addNodeNeighbour(x + 1, y - 1, node, 1.4f);
         }
-
-        pathFinder = new IndexedAStarPathFinder<>(this, true);
     }
 
     public TiledMapTileLayer getGroundLayer() {

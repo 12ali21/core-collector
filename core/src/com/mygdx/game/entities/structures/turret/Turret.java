@@ -11,7 +11,7 @@ import com.mygdx.game.Debug;
 import com.mygdx.game.entities.CollidedEntity;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.world.World;
+import com.mygdx.game.world.Game;
 
 public class Turret extends Structure {
     private final StructurePart base;
@@ -48,7 +48,7 @@ public class Turret extends Structure {
     private boolean checkLOS(Vector2 targetPos) {
         float distance = targetPos.dst(getCenter());
         Vector2 center = getCenter();
-        CollidedEntity collision = world.rayCastWalls(center, targetPos);
+        CollidedEntity collision = game.rayCastWalls(center, targetPos);
         if (collision != null) {
             return !(center.dst(collision.position) < distance); // no line of sight
         }
@@ -56,7 +56,7 @@ public class Turret extends Structure {
     }
 
     private void searchTarget() {
-        Array<Enemy> enemies = world.getEnemies();
+        Array<Enemy> enemies = game.getEnemies();
         Enemy closest = null;
         float closestDistance = Float.MAX_VALUE;
 
@@ -118,8 +118,8 @@ public class Turret extends Structure {
         if (cooldownTimer > 0) {
             return;
         }
-        Bullet bullet = new Bullet(world, getFiringPosition(), headRotation, bulletSpeed);
-        world.addEntity(bullet);
+        Bullet bullet = new Bullet(game, getFiringPosition(), headRotation, bulletSpeed);
+        game.addEntity(bullet);
         cooldownTimer = bulletCooldown;
 
         recoil.fire();
@@ -199,8 +199,8 @@ public class Turret extends Structure {
         private float recoilMaxDistance = 0.1f;
         private float recoilReturnVelocity = 0.2f;
 
-        public Builder(World world, float hitPoints) {
-            super(world);
+        public Builder(Game game, float hitPoints) {
+            super(game);
             this.width = 2;
             this.height = 2;
             this.maxHp = hitPoints;

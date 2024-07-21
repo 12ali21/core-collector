@@ -2,22 +2,18 @@ package com.mygdx.game.entities;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.world.World;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.mygdx.game.world.Game;
 
 public abstract class EntityObj extends Entity{
     protected Sprite sprite;
-    protected final Vector2 position;
-    public EntityObj(World world, Vector2 position) {
-        super(world);
-        this.position = position.cpy();
-    }
-
-    public Vector2 getPosition() {
-        return position;
+    protected Body body;
+    public EntityObj(Game game) {
+        super(game);
     }
 
     @Override
     public Vector2 getCenter() {
-        return new Vector2(position.x, position.y);
+        return new Vector2(body.getPosition());
     }
 }

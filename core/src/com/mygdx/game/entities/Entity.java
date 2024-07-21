@@ -6,21 +6,21 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
-import com.mygdx.game.world.World;
+import com.mygdx.game.world.Game;
 
 public abstract class Entity implements Drawable, Updatable, Disposable {
 
     protected final AssetManager assets;
     protected final Batch batch;
-    protected final World world;
+    protected final Game game;
     protected boolean alive = true;
 
     private int renderPriority;
 
-    public Entity(World world) {
-        this.world = world;
-        this.assets = world.getAssets();
-        this.batch = world.getBatch();
+    public Entity(Game game) {
+        this.game = game;
+        this.assets = game.getAssets();
+        this.batch = game.getBatch();
     }
 
     public void setRenderPriority(int renderPriority) {
@@ -46,7 +46,7 @@ public abstract class Entity implements Drawable, Updatable, Disposable {
         alive = false;
     }
 
-    public World getWorld() {
-        return world;
+    public Game getWorld() {
+        return game;
     }
 }
