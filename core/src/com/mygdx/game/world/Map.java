@@ -1,9 +1,13 @@
 package com.mygdx.game.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -17,7 +21,6 @@ import com.mygdx.game.entities.structures.Structure;
 
 public class Map implements IndexedGraph<MapNode> {
 
-    private final static String GROUND_LAYER = "ground layer";
     private final static String WALL_LAYER = "solid layer";
     private final Game game;
     private final TiledMap map;
@@ -29,27 +32,38 @@ public class Map implements IndexedGraph<MapNode> {
     private final MapNode[][] nodes;
     private final EuclideanHeuristic heuristic;
 
+    private final float width;
+    private final float height;
+    private final float TILE_SIZE = 64f;
+
+
+    Texture groundTexture;
+
     public Map(Game game, String mapName) {
         this.game = game;
         // Load the map
         map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
-        float unitScale = 1 / 64f;
+        float unitScale = 1 / TILE_SIZE;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.getBatch());
         renderer.setView(game.getCamera());
         structures = new Array<>();
 
-        createBodies();
+        groundTexture = game.getAssets().get("maps/ground/1.png", Texture.class);
+        groundTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
-        TiledMapTileLayer groundLayer = getGroundLayer();
+        TiledMapTileLayer wallLayer = getWallLayer();
+        width = wallLayer.getWidth();
+        height = wallLayer.getHeight();
+
+        createBodies(wallLayer);
         heuristic = new EuclideanHeuristic();
-        nodes = new MapNode[groundLayer.getWidth()][groundLayer.getHeight()];
-        createGroundNodes();
+        nodes = new MapNode[wallLayer.getWidth()][wallLayer.getHeight()];
+        createGroundNodes(wallLayer);
         pathFinder = new IndexedAStarPathFinder<>(this, true);
 
+//
     }
-    private void createBodies() {
-        TiledMapTileLayer wallLayer = getWallLayer();
-
+    private void createBodies(TiledMapTileLayer wallLayer) {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(0.5f, 0.5f);
         BodyDef bodyDef = new BodyDef();
@@ -71,14 +85,12 @@ public class Map implements IndexedGraph<MapNode> {
         shape.dispose();
     }
 
-    private void createGroundNodes() {
-        TiledMapTileLayer groundLayer = getGroundLayer();
-
+    private void createGroundNodes(TiledMapTileLayer wallLayer) {
         // create the nodes
         int index = 0;
-        for (int y = 0; y < groundLayer.getWidth(); y++) {
-            for (int x = 0; x < groundLayer.getHeight(); x++) {
-                if (groundLayer.getCell(x, y) != null) {
+        for (int y = 0; y < wallLayer.getWidth(); y++) {
+            for (int x = 0; x < wallLayer.getHeight(); x++) {
+                if (wallLayer.getCell(x, y) == null) {
                     MapNode node = new MapNode(index++, x, y);
                     nodesList.add(node);
                     nodes[x][y] = node;
@@ -109,10 +121,6 @@ public class Map implements IndexedGraph<MapNode> {
         }
     }
 
-    public TiledMapTileLayer getGroundLayer() {
-        return (TiledMapTileLayer) map.getLayers().get(GROUND_LAYER);
-    }
-
     public TiledMapTileLayer getWallLayer() {
         return (TiledMapTileLayer) map.getLayers().get(WALL_LAYER);
     }
@@ -133,7 +141,6 @@ public class Map implements IndexedGraph<MapNode> {
         structures.add(structure);
     }
 
-
     public void removeStructure(Structure structure, int x, int y, int width, int height) {
         for (int i = x; i < x + width; i++) {
             for (int j = y; j < y + height; j++) {
@@ -147,8 +154,24 @@ public class Map implements IndexedGraph<MapNode> {
         return structures;
     }
 
+    //TODO: don't draw the whole ground, only the visible part
+    private void drawGround(Batch batch) {
+        batch.setColor(185f/255f, 133f/255f, 93f/ 255f, 1f);
+        int srcWidth = (int) (width * TILE_SIZE);
+        int srcHeight = (int) (height * TILE_SIZE);
+
+        batch.draw(groundTexture, 0, 0, width, height, 0, 0, srcWidth, srcHeight, false, false);
+        batch.setColor(Color.WHITE);
+
+    }
+
     public void render() {
-        renderer.render();
+        Batch batch = game.getBatch();
+        renderer.setView(game.getCamera());
+        batch.begin();
+        drawGround(batch);
+        renderer.renderTileLayer(getWallLayer());
+        batch.end();
     }
 
     private void addNodeNeighbour(int x, int y, MapNode node, float cost) {

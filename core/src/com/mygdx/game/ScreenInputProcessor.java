@@ -8,8 +8,8 @@ import com.badlogic.gdx.math.Vector2;
 
 public class ScreenInputProcessor extends InputAdapter implements Updatable {
 
-    public static final float ZOOM_LIMIT_LOW = 0.25f;
-    public static final float ZOOM_LIMIT_HIGH = 4f;
+    public static final float ZOOM_LIMIT_LOW = 0.1f;
+    public static final float ZOOM_LIMIT_HIGH = 1f;
     public static final float ZOOM_CHANGE_SPEED =0.1f;
 
     public static final float MOVE_SPEED = 7f;
