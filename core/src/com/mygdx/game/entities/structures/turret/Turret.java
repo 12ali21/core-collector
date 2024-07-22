@@ -9,10 +9,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.OrderedSet;
 import com.mygdx.game.Debug;
+import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
-import com.mygdx.game.world.Map;
+import com.mygdx.game.world.map.Map;
 
 public class Turret extends Structure {
     private final StructurePart base;
@@ -143,6 +144,7 @@ public class Turret extends Structure {
 
     @Override
     public void update(float deltaTime) {
+        Debug.log("Turret state: ", "" + stateMachine.getCurrentState());
         stateMachine.update();
         updateHead(deltaTime);
     }

@@ -11,14 +11,16 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Drawable;
-import com.mygdx.game.StructureBuilder;
 import com.mygdx.game.Updatable;
+import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.Entity;
 import com.mygdx.game.entities.HoveredTile;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.world.map.Map;
+import com.mygdx.game.world.map.MapNode;
 
 import java.util.Iterator;
 
@@ -38,10 +40,14 @@ public class Game implements Drawable, Updatable {
     private final Array<Entity> entitiesToAdd = new Array<>();
     private final Array<Enemy> enemies = new Array<>();
     private final Enemy creep;
+    private final MyContactListener contactListener;
     private boolean isSorted = false;
 
     public Game(AssetManager assets, Batch batch, OrthographicCamera camera) {
         this.world = new World(new Vector2(0, 0), true);
+        contactListener = new MyContactListener();
+        setContactListeners();
+
         this.debugRenderer = new Box2DDebugRenderer();
         this.assets = assets;
         this.batch = batch;
@@ -53,6 +59,11 @@ public class Game implements Drawable, Updatable {
         creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
         addEntity(creep);
         enemies.add(creep);
+    }
+
+    private void setContactListeners() {
+        world.setContactListener(contactListener);
+        contactListener.registerCallback(Bullet::handleContact);
     }
 
     @Override
@@ -72,7 +83,10 @@ public class Game implements Drawable, Updatable {
                     Structure s = (Structure) entity;
                     Bounds bounds = s.getBounds();
                     map.removeStructure(s, bounds.x, bounds.y, bounds.width, bounds.height);
+                } else if (entity instanceof Enemy) {
+                    enemies.removeValue((Enemy) entity, true);
                 }
+                entity.dispose();
                 itr.remove();
             }
         }

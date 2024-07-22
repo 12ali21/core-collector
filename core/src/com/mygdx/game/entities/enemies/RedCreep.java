@@ -17,7 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Debug;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
-import com.mygdx.game.world.MapNode;
+import com.mygdx.game.world.map.MapNode;
 
 import java.util.Iterator;
 
@@ -34,7 +34,7 @@ public class RedCreep extends Enemy {
     private Structure target;
 
     public RedCreep(Game game, Vector2 position) {
-        super(game);
+        super(game, 100);
         Texture t = assets.get("sprites/enemy_small.png", Texture.class);
         sprite = new Sprite(t);
         sprite.setSize(1, 1);
@@ -123,8 +123,6 @@ public class RedCreep extends Enemy {
 
     private boolean targetWithinRange() {
         Vector2 position = body.getPosition();
-        Debug.log("enemy position", "" + position);
-        Debug.log("turret center", "" + target.getCenter());
         float dist = target.getCenter().dst(position);
         return dist < attackingRange;
     }
@@ -143,6 +141,12 @@ public class RedCreep extends Enemy {
         stateMachine.update();
         Debug.log("Enemy state", "" + stateMachine.getCurrentState());
         super.update(deltaTime);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        game.getWorld().destroyBody(body);
     }
 
     /**
@@ -187,17 +191,16 @@ public class RedCreep extends Enemy {
             @Override
             public void update(RedCreep entity) {
                 // if the target dies while moving, go back to idle
-                if (entity.target.isAlive()) {
+                if (entity.target != null && entity.target.isAlive()) {
                     entity.moveTowardsTarget();
+                    // if reached the attacking range, go to attacking
+                    if (entity.targetWithinRange()) {
+                        entity.currentDest = null;
+                        entity.stateMachine.changeState(ATTACKING);
+                    }
                 } else {
                     entity.target = null;
                     entity.stateMachine.changeState(IDLE);
-                }
-
-                // if reached the attacking range, go to attacking
-                if (entity.targetWithinRange()) {
-                    entity.currentDest = null;
-                    entity.stateMachine.changeState(ATTACKING);
                 }
             }
 
@@ -234,7 +237,6 @@ public class RedCreep extends Enemy {
 
         }
 
-        // TODO: Handle incoming damage
         @Override
         public boolean onMessage(RedCreep entity, Telegram telegram) {
             return false;

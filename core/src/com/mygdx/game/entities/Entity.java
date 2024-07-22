@@ -8,7 +8,7 @@ import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.world.Game;
 
-public abstract class Entity implements Drawable, Updatable {
+public abstract class Entity implements Drawable, Updatable, Disposable {
 
     protected final AssetManager assets;
     protected final Batch batch;
@@ -39,6 +39,11 @@ public abstract class Entity implements Drawable, Updatable {
 
     public void kill() {
         alive = false;
+    }
+
+    @Override
+    public void dispose() {
+
     }
 
     public Game getWorld() {

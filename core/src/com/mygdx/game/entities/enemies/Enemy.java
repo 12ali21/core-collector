@@ -3,13 +3,16 @@ package com.mygdx.game.entities.enemies;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entities.EntityObj;
+import com.mygdx.game.entities.HealthPoints;
 import com.mygdx.game.world.Game;
 
 public abstract class Enemy extends EntityObj {
     protected float movementSpeed;
+    protected HealthPoints health;
 
-    public Enemy(Game game) {
+    public Enemy(Game game, float maxHp) {
         super(game);
+        health = new HealthPoints(maxHp, this::kill);
         setRenderPriority(2);
     }
 
@@ -17,6 +20,10 @@ public abstract class Enemy extends EntityObj {
     @Override
     public void render() {
 
+    }
+
+    public HealthPoints getHealth() {
+        return health;
     }
 
     @Override

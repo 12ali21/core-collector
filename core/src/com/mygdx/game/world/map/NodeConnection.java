@@ -1,4 +1,4 @@
-package com.mygdx.game.world;
+package com.mygdx.game.world.map;
 
 import com.badlogic.gdx.ai.pfa.Connection;
 

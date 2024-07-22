@@ -1,9 +1,11 @@
-package com.mygdx.game;
+package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.Drawable;
+import com.mygdx.game.Updatable;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.turret.Turrets;

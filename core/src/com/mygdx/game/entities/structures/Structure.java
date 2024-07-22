@@ -8,7 +8,7 @@ import com.mygdx.game.entities.Entity;
 import com.mygdx.game.entities.HealthPoints;
 import com.mygdx.game.world.Game;
 
-public abstract class Structure extends Entity implements HealthPoints.Callback {
+public abstract class Structure extends Entity {
     protected final Array<StructurePart> parts;
     protected final Bounds bounds;
     protected final HealthPoints health;
@@ -17,7 +17,13 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
         super(builder.game);
         this.bounds = builder.bounds;
         this.parts = builder.parts;
-        health = new HealthPoints(builder.maxHp, this);
+        health = new HealthPoints(builder.maxHp, () -> {
+            for (StructurePart part : parts) {
+                part.kill();
+            }
+            kill();
+        });
+
     }
 
     public Array<StructurePart> getParts() {
@@ -37,14 +43,6 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
     }
 
     @Override
-    public void onDeath() {
-        for (StructurePart part : parts) {
-            part.kill();
-        }
-        kill();
-    }
-
-    @Override
     public void render() {
         for (StructurePart p : parts) {
             p.render();
@@ -54,14 +52,13 @@ public abstract class Structure extends Entity implements HealthPoints.Callback 
     public abstract static class Builder {
         protected final Game game;
         protected final Array<StructurePart> parts;
+        private final Color GHOST_COLOR = new Color(0.2f, 1, 0.2f, 0.5f);
+        private final Color GHOST_COLOR_INVALID = new Color(1, 0.2f, 0.2f, 0.5f);
+        private final Array<Sprite> ghostParts;
         protected float maxHp;
         protected Bounds bounds;
         protected int width;
         protected int height;
-
-        private final Color GHOST_COLOR = new Color(0.2f, 1, 0.2f, 0.5f);
-        private final Color GHOST_COLOR_INVALID = new Color(1, 0.2f, 0.2f, 0.5f);
-        private final Array<Sprite> ghostParts;
 
         public Builder(Game game) {
             this.game = game;

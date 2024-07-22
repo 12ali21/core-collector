@@ -1,6 +1,5 @@
-package com.mygdx.game.world;
+package com.mygdx.game.world.map;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
@@ -18,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.world.Game;
 
 public class Map implements IndexedGraph<MapNode> {
 
