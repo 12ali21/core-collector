@@ -46,6 +46,8 @@ public class Turret extends Structure {
                 builder.recoilReturnVelocity);
 
         stateMachine = new DefaultStateMachine<>(this, TurretState.SEARCHING);
+        health.setWidth(1.5f);
+        health.setOffset(new Vector2(0, -1));
     }
 
     /**
@@ -144,6 +146,7 @@ public class Turret extends Structure {
 
     @Override
     public void update(float deltaTime) {
+        super.update(deltaTime);
         Debug.log("Turret state: ", "" + stateMachine.getCurrentState());
         stateMachine.update();
         updateHead(deltaTime);

@@ -164,10 +164,8 @@ public class Game implements Drawable, Updatable {
                 for (Entity e2 : s.getParts()) {
                     entitiesRender.add(e2);
                 }
-            } else {
-                entitiesRender.add(e);
             }
-
+            entitiesRender.add(e);
             entitiesUpdate.add(e);
         }
         isSorted = false;

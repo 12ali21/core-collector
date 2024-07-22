@@ -40,9 +40,9 @@ public class RedCreep extends Enemy {
         sprite.setSize(1, 1);
         sprite.setOriginCenter();
         sprite.setOriginBasedPosition(position.x + 0.5f, position.y + 0.5f);
+        health.setOffset(new Vector2(0, -0.5f));
 
         body = makeBody(position);
-
         stateMachine = new DefaultStateMachine<>(this, RedCreepState.IDLE);
 
         movementSpeed = 2;
@@ -68,11 +68,6 @@ public class RedCreep extends Enemy {
         fixtureDef.restitution = 0.5f;
         body.createFixture(fixtureDef).setUserData(this);
         return body;
-    }
-
-    @Override
-    public void render() {
-        sprite.draw(batch);
     }
 
     public void setTarget(Structure target) {
@@ -134,6 +129,12 @@ public class RedCreep extends Enemy {
             target.getHealth().damage(damage);
             timer = DAMAGE_COOLDOWN;
         }
+    }
+
+    @Override
+    public void render() {
+        super.render();
+        sprite.draw(batch);
     }
 
     @Override

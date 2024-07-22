@@ -17,13 +17,12 @@ public abstract class Structure extends Entity {
         super(builder.game);
         this.bounds = builder.bounds;
         this.parts = builder.parts;
-        health = new HealthPoints(builder.maxHp, () -> {
+        health = new HealthPoints(game, builder.maxHp, () -> {
             for (StructurePart part : parts) {
                 part.kill();
             }
             kill();
         });
-
     }
 
     public Array<StructurePart> getParts() {
@@ -44,9 +43,12 @@ public abstract class Structure extends Entity {
 
     @Override
     public void render() {
-        for (StructurePart p : parts) {
-            p.render();
-        }
+        health.render();
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        health.setPosition(getCenter());
     }
 
     public abstract static class Builder {

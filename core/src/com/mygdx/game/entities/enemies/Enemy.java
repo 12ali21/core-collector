@@ -12,14 +12,14 @@ public abstract class Enemy extends EntityObj {
 
     public Enemy(Game game, float maxHp) {
         super(game);
-        health = new HealthPoints(maxHp, this::kill);
+        health = new HealthPoints(game, maxHp, this::kill);
         setRenderPriority(2);
     }
 
 
     @Override
     public void render() {
-
+        health.render();
     }
 
     public HealthPoints getHealth() {
@@ -31,5 +31,6 @@ public abstract class Enemy extends EntityObj {
         Vector2 pos = getCenter();
         sprite.setOriginBasedPosition(pos.x, pos.y);
         sprite.setRotation((float) Math.toDegrees(body.getAngle()));
+        health.setPosition(pos);
     }
 }

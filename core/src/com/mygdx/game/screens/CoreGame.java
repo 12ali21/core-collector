@@ -24,6 +24,10 @@ public class CoreGame extends ApplicationAdapter {
 		assets.load("sprites/turret_base.png", Texture.class);
 		assets.load("sprites/turret_head.png", Texture.class);
 		assets.load("maps/ground/1.png", Texture.class);
+		assets.load("sprites/health_border.png", Texture.class);
+		assets.load("sprites/green_bar.png", Texture.class);
+		assets.load("sprites/yellow_bar.png", Texture.class);
+		assets.load("sprites/red_bar.png", Texture.class);
 
 		gameScreen = new GameScreen(assets);
 //		gameScreen.show();
