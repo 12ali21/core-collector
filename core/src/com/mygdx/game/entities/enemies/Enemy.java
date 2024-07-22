@@ -1,6 +1,5 @@
 package com.mygdx.game.entities.enemies;
 
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entities.EntityObj;
 import com.mygdx.game.entities.HealthPoints;

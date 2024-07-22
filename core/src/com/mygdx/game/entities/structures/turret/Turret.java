@@ -7,7 +7,6 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.OrderedSet;
 import com.mygdx.game.Debug;
 import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.enemies.Enemy;
@@ -16,23 +15,19 @@ import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.Map;
 
 public class Turret extends Structure {
-    private final StructurePart base;
     private final StructurePart head;
     private final float rangeRadius;
     private final float rotationSpeed;
     private final float bulletSpeed;
     private final float bulletCooldown;
     private final Recoil recoil;
+    private final StateMachine<Turret, TurretState> stateMachine;
     private float headRotation = 0;
     private Enemy target;
     private float cooldownTimer = 0;
 
-    private final OrderedSet<Enemy> targetCandidates = new OrderedSet<>();
-    private final StateMachine<Turret, TurretState> stateMachine;
-
     private Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
-        this.base = builder.base;
         this.head = builder.head;
         this.rangeRadius = builder.rangeRadius;
         this.rotationSpeed = builder.rotationSpeed;
@@ -190,7 +185,6 @@ public class Turret extends Structure {
         };
 
 
-
         @Override
         public void enter(Turret entity) {
 
@@ -214,7 +208,6 @@ public class Turret extends Structure {
 
     public static class Builder extends Structure.Builder {
 
-        private StructurePart base;
         private StructurePart head;
         private float rangeRadius = 10f;
         private float rotationSpeed = 50f;
@@ -233,7 +226,6 @@ public class Turret extends Structure {
         }
 
         public Builder setBase(StructurePart base) {
-            this.base = base;
             base.setRenderPriority(1);
             addPart(base);
             return this;

@@ -10,16 +10,14 @@ import com.mygdx.game.Debug;
 import com.mygdx.game.world.Game;
 
 public class GameScreen extends ScreenAdapter {
+    private final AssetManager assets;
+    float VIEWPORT_SIZE = 50;
     private boolean active;
     private SpriteBatch batch;
-
     private OrthographicCamera camera;
     private ScreenInputProcessor inputProcessor;
     private Game game;
 
-    float VIEWPORT_SIZE = 50;
-
-    private final AssetManager assets;
     public GameScreen(AssetManager assets) {
         this.assets = assets;
     }
@@ -49,7 +47,8 @@ public class GameScreen extends ScreenAdapter {
         inputProcessor.update(delta);
         game.update(delta);
 
-        camera.zoom = inputProcessor.getZoom();
+        if (inputProcessor.isFOVChanged())
+            camera.zoom = inputProcessor.getZoom();
         camera.position.set(inputProcessor.getCameraPosition(), 0);
         camera.update();
     }
@@ -65,7 +64,7 @@ public class GameScreen extends ScreenAdapter {
     public void resize(int width, int height) {
         if (!active) return;
         camera.viewportWidth = VIEWPORT_SIZE;
-        camera.viewportHeight = VIEWPORT_SIZE * height/width;
+        camera.viewportHeight = VIEWPORT_SIZE * height / width;
         camera.update();
     }
 

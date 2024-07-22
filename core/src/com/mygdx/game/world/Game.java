@@ -1,7 +1,6 @@
 package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -20,7 +19,6 @@ import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.map.Map;
-import com.mygdx.game.world.map.MapNode;
 
 import java.util.Iterator;
 
@@ -39,7 +37,6 @@ public class Game implements Drawable, Updatable {
     private final Array<Entity> entitiesUpdate = new Array<>();
     private final Array<Entity> entitiesToAdd = new Array<>();
     private final Array<Enemy> enemies = new Array<>();
-    private final Enemy creep;
     private final MyContactListener contactListener;
     private boolean isSorted = false;
 
@@ -56,7 +53,7 @@ public class Game implements Drawable, Updatable {
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
-        creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
+        Enemy creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
         addEntity(creep);
         enemies.add(creep);
     }
@@ -142,6 +139,11 @@ public class Game implements Drawable, Updatable {
         entitiesToAdd.add(structure);
     }
 
+    /**
+     * check the structures on map to see if they are occupied
+     *
+     * @return true if the tiles are occupied
+     */
     public boolean areTilesOccupied(int x, int y, int width, int height) {
         for (int i = x; i < x + width; i++) {
             for (int j = y; j < y + height; j++) {
@@ -153,6 +155,9 @@ public class Game implements Drawable, Updatable {
         return false;
     }
 
+    /**
+     * Register new entities this frame to be updated and rendered
+     */
     private void registerEntities() {
         if (entitiesToAdd.isEmpty()) {
             return;
@@ -172,10 +177,7 @@ public class Game implements Drawable, Updatable {
         entitiesToAdd.clear();
     }
 
-    public DefaultGraphPath<MapNode> findPath(int startX, int startY, int endX, int endY) {
-        return map.findPath(startX, startY, endX, endY);
-    }
-
+    // ---------------- Getters ----------------
     public World getWorld() {
         return world;
     }

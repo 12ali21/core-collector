@@ -25,7 +25,7 @@ public class Map implements IndexedGraph<MapNode> {
     private final Game game;
     private final TiledMap map;
     private final OrthogonalTiledMapRenderer renderer;
-    private final Array<Structure> structures;
+    private final Array<Structure> structures = new Array<>();
 
     private final IndexedAStarPathFinder<MapNode> pathFinder;
     private final Array<MapNode> nodesList = new Array<>();
@@ -46,7 +46,6 @@ public class Map implements IndexedGraph<MapNode> {
         float unitScale = 1 / TILE_SIZE;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.getBatch());
         renderer.setView(game.getCamera());
-        structures = new Array<>();
 
         groundTexture = game.getAssets().get("maps/ground/1.png", Texture.class);
         groundTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);

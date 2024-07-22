@@ -23,12 +23,11 @@ import java.util.Iterator;
 
 public class RedCreep extends Enemy {
 
-    private final float attackingRange = 1;
-    private final float damage = 50;
-    private final float DAMAGE_COOLDOWN = 1f;
+    private static final float ATTACKING_RANGE = 1;
+    private static final float DAMAGE = 50;
+    private static final float DAMAGE_COOLDOWN = 1f;
     private final StateMachine<RedCreep, RedCreepState> stateMachine;
     private float timer = 0f;
-    private DefaultGraphPath<MapNode> path;
     private Iterator<MapNode> pathIterator;
     private MapNode currentDest;
     private Structure target;
@@ -73,7 +72,7 @@ public class RedCreep extends Enemy {
     public void setTarget(Structure target) {
         Vector2 position = body.getPosition();
         this.target = target;
-        path = game.findPath((int) position.x, (int) position.y, (int) target.getCenter().x, (int) target.getCenter().y);
+        DefaultGraphPath<MapNode> path = game.map.findPath((int) position.x, (int) position.y, (int) target.getCenter().x, (int) target.getCenter().y);
         pathIterator = path.iterator();
     }
 
@@ -119,14 +118,14 @@ public class RedCreep extends Enemy {
     private boolean targetWithinRange() {
         Vector2 position = body.getPosition();
         float dist = target.getCenter().dst(position);
-        return dist < attackingRange;
+        return dist < ATTACKING_RANGE;
     }
 
     private void attackTarget() {
         float delta = Gdx.graphics.getDeltaTime();
         timer -= delta;
         if (timer < 0) {
-            target.getHealth().damage(damage);
+            target.getHealth().damage(DAMAGE);
             timer = DAMAGE_COOLDOWN;
         }
     }

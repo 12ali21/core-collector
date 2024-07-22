@@ -9,7 +9,6 @@ import com.mygdx.game.Updatable;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.turret.Turrets;
-import com.mygdx.game.world.Game;
 
 public class StructureBuilder implements Updatable, Drawable {
     private final Game game;
@@ -56,12 +55,10 @@ public class StructureBuilder implements Updatable, Drawable {
                     currentStructure = null;
                 }
             }
-
-             if (currentStructure != null) {
+            if (currentStructure != null) {
                 currentStructure.setGhostPosition(mousePos.x, mousePos.y);
             }
         }
-
     }
 
     @Override
