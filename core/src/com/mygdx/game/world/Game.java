@@ -18,12 +18,12 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.world.map.Map;
+import com.mygdx.game.world.map.MapManager;
 
 import java.util.Iterator;
 
 public class Game implements Drawable, Updatable {
-    public final Map map;
+    public final MapManager map;
 
     private final World world;
     private final Batch batch;
@@ -49,7 +49,7 @@ public class Game implements Drawable, Updatable {
         this.assets = assets;
         this.batch = batch;
         this.camera = camera;
-        map = new Map(this, "maze");
+        map = new MapManager(this, "maze");
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
@@ -117,7 +117,7 @@ public class Game implements Drawable, Updatable {
             }
         }
         batch.end();
-        debugRenderer.render(world, camera.combined);
+//        debugRenderer.render(world, camera.combined);
         // Updating physics world should be done at the end of rendering
         world.step(1 / 60f, 6, 2);
     }

@@ -6,13 +6,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.world.Game;
-import com.mygdx.game.world.map.Map;
+import com.mygdx.game.world.map.MapManager;
 
 public class Bullet extends EntityObj {
     private static final float SCALE = 0.01f;
     private final Body body;
-    private float lifetime = 2f;
     private final float damage = 10f;
+    private float lifetime = 2f;
 
     public Bullet(Game game, Vector2 position, float direction, float speed) {
         super(game);
@@ -45,7 +45,7 @@ public class Bullet extends EntityObj {
             bullet = (Bullet) userDataA;
             if (userDataB instanceof Enemy) {
                 enemy = (Enemy) userDataB;
-            } else if(userDataB.equals(Map.CellBodyType.WALL)) {
+            } else if (userDataB.equals(MapManager.CellBodyType.WALL)) {
                 bullet.kill();
                 return true;
             }
@@ -53,7 +53,7 @@ public class Bullet extends EntityObj {
             bullet = (Bullet) userDataB;
             if (userDataA instanceof Enemy) {
                 enemy = (Enemy) userDataA;
-            } else if(userDataA.equals(Map.CellBodyType.WALL)) {
+            } else if (userDataA.equals(MapManager.CellBodyType.WALL)) {
                 bullet.kill();
                 return true;
             }

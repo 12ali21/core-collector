@@ -12,7 +12,7 @@ import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
-import com.mygdx.game.world.map.Map;
+import com.mygdx.game.world.map.MapManager;
 
 public class Turret extends Structure {
     private final StructurePart head;
@@ -55,7 +55,7 @@ public class Turret extends Structure {
         game.getWorld().rayCast((fixture, point, normal, fraction) -> {
             Object userData = fixture.getBody().getUserData();
             if (userData == null) return -1;
-            if (userData.equals(Map.CellBodyType.WALL)) { // if there is a wall, there is no LOS
+            if (userData.equals(MapManager.CellBodyType.WALL)) { // if there is a wall, there is no LOS
                 target = null;
                 return 0;
             }
@@ -79,7 +79,7 @@ public class Turret extends Structure {
                 // check for line of sight
                 game.getWorld().rayCast((fixture, point, normal, fraction) -> {
                     Object userData = fixture.getBody().getUserData();
-                    if (userData.equals(Map.CellBodyType.WALL)) {
+                    if (userData.equals(MapManager.CellBodyType.WALL)) {
                         inSight[0] = false;
                         return 0; // no sight, stop ray
                     }

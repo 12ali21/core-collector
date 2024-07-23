@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -18,10 +17,11 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
+import com.mygdx.game.world.map.generator.MapGenerator;
 
-public class Map implements IndexedGraph<MapNode> {
+public class MapManager implements IndexedGraph<MapNode> {
 
-    private final static String WALL_LAYER = "solid layer";
+    public final static String WALL_LAYER = "solid layer";
     private final Game game;
     private final TiledMap map;
     private final OrthogonalTiledMapRenderer renderer;
@@ -39,10 +39,12 @@ public class Map implements IndexedGraph<MapNode> {
 
     Texture groundTexture;
 
-    public Map(Game game, String mapName) {
+    public MapManager(Game game, String mapName) {
         this.game = game;
         // Load the map
-        map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
+        MapGenerator generator = new MapGenerator(12345, game.getAssets());
+//        map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
+        map = generator.generate(200, 200);
         float unitScale = 1 / TILE_SIZE;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.getBatch());
         renderer.setView(game.getCamera());
@@ -62,6 +64,7 @@ public class Map implements IndexedGraph<MapNode> {
 
 //
     }
+
     private void createBodies(TiledMapTileLayer wallLayer) {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(0.5f, 0.5f);
@@ -109,13 +112,13 @@ public class Map implements IndexedGraph<MapNode> {
             addNodeNeighbour(x, y + 1, node, 1);
 
             // Diagonal connections if possible
-            if (nodes[x-1][y] != null && nodes[x][y-1] != null)
+            if (nodes[x - 1][y] != null && nodes[x][y - 1] != null)
                 addNodeNeighbour(x - 1, y - 1, node, 1.4f);
-            if (nodes[x+1][y] != null && nodes[x][y+1] != null)
+            if (nodes[x + 1][y] != null && nodes[x][y + 1] != null)
                 addNodeNeighbour(x + 1, y + 1, node, 1.4f);
-            if (nodes[x-1][y] != null && nodes[x][y+1] != null)
+            if (nodes[x - 1][y] != null && nodes[x][y + 1] != null)
                 addNodeNeighbour(x - 1, y + 1, node, 1.4f);
-            if (nodes[x+1][y] != null && nodes[x][y-1] != null)
+            if (nodes[x + 1][y] != null && nodes[x][y - 1] != null)
                 addNodeNeighbour(x + 1, y - 1, node, 1.4f);
         }
     }
@@ -155,7 +158,7 @@ public class Map implements IndexedGraph<MapNode> {
 
     //TODO: don't draw the whole ground, only the visible part
     private void drawGround(Batch batch) {
-        batch.setColor(185f/255f, 133f/255f, 93f/ 255f, 1f);
+        batch.setColor(185f / 255f, 133f / 255f, 93f / 255f, 1f);
         int srcWidth = (int) (width * TILE_SIZE);
         int srcHeight = (int) (height * TILE_SIZE);
 

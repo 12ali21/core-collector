@@ -9,53 +9,55 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Debug;
 
 public class CoreGame extends ApplicationAdapter {
-	Screen gameScreen;
-	private AssetManager assets;
-	private boolean loaded;
-	@Override
-	public void create () {
-		assets = new AssetManager();
-		assets.load("sprites/bot.png", Texture.class);
-		assets.load("sprites/bullet.png", Texture.class);
-		assets.load("sprites/enemy_big.png", Texture.class);
-		assets.load("sprites/enemy_small.png", Texture.class);
-		assets.load("sprites/hovered_tile.png", Texture.class);
-		assets.load("sprites/ship.png", Texture.class);
-		assets.load("sprites/turret_base.png", Texture.class);
-		assets.load("sprites/turret_head.png", Texture.class);
-		assets.load("maps/ground/1.png", Texture.class);
-		assets.load("sprites/health_border.png", Texture.class);
-		assets.load("sprites/green_bar.png", Texture.class);
-		assets.load("sprites/yellow_bar.png", Texture.class);
-		assets.load("sprites/red_bar.png", Texture.class);
+    Screen gameScreen;
+    private AssetManager assets;
+    private boolean loaded;
 
-		gameScreen = new GameScreen(assets);
+    @Override
+    public void create() {
+        assets = new AssetManager();
+        assets.load("sprites/bot.png", Texture.class);
+        assets.load("sprites/bullet.png", Texture.class);
+        assets.load("sprites/enemy_big.png", Texture.class);
+        assets.load("sprites/enemy_small.png", Texture.class);
+        assets.load("sprites/hovered_tile.png", Texture.class);
+        assets.load("sprites/ship.png", Texture.class);
+        assets.load("sprites/turret_base.png", Texture.class);
+        assets.load("sprites/turret_head.png", Texture.class);
+        assets.load("maps/ground/1.png", Texture.class);
+        assets.load("sprites/health_border.png", Texture.class);
+        assets.load("sprites/green_bar.png", Texture.class);
+        assets.load("sprites/yellow_bar.png", Texture.class);
+        assets.load("sprites/red_bar.png", Texture.class);
+        assets.load("maps/tiles/Walls/Wall-Dirt_02-64x64.png", Texture.class);
+
+        gameScreen = new GameScreen(assets);
 //		gameScreen.show();
-	}
+    }
 
-	@Override
-	public void render () {
-		ScreenUtils.clear(0, 0, 0, 1);
-		if (assets.update()) {
-			if (!loaded) {
-				gameScreen.show();
-			}
-			loaded = true;
-			gameScreen.render(Gdx.graphics.getDeltaTime());
-			Debug.render(Gdx.graphics.getDeltaTime());
-		}
-	}
+    @Override
+    public void render() {
+        ScreenUtils.clear(0, 0, 0, 1);
+        if (assets.update()) {
+            if (!loaded) {
+                gameScreen.show();
+            }
+            loaded = true;
+            gameScreen.render(Gdx.graphics.getDeltaTime());
+            Debug.render(Gdx.graphics.getDeltaTime());
+        }
+    }
 
-	@Override
-	public void resize(int width, int height) {
-		gameScreen.resize(width, height);
-		Debug.resize(width, height);
-	}
+    @Override
+    public void resize(int width, int height) {
+        gameScreen.resize(width, height);
+        Debug.resize(width, height);
+    }
 
-	@Override
-	public void dispose () {
-		gameScreen.dispose();
-		Debug.dispose();
-	}
+    @Override
+    public void dispose() {
+        gameScreen.dispose();
+        Debug.dispose();
+    }
 
 }

@@ -10,14 +10,12 @@ import com.mygdx.game.Updatable;
 public class ScreenInputProcessor extends InputAdapter implements Updatable {
 
     public static final float ZOOM_LIMIT_LOW = 0.1f;
-    public static final float ZOOM_LIMIT_HIGH = 1f;
-    public static final float ZOOM_CHANGE_SPEED =0.1f;
+    public static final float ZOOM_LIMIT_HIGH = 5f;
+    public static final float ZOOM_CHANGE_SPEED = 0.1f;
 
-    public static final float MOVE_SPEED = 7f;
-
-    private float zoom = 1f;
+    public static final float MOVE_SPEED = 10f;
     private final Vector2 cameraPosition = new Vector2(0, 0);
-
+    private float zoom = 1f;
     private boolean FOVChanged = false;
 
     @Override
@@ -31,6 +29,10 @@ public class ScreenInputProcessor extends InputAdapter implements Updatable {
     @Override
     public void update(float delta) {
         float movement = MOVE_SPEED * delta * 1f;
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+            movement *= 2;
+        }
+
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             cameraPosition.y += movement;
         }
