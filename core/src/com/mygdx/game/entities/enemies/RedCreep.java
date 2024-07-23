@@ -1,5 +1,6 @@
 package com.mygdx.game.entities.enemies;
 
+import box2dLight.LightData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.State;
@@ -48,6 +49,8 @@ public class RedCreep extends Enemy {
     }
 
     private Body makeBody(Vector2 position) {
+        Object userData = new LightData(this, 0.5f, true);
+
         final Body body;
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(0.2f, 0.4f);
@@ -58,14 +61,14 @@ public class RedCreep extends Enemy {
         body = game.getWorld().createBody(bodyDef);
         body.setLinearDamping(1f);
         body.setFixedRotation(true);
-        body.setUserData(this);
+        body.setUserData(userData);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
         fixtureDef.friction = 0.3f;
         fixtureDef.restitution = 0.5f;
-        body.createFixture(fixtureDef).setUserData(this);
+        body.createFixture(fixtureDef).setUserData(userData);
         return body;
     }
 

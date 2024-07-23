@@ -1,5 +1,6 @@
 package com.mygdx.game.world.map;
 
+import box2dLight.LightData;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
@@ -62,6 +63,7 @@ public class Map implements IndexedGraph<MapNode> {
 
 //
     }
+
     private void createBodies(TiledMapTileLayer wallLayer) {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(0.5f, 0.5f);
@@ -77,7 +79,7 @@ public class Map implements IndexedGraph<MapNode> {
                     FixtureDef fixtureDef = new FixtureDef();
                     fixtureDef.shape = shape;
                     fixtureDef.restitution = 0f;
-                    wallBody.createFixture(fixtureDef).setUserData(CellBodyType.WALL);
+                    wallBody.createFixture(fixtureDef).setUserData(new LightData(CellBodyType.WALL, 1f, true));
                 }
             }
         }
@@ -109,13 +111,13 @@ public class Map implements IndexedGraph<MapNode> {
             addNodeNeighbour(x, y + 1, node, 1);
 
             // Diagonal connections if possible
-            if (nodes[x-1][y] != null && nodes[x][y-1] != null)
+            if (nodes[x - 1][y] != null && nodes[x][y - 1] != null)
                 addNodeNeighbour(x - 1, y - 1, node, 1.4f);
-            if (nodes[x+1][y] != null && nodes[x][y+1] != null)
+            if (nodes[x + 1][y] != null && nodes[x][y + 1] != null)
                 addNodeNeighbour(x + 1, y + 1, node, 1.4f);
-            if (nodes[x-1][y] != null && nodes[x][y+1] != null)
+            if (nodes[x - 1][y] != null && nodes[x][y + 1] != null)
                 addNodeNeighbour(x - 1, y + 1, node, 1.4f);
-            if (nodes[x+1][y] != null && nodes[x][y-1] != null)
+            if (nodes[x + 1][y] != null && nodes[x][y - 1] != null)
                 addNodeNeighbour(x + 1, y - 1, node, 1.4f);
         }
     }
@@ -155,7 +157,7 @@ public class Map implements IndexedGraph<MapNode> {
 
     //TODO: don't draw the whole ground, only the visible part
     private void drawGround(Batch batch) {
-        batch.setColor(185f/255f, 133f/255f, 93f/ 255f, 1f);
+        batch.setColor(185f / 255f, 133f / 255f, 93f / 255f, 1f);
         int srcWidth = (int) (width * TILE_SIZE);
         int srcHeight = (int) (height * TILE_SIZE);
 

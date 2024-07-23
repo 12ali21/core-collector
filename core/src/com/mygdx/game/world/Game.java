@@ -1,7 +1,11 @@
 package com.mygdx.game.world;
 
+import box2dLight.DirectionalLight;
+import box2dLight.RayHandler;
+import box2dLight.RayHandlerOptions;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
@@ -29,7 +33,6 @@ public class Game implements Drawable, Updatable {
     private final Batch batch;
     private final OrthographicCamera camera;
     private final AssetManager assets;
-
     private final Box2DDebugRenderer debugRenderer;
     private final StructureBuilder structureBuilder = new StructureBuilder(this);
     private final HoveredTile hoveredTile;
@@ -38,10 +41,27 @@ public class Game implements Drawable, Updatable {
     private final Array<Entity> entitiesToAdd = new Array<>();
     private final Array<Enemy> enemies = new Array<>();
     private final MyContactListener contactListener;
+    RayHandler rayHandler;
     private boolean isSorted = false;
 
     public Game(AssetManager assets, Batch batch, OrthographicCamera camera) {
         this.world = new World(new Vector2(0, 0), true);
+        RayHandlerOptions options = new RayHandlerOptions();
+//        options.setGammaCorrection(true);
+        options.setDiffuse(true);
+        options.setPseudo3d(true);
+
+        rayHandler = new RayHandler(world, options);
+
+        rayHandler.setAmbientLight(1f);
+        DirectionalLight sunlight = new DirectionalLight(rayHandler, 100, Color.WHITE, -90);
+//        sunlight.setSoftnessLength(5f);
+//        sunlight.setSoft(true);
+        sunlight.setHeight(10);
+
+//        sunlight.setStaticLight(true);
+//        pointLight = new PointLight(rayHandler, 100, Color.WHITE, 1, 0, 0);
+
         contactListener = new MyContactListener();
         setContactListeners();
 
@@ -55,6 +75,7 @@ public class Game implements Drawable, Updatable {
         addEntity(hoveredTile);
         Enemy creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
         addEntity(creep);
+
         enemies.add(creep);
     }
 
@@ -65,6 +86,9 @@ public class Game implements Drawable, Updatable {
 
     @Override
     public void update(float delta) {
+        world.step(1 / 60f, 6, 2);
+        rayHandler.setCombinedMatrix(camera.combined, camera.position.x, camera.position.y, camera.viewportWidth, camera.viewportHeight);
+        rayHandler.update();
         Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
         hoveredTile.findPosition(mousePos);
 
@@ -118,8 +142,7 @@ public class Game implements Drawable, Updatable {
         }
         batch.end();
         debugRenderer.render(world, camera.combined);
-        // Updating physics world should be done at the end of rendering
-        world.step(1 / 60f, 6, 2);
+        rayHandler.render();
     }
 
     /**

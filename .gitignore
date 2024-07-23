@@ -115,3 +115,5 @@ assets/
 /ios/IOSLauncher.app
 /ios/IOSLauncher.app.dSYM
 /core/src/com/mygdx/game/Test.java
+/core/libs/box2dlights-1.6-SNAPSHOT.jar
+/libs/
