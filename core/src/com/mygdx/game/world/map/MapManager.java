@@ -15,6 +15,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Constants;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.generator.MapGenerator;
@@ -49,7 +50,7 @@ public class MapManager implements IndexedGraph<MapNode> {
         renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.getBatch());
         renderer.setView(game.getCamera());
 
-        groundTexture = game.getAssets().get("maps/ground/1.png", Texture.class);
+        groundTexture = game.getAssets().get(Constants.GROUND_TEXTURE, Texture.class);
         groundTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
         TiledMapTileLayer wallLayer = getWallLayer();

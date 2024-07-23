@@ -4,13 +4,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.Constants;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.world.Game;
 
 public class HealthPoints implements Drawable {
-    private final Vector2 offset = new Vector2(0, 0);
     private static final float YELLOW_THRESHOLD = 0.5f;
     private static final float RED_THRESHOLD = 0.2f;
+    private final Vector2 offset = new Vector2(0, 0);
     private final float maxHp;
     private final Batch batch;
     private final Callback callback;
@@ -28,14 +29,14 @@ public class HealthPoints implements Drawable {
         this.callback = callback;
         this.batch = game.getBatch();
 
-        Texture t = game.getAssets().get("sprites/health_border.png");
+        Texture t = game.getAssets().get(Constants.HEALTH_BORDER_TEXTURE);
         border = new Sprite(t);
         border.setSize(width, height);
         border.setOriginCenter();
 
-        greenBarTexture = game.getAssets().get("sprites/green_bar.png");
-        yellowBarTexture = game.getAssets().get("sprites/yellow_bar.png");
-        redBarTexture = game.getAssets().get("sprites/red_bar.png");
+        greenBarTexture = game.getAssets().get(Constants.GREEN_BAR_TEXTURE);
+        yellowBarTexture = game.getAssets().get(Constants.YELLOW_BAR_TEXTURE);
+        redBarTexture = game.getAssets().get(Constants.RED_BAR_TEXTURE);
 
         fill = new Sprite(greenBarTexture);
         fill.setSize(width, height);

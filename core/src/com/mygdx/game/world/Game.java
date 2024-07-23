@@ -1,6 +1,7 @@
 package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Constants;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.entities.Bullet;
@@ -40,6 +42,8 @@ public class Game implements Drawable, Updatable {
     private final MyContactListener contactListener;
     private boolean isSorted = false;
 
+    private boolean isPaused = false;
+
     public Game(AssetManager assets, Batch batch, OrthographicCamera camera) {
         this.world = new World(new Vector2(0, 0), true);
         contactListener = new MyContactListener();
@@ -65,6 +69,15 @@ public class Game implements Drawable, Updatable {
 
     @Override
     public void update(float delta) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            isPaused = !isPaused;
+        }
+        if (isPaused) {
+            return;
+        }
+
+        world.step(1 / 60f, 6, 2);
+
         Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
         hoveredTile.findPosition(mousePos);
 
@@ -117,9 +130,9 @@ public class Game implements Drawable, Updatable {
             }
         }
         batch.end();
-//        debugRenderer.render(world, camera.combined);
-        // Updating physics world should be done at the end of rendering
-        world.step(1 / 60f, 6, 2);
+        if (Constants.DEBUG) {
+            debugRenderer.render(world, camera.combined);
+        }
     }
 
     /**

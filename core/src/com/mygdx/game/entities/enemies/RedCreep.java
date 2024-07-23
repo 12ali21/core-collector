@@ -14,6 +14,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Constants;
 import com.mygdx.game.Debug;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
@@ -34,7 +35,7 @@ public class RedCreep extends Enemy {
 
     public RedCreep(Game game, Vector2 position) {
         super(game, 100);
-        Texture t = assets.get("sprites/enemy_small.png", Texture.class);
+        Texture t = assets.get(Constants.ENEMY_SMALL_TEXTURE, Texture.class);
         sprite = new Sprite(t);
         sprite.setSize(1, 1);
         sprite.setOriginCenter();

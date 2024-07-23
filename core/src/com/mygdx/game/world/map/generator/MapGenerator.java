@@ -7,6 +7,7 @@ import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.mygdx.game.Constants;
 import com.mygdx.game.world.map.MapManager;
 
 import java.util.Arrays;
@@ -87,7 +88,7 @@ public class MapGenerator {
         this.width = width;
         this.height = height;
 
-        Texture mountainWallTexture = assets.get("maps/tiles/Walls/Wall-Dirt_02-64x64.png");
+        Texture mountainWallTexture = assets.get(Constants.DIRT_WALL_TEXTURE);
         TextureRegion[][] mountain = TextureRegion.split(mountainWallTexture, TILE_SIZE, TILE_SIZE);
         MapLayers layers = map.getLayers();
         wallLayer = new TiledMapTileLayer(width, height, TILE_SIZE, TILE_SIZE);

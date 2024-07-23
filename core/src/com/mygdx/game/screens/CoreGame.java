@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.mygdx.game.Constants;
 import com.mygdx.game.Debug;
 
 public class CoreGame extends ApplicationAdapter {
@@ -16,20 +17,20 @@ public class CoreGame extends ApplicationAdapter {
     @Override
     public void create() {
         assets = new AssetManager();
-        assets.load("sprites/bot.png", Texture.class);
-        assets.load("sprites/bullet.png", Texture.class);
-        assets.load("sprites/enemy_big.png", Texture.class);
-        assets.load("sprites/enemy_small.png", Texture.class);
-        assets.load("sprites/hovered_tile.png", Texture.class);
-        assets.load("sprites/ship.png", Texture.class);
-        assets.load("sprites/turret_base.png", Texture.class);
-        assets.load("sprites/turret_head.png", Texture.class);
-        assets.load("maps/ground/1.png", Texture.class);
-        assets.load("sprites/health_border.png", Texture.class);
-        assets.load("sprites/green_bar.png", Texture.class);
-        assets.load("sprites/yellow_bar.png", Texture.class);
-        assets.load("sprites/red_bar.png", Texture.class);
-        assets.load("maps/tiles/Walls/Wall-Dirt_02-64x64.png", Texture.class);
+        assets.load(Constants.BOT_TEXTURE, Texture.class);
+        assets.load(Constants.BULLET_TEXTURE, Texture.class);
+        assets.load(Constants.ENEMY_BIG_TEXTURE, Texture.class);
+        assets.load(Constants.ENEMY_SMALL_TEXTURE, Texture.class);
+        assets.load(Constants.HOVERED_TILE_TEXTURE, Texture.class);
+        assets.load(Constants.SHIP_TEXTURE, Texture.class);
+        assets.load(Constants.TURRET_BASE_TEXTURE, Texture.class);
+        assets.load(Constants.TURRET_HEAD_TEXTURE, Texture.class);
+        assets.load(Constants.GROUND_TEXTURE, Texture.class);
+        assets.load(Constants.HEALTH_BORDER_TEXTURE, Texture.class);
+        assets.load(Constants.GREEN_BAR_TEXTURE, Texture.class);
+        assets.load(Constants.YELLOW_BAR_TEXTURE, Texture.class);
+        assets.load(Constants.RED_BAR_TEXTURE, Texture.class);
+        assets.load(Constants.DIRT_WALL_TEXTURE, Texture.class);
 
         gameScreen = new GameScreen(assets);
 //		gameScreen.show();

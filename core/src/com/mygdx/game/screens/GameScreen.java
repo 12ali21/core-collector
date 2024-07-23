@@ -6,12 +6,12 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.Constants;
 import com.mygdx.game.Debug;
 import com.mygdx.game.world.Game;
 
 public class GameScreen extends ScreenAdapter {
     private final AssetManager assets;
-    float VIEWPORT_SIZE = 50;
     private boolean active;
     private SpriteBatch batch;
     private OrthographicCamera camera;
@@ -63,8 +63,8 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         if (!active) return;
-        camera.viewportWidth = VIEWPORT_SIZE;
-        camera.viewportHeight = VIEWPORT_SIZE * height / width;
+        camera.viewportWidth = Constants.VIEWPORT_SIZE;
+        camera.viewportHeight = Constants.VIEWPORT_SIZE * height / width;
         camera.update();
     }
 

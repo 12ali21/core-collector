@@ -5,30 +5,27 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.Constants;
 import com.mygdx.game.Updatable;
 
 public class ScreenInputProcessor extends InputAdapter implements Updatable {
 
-    public static final float ZOOM_LIMIT_LOW = 0.1f;
-    public static final float ZOOM_LIMIT_HIGH = 5f;
-    public static final float ZOOM_CHANGE_SPEED = 0.1f;
 
-    public static final float MOVE_SPEED = 10f;
     private final Vector2 cameraPosition = new Vector2(0, 0);
     private float zoom = 1f;
     private boolean FOVChanged = false;
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        zoom += amountY * ZOOM_CHANGE_SPEED;
-        zoom = MathUtils.clamp(zoom, ZOOM_LIMIT_LOW, ZOOM_LIMIT_HIGH);
+        zoom += amountY * Constants.ZOOM_CHANGE_SPEED;
+        zoom = MathUtils.clamp(zoom, Constants.ZOOM_LIMIT_LOW, Constants.ZOOM_LIMIT_HIGH);
         FOVChanged = true;
         return true;
     }
 
     @Override
     public void update(float delta) {
-        float movement = MOVE_SPEED * delta * 1f;
+        float movement = Constants.PAN_SPEED * delta * 1f;
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
             movement *= 2;
         }

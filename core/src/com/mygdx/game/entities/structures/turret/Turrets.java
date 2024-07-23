@@ -2,13 +2,14 @@ package com.mygdx.game.entities.structures.turret;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.mygdx.game.Constants;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
 
 public class Turrets {
     public static Turret.Builder basicTurret(Game game, int x, int y) {
 
-        Texture t = game.getAssets().get("sprites/turret_base.png", Texture.class);
+        Texture t = game.getAssets().get(Constants.TURRET_BASE_TEXTURE, Texture.class);
 
         Sprite baseSprite = new Sprite(t);
         baseSprite.setSize(2f, 2f);
@@ -16,7 +17,7 @@ public class Turrets {
         baseSprite.setOriginBasedPosition(x, y);
         baseSprite.setScale(0.75f);
 
-        t = game.getAssets().get("sprites/turret_head.png", Texture.class);
+        t = game.getAssets().get(Constants.TURRET_HEAD_TEXTURE, Texture.class);
         Sprite headSprite = new Sprite(t);
         headSprite.setSize(2, 2);
         headSprite.setOrigin(0.5f, headSprite.getHeight() / 2);
