@@ -7,6 +7,7 @@ public class Constants {
     public static final float ZOOM_LIMIT_HIGH = 5f;
     public static final float ZOOM_CHANGE_SPEED = 0.1f;
     public static final float PAN_SPEED = 10f;
+    public static final float SOUND_EFFECT_LIMIT = 60f; // 1 min
 
     public static String BOT_TEXTURE = "sprites/bot.png";
     public static String BULLET_TEXTURE = "sprites/bullet.png";
@@ -22,5 +23,9 @@ public class Constants {
     public static String YELLOW_BAR_TEXTURE = "sprites/yellow_bar.png";
     public static String RED_BAR_TEXTURE = "sprites/red_bar.png";
     public static String DIRT_WALL_TEXTURE = "maps/tiles/Walls/Wall-Dirt_02-64x64.png";
+    public static String CANON_SHOOT = "audio/soundeffects/turret_shoot.wav";
+    public static String PAUSE_SOUND = "audio/soundeffects/pause.wav";
+    public static String TURRET_ROTATE = "audio/soundeffects/turret_rotate.wav";
+    public static String AMBIENT_MUSIC = "audio/music/soft_wind.wav";
 
 }

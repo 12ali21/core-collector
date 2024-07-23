@@ -34,7 +34,7 @@ public class RedCreep extends Enemy {
     private Structure target;
 
     public RedCreep(Game game, Vector2 position) {
-        super(game, 100);
+        super(game, 1000);
         Texture t = assets.get(Constants.ENEMY_SMALL_TEXTURE, Texture.class);
         sprite = new Sprite(t);
         sprite.setSize(1, 1);

@@ -7,7 +7,10 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Constants;
 import com.mygdx.game.Debug;
+import com.mygdx.game.audio.SpatialSoundLooping;
+import com.mygdx.game.audio.SpatialSoundNonLooping;
 import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
@@ -22,6 +25,8 @@ public class Turret extends Structure {
     private final float bulletCooldown;
     private final Recoil recoil;
     private final StateMachine<Turret, TurretState> stateMachine;
+    private final SpatialSoundNonLooping shootSound;
+    private final SpatialSoundLooping rotateSound;
     private float headRotation = 0;
     private Enemy target;
     private float cooldownTimer = 0;
@@ -43,6 +48,13 @@ public class Turret extends Structure {
         stateMachine = new DefaultStateMachine<>(this, TurretState.SEARCHING);
         health.setWidth(1.5f);
         health.setOffset(new Vector2(0, -1));
+
+        shootSound = game.audio.newNonLoopingSpatialSoundEffect(Constants.CANON_SHOOT);
+        shootSound.setPosition(getCenter());
+
+        rotateSound = game.audio.newLoopingSpatialSoundEffect(Constants.TURRET_ROTATE);
+        rotateSound.setPosition(getCenter());
+        rotateSound.setVolume(0.3f);
     }
 
     /**
@@ -133,6 +145,7 @@ public class Turret extends Structure {
             return;
         }
         Bullet bullet = new Bullet(game, getFiringPosition(), headRotation, bulletSpeed);
+        shootSound.play();
         game.addEntity(bullet);
         cooldownTimer = bulletCooldown;
 
@@ -155,6 +168,13 @@ public class Turret extends Structure {
         head.sprite.setOriginBasedPosition(headPos.x, headPos.y);
     }
 
+    @Override
+    public void dispose() {
+        super.dispose();
+        shootSound.dispose();
+        rotateSound.dispose();
+    }
+
     private enum TurretState implements State<Turret> {
         SEARCHING() {
             @Override
@@ -174,13 +194,21 @@ public class Turret extends Structure {
                 } else {
                     if (entity.target.isAlive()) {
                         if (entity.faceTarget(Gdx.graphics.getDeltaTime())) {
+                            entity.rotateSound.pause();
                             entity.fire(Gdx.graphics.getDeltaTime());
+                        } else {
+                            entity.rotateSound.resume();
                         }
                     } else { // target died
                         entity.target = null;
                         entity.stateMachine.changeState(SEARCHING);
                     }
                 }
+            }
+
+            @Override
+            public void exit(Turret entity) {
+                entity.rotateSound.stop();
             }
         };
 

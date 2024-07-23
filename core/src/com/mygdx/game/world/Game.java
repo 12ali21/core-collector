@@ -3,6 +3,7 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
@@ -10,9 +11,12 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.Constants;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
+import com.mygdx.game.audio.AudioManager;
+import com.mygdx.game.audio.NonSpatialSound;
 import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.Entity;
 import com.mygdx.game.entities.HoveredTile;
@@ -24,8 +28,9 @@ import com.mygdx.game.world.map.MapManager;
 
 import java.util.Iterator;
 
-public class Game implements Drawable, Updatable {
+public class Game implements Drawable, Updatable, Disposable {
     public final MapManager map;
+    public final AudioManager audio;
 
     private final World world;
     private final Batch batch;
@@ -40,8 +45,9 @@ public class Game implements Drawable, Updatable {
     private final Array<Entity> entitiesToAdd = new Array<>();
     private final Array<Enemy> enemies = new Array<>();
     private final MyContactListener contactListener;
+    private final NonSpatialSound pauseSound;
+    private final Music ambientMusic;
     private boolean isSorted = false;
-
     private boolean isPaused = false;
 
     public Game(AssetManager assets, Batch batch, OrthographicCamera camera) {
@@ -54,12 +60,20 @@ public class Game implements Drawable, Updatable {
         this.batch = batch;
         this.camera = camera;
         map = new MapManager(this, "maze");
+        audio = new AudioManager(camera);
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
         Enemy creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
         addEntity(creep);
         enemies.add(creep);
+        pauseSound = audio.newNonSpatialSoundEffect(Constants.PAUSE_SOUND);
+        audio.setSoundEffectsVolume(0.1f);
+
+        ambientMusic = audio.newMusic(Constants.AMBIENT_MUSIC);
+        ambientMusic.setLooping(true);
+        ambientMusic.setVolume(0.4f);
+        ambientMusic.play();
     }
 
     private void setContactListeners() {
@@ -71,6 +85,7 @@ public class Game implements Drawable, Updatable {
     public void update(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             isPaused = !isPaused;
+            pauseSound.play();
         }
         if (isPaused) {
             return;
@@ -102,6 +117,7 @@ public class Game implements Drawable, Updatable {
         }
 
         registerEntities();
+        audio.update(delta);
     }
 
     public Vector3 unproject(float x, float y) {
@@ -209,5 +225,14 @@ public class Game implements Drawable, Updatable {
 
     public Array<Enemy> getEnemies() {
         return enemies;
+    }
+
+    @Override
+    public void dispose() {
+        world.dispose();
+        debugRenderer.dispose();
+        map.dispose();
+        ambientMusic.dispose();
+        audio.dispose();
     }
 }

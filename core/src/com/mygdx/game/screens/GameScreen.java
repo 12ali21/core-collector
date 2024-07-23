@@ -45,12 +45,13 @@ public class GameScreen extends ScreenAdapter {
 
     private void update(float delta) {
         inputProcessor.update(delta);
-        game.update(delta);
 
-        if (inputProcessor.isFOVChanged())
+        if (inputProcessor.isFOVChanged()) {
             camera.zoom = inputProcessor.getZoom();
+        }
         camera.position.set(inputProcessor.getCameraPosition(), 0);
         camera.update();
+        game.update(delta);
     }
 
     @Override
@@ -71,6 +72,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         if (!active) return;
+        game.dispose();
         batch.dispose();
         active = false;
     }
