@@ -1,13 +1,14 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mygdx.game.Constants;
-import com.mygdx.game.Debug;
+import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 
 public class GameScreen extends ScreenAdapter {
@@ -16,6 +17,7 @@ public class GameScreen extends ScreenAdapter {
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private ScreenInputProcessor inputProcessor;
+    private InputMultiplexer inputMux;
     private Game game;
 
     public GameScreen(AssetManager assets) {
@@ -39,7 +41,10 @@ public class GameScreen extends ScreenAdapter {
 
         // setup input processor
         inputProcessor = new ScreenInputProcessor();
-        Gdx.input.setInputProcessor(inputProcessor);
+        inputMux = new InputMultiplexer();
+        inputMux.addProcessor(inputProcessor);
+        inputMux.addProcessor(Debug.getStage());
+        Gdx.input.setInputProcessor(inputMux);
 
     }
 

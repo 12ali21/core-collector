@@ -12,7 +12,6 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.mygdx.game.Constants;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.audio.AudioManager;
@@ -24,6 +23,8 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.map.MapManager;
 
 import java.util.Iterator;
@@ -74,6 +75,12 @@ public class Game implements Drawable, Updatable, Disposable {
         ambientMusic.setLooping(true);
         ambientMusic.setVolume(0.4f);
         ambientMusic.play();
+
+        Debug.addButton("Spawn Enemy", () -> {
+            Enemy enemy = new RedCreep(this, new Vector2(1.5f, 1.5f));
+            addEntity(enemy);
+            enemies.add(enemy);
+        });
     }
 
     private void setContactListeners() {

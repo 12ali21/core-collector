@@ -2,7 +2,7 @@ package com.mygdx.game.audio;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.Constants;
+import com.mygdx.game.utils.Constants;
 
 public class SpatialSoundNonLooping extends SpatialSoundEffect {
     Array<Long> ids = new Array<>();

@@ -5,8 +5,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.Constants;
 import com.mygdx.game.Updatable;
+import com.mygdx.game.utils.Constants;
 
 public class ScreenInputProcessor extends InputAdapter implements Updatable {
 

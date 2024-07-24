@@ -2,8 +2,8 @@ package com.mygdx.game.entities.structures.turret;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.mygdx.game.Constants;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.world.Game;
 
 public class Turrets {

@@ -7,7 +7,7 @@ import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
-import com.mygdx.game.Constants;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.world.map.MapManager;
 
 import java.util.Arrays;

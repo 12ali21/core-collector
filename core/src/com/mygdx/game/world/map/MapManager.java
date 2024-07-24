@@ -16,8 +16,8 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.mygdx.game.Constants;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.generator.MapGenerator;
 

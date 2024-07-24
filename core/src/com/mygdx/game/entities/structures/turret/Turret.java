@@ -7,13 +7,13 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.Constants;
-import com.mygdx.game.Debug;
 import com.mygdx.game.audio.SpatialSoundLooping;
 import com.mygdx.game.audio.SpatialSoundNonLooping;
 import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
 

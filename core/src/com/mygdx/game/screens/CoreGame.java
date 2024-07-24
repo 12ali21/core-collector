@@ -6,8 +6,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.mygdx.game.Constants;
-import com.mygdx.game.Debug;
+import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.Debug;
 
 public class CoreGame extends ApplicationAdapter {
     Screen gameScreen;

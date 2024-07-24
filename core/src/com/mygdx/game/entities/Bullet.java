@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import com.mygdx.game.Constants;
 import com.mygdx.game.entities.enemies.Enemy;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
 
