@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.entities.enemies.Enemy;
-import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
 
@@ -18,7 +18,7 @@ public class Bullet extends EntityObj {
     public Bullet(Game game, Vector2 position, float direction, float speed) {
         super(game);
 
-        Texture t = assets.get(Constants.BULLET_TEXTURE, Texture.class);
+        Texture t = TextureAssets.get(TextureAssets.BULLET_TEXTURE);
         sprite = new Sprite(t);
 //        sprite.setSize(scale * t.getHeight(), scale * t.getWidth());
         sprite.setScale(SCALE);

@@ -2,7 +2,6 @@ package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -23,6 +22,7 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.map.MapManager;
@@ -36,7 +36,6 @@ public class Game implements Drawable, Updatable, Disposable {
     private final World world;
     private final Batch batch;
     private final OrthographicCamera camera;
-    private final AssetManager assets;
 
     private final Box2DDebugRenderer debugRenderer;
     private final StructureBuilder structureBuilder = new StructureBuilder(this);
@@ -51,13 +50,12 @@ public class Game implements Drawable, Updatable, Disposable {
     private boolean isSorted = false;
     private boolean isPaused = false;
 
-    public Game(AssetManager assets, Batch batch, OrthographicCamera camera) {
+    public Game(Batch batch, OrthographicCamera camera) {
         this.world = new World(new Vector2(0, 0), true);
         contactListener = new MyContactListener();
         setContactListeners();
 
         this.debugRenderer = new Box2DDebugRenderer();
-        this.assets = assets;
         this.batch = batch;
         this.camera = camera;
         map = new MapManager(this, "maze");
@@ -68,10 +66,10 @@ public class Game implements Drawable, Updatable, Disposable {
         Enemy creep = new RedCreep(this, new Vector2(1.5f, 1.5f));
         addEntity(creep);
         enemies.add(creep);
-        pauseSound = audio.newNonSpatialSoundEffect(Constants.PAUSE_SOUND);
+        pauseSound = audio.newNonSpatialSoundEffect(AudioAssets.PAUSE_SOUND);
         audio.setSoundEffectsVolume(0.1f);
 
-        ambientMusic = audio.newMusic(Constants.AMBIENT_MUSIC);
+        ambientMusic = audio.newMusic(AudioAssets.AMBIENT_MUSIC);
         ambientMusic.setLooping(true);
         ambientMusic.setVolume(0.4f);
         ambientMusic.play();
@@ -224,10 +222,6 @@ public class Game implements Drawable, Updatable, Disposable {
 
     public OrthographicCamera getCamera() {
         return camera;
-    }
-
-    public AssetManager getAssets() {
-        return assets;
     }
 
     public Array<Enemy> getEnemies() {

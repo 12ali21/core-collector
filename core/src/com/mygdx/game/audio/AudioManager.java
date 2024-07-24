@@ -1,12 +1,12 @@
 package com.mygdx.game.audio;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.utils.AudioAssets;
 
 public class AudioManager implements Disposable {
     public static final float SOUND_DISTANCE_THRESHOLD = 25;
@@ -23,37 +23,37 @@ public class AudioManager implements Disposable {
         this.camera = camera;
     }
 
-    private Sound loadSound(String path) {
-        return Gdx.audio.newSound(Gdx.files.internal(path));
+    private Sound loadSound(AudioAssets assets) {
+        return AudioAssets.getSound(assets);
     }
 
-    private Music loadMusic(String path) {
-        return Gdx.audio.newMusic(Gdx.files.internal(path));
+    private Music loadMusic(AudioAssets assets) {
+        return AudioAssets.getMusic(assets);
     }
 
-    public SpatialSoundNonLooping newNonLoopingSpatialSoundEffect(String path) {
-        SpatialSoundNonLooping soundEffect = new SpatialSoundNonLooping(loadSound(path));
+    public SpatialSoundNonLooping newNonLoopingSpatialSoundEffect(AudioAssets assets) {
+        SpatialSoundNonLooping soundEffect = new SpatialSoundNonLooping(loadSound(assets));
         soundEffect.setGlobalVolume(soundEffectsVolume);
         spatialSoundEffects.add(soundEffect);
         return soundEffect;
     }
 
-    public SpatialSoundLooping newLoopingSpatialSoundEffect(String path) {
-        SpatialSoundLooping soundEffect = new SpatialSoundLooping(loadSound(path));
+    public SpatialSoundLooping newLoopingSpatialSoundEffect(AudioAssets assets) {
+        SpatialSoundLooping soundEffect = new SpatialSoundLooping(loadSound(assets));
         soundEffect.setGlobalVolume(soundEffectsVolume);
         spatialSoundEffects.add(soundEffect);
         return soundEffect;
     }
 
-    public NonSpatialSound newNonSpatialSoundEffect(String path) {
-        NonSpatialSound soundEffect = new NonSpatialSound(loadSound(path));
+    public NonSpatialSound newNonSpatialSoundEffect(AudioAssets assets) {
+        NonSpatialSound soundEffect = new NonSpatialSound(loadSound(assets));
         soundEffect.setGlobalVolume(soundEffectsVolume);
         simpleSoundEffects.add(soundEffect);
         return soundEffect;
     }
 
-    public Music newMusic(String path) {
-        Music music = loadMusic(path);
+    public Music newMusic(AudioAssets assets) {
+        Music music = loadMusic(assets);
         music.setVolume(musicVolume);
         return music;
     }

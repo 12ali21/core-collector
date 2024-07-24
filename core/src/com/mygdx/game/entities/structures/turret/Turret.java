@@ -12,7 +12,7 @@ import com.mygdx.game.audio.SpatialSoundNonLooping;
 import com.mygdx.game.entities.Bullet;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
@@ -49,10 +49,10 @@ public class Turret extends Structure {
         health.setWidth(1.5f);
         health.setOffset(new Vector2(0, -1));
 
-        shootSound = game.audio.newNonLoopingSpatialSoundEffect(Constants.CANON_SHOOT);
+        shootSound = game.audio.newNonLoopingSpatialSoundEffect(AudioAssets.CANON_SHOOT);
         shootSound.setPosition(getCenter());
 
-        rotateSound = game.audio.newLoopingSpatialSoundEffect(Constants.TURRET_ROTATE);
+        rotateSound = game.audio.newLoopingSpatialSoundEffect(AudioAssets.TURRET_ROTATE);
         rotateSound.setPosition(getCenter());
         rotateSound.setVolume(0.3f);
     }

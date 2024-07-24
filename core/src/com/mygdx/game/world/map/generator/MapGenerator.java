@@ -1,13 +1,12 @@
 package com.mygdx.game.world.map.generator;
 
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
-import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.map.MapManager;
 
 import java.util.Arrays;
@@ -70,15 +69,13 @@ public class MapGenerator {
     }
 
     public final long seed;
-    private final AssetManager assets;
     TiledMapTileLayer wallLayer;
     private TiledMap map;
     private int width;
     private int height;
 
-    public MapGenerator(long seed, AssetManager assets) {
+    public MapGenerator(long seed) {
         this.seed = seed;
-        this.assets = assets;
     }
 
     public TiledMap generate(int width, int height) {
@@ -88,7 +85,7 @@ public class MapGenerator {
         this.width = width;
         this.height = height;
 
-        Texture mountainWallTexture = assets.get(Constants.DIRT_WALL_TEXTURE);
+        Texture mountainWallTexture = TextureAssets.get(TextureAssets.DIRT_WALL_TEXTURE);
         TextureRegion[][] mountain = TextureRegion.split(mountainWallTexture, TILE_SIZE, TILE_SIZE);
         MapLayers layers = map.getLayers();
         wallLayer = new TiledMapTileLayer(width, height, TILE_SIZE, TILE_SIZE);

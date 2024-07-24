@@ -3,7 +3,6 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,7 +11,6 @@ import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 
 public class GameScreen extends ScreenAdapter {
-    private final AssetManager assets;
     private boolean active;
     private SpriteBatch batch;
     private OrthographicCamera camera;
@@ -20,8 +18,7 @@ public class GameScreen extends ScreenAdapter {
     private InputMultiplexer inputMux;
     private Game game;
 
-    public GameScreen(AssetManager assets) {
-        this.assets = assets;
+    public GameScreen() {
     }
 
     @Override
@@ -37,7 +34,7 @@ public class GameScreen extends ScreenAdapter {
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
 
-        game = new Game(assets, batch, camera);
+        game = new Game(batch, camera);
 
         // setup input processor
         inputProcessor = new ScreenInputProcessor();

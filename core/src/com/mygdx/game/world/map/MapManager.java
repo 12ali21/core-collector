@@ -17,7 +17,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.generator.MapGenerator;
 
@@ -44,14 +44,14 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     public MapManager(Game game, String mapName) {
         this.game = game;
         // Load the map
-        MapGenerator generator = new MapGenerator(12345, game.getAssets());
+        MapGenerator generator = new MapGenerator(12345);
 //        map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
         map = generator.generate(200, 200);
         float unitScale = 1 / TILE_SIZE;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.getBatch());
         renderer.setView(game.getCamera());
 
-        groundTexture = game.getAssets().get(Constants.GROUND_TEXTURE, Texture.class);
+        groundTexture = TextureAssets.get(TextureAssets.GROUND_TEXTURE);
         groundTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
         TiledMapTileLayer wallLayer = getWallLayer();

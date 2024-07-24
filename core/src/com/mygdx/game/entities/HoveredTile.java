@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
 public class HoveredTile extends Entity {
@@ -19,7 +19,7 @@ public class HoveredTile extends Entity {
     public HoveredTile(Game game) {
         super(game);
         this.batch = game.getBatch();
-        Texture texture = assets.get(Constants.HOVERED_TILE_TEXTURE, Texture.class);
+        Texture texture = TextureAssets.get(TextureAssets.HOVERED_TILE_TEXTURE);
         sprite = new Sprite(texture);
         sprite.setSize(1, 1);
     }
