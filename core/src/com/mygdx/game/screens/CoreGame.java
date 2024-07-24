@@ -25,6 +25,7 @@ public class CoreGame extends ApplicationAdapter {
         assets.load(Constants.SHIP_TEXTURE, Texture.class);
         assets.load(Constants.TURRET_BASE_TEXTURE, Texture.class);
         assets.load(Constants.TURRET_HEAD_TEXTURE, Texture.class);
+        assets.load(Constants.TURRET_HEAD_MULTI_TEXTURE, Texture.class);
         assets.load(Constants.GROUND_TEXTURE, Texture.class);
         assets.load(Constants.HEALTH_BORDER_TEXTURE, Texture.class);
         assets.load(Constants.GREEN_BAR_TEXTURE, Texture.class);

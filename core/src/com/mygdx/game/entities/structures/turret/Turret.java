@@ -31,7 +31,7 @@ public class Turret extends Structure {
     private Enemy target;
     private float cooldownTimer = 0;
 
-    private Turret(Builder builder) {
+    protected Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
         this.head = builder.head;
         this.rangeRadius = builder.rangeRadius;
@@ -139,10 +139,10 @@ public class Turret extends Structure {
         return getCenter().add(offset);
     }
 
-    private void fire(float delta) {
+    protected boolean fire(float delta) {
         cooldownTimer -= delta;
         if (cooldownTimer > 0) {
-            return;
+            return false;
         }
         Bullet bullet = new Bullet(game, getFiringPosition(), headRotation, bulletSpeed);
         shootSound.play();
@@ -150,6 +150,7 @@ public class Turret extends Structure {
         cooldownTimer = bulletCooldown;
 
         recoil.fire();
+        return true;
     }
 
     @Override
@@ -237,6 +238,7 @@ public class Turret extends Structure {
     public static class Builder extends Structure.Builder {
 
         private StructurePart head;
+        private StructurePart base;
         private float rangeRadius = 10f;
         private float rotationSpeed = 50f;
         private float bulletSpeed = 30f;
@@ -253,66 +255,55 @@ public class Turret extends Structure {
             this.maxHp = hitPoints;
         }
 
-        public Builder setBase(StructurePart base) {
+        public void setBase(StructurePart base) {
+            this.base = base;
             base.setRenderPriority(1);
             addPart(base);
-            return this;
         }
 
-        public Builder setHead(StructurePart head) {
+        public void setHead(StructurePart head) {
             this.head = head;
             head.setRenderPriority(3);
             addPart(head);
-            return this;
         }
 
-        public Builder setRangeRadius(float rangeRadius) {
+        public void setRangeRadius(float rangeRadius) {
             this.rangeRadius = rangeRadius;
-            return this;
         }
 
-        public Builder setRotationSpeed(float rotationSpeed) {
+        public void setRotationSpeed(float rotationSpeed) {
             this.rotationSpeed = rotationSpeed;
-            return this;
         }
 
-        public Builder setBulletSpeed(float bulletSpeed) {
+        public void setBulletSpeed(float bulletSpeed) {
             this.bulletSpeed = bulletSpeed;
-            return this;
         }
 
-        public Builder setFireRate(float rate) {
+        public void setFireRate(float rate) {
             this.cooldown = 60f / rate;
-            return this;
         }
 
-        public Builder setBounds(int x, int y) {
-            super.setBounds(x, y); // set bounds (bottom left corner
-            return this;
-        }
-
-        public Builder setRecoilImpulse(float impulse) {
+        public void setRecoilImpulse(float impulse) {
             this.recoilImpulse = impulse;
-            return this;
         }
 
-        public Builder setRecoilStoppingPower(float stoppingPower) {
+        public void setRecoilStoppingPower(float stoppingPower) {
             this.recoilStoppingPower = stoppingPower;
-            return this;
         }
 
-        public Builder setRecoilMaxDistance(float maxDistance) {
+        public void setRecoilMaxDistance(float maxDistance) {
             this.recoilMaxDistance = maxDistance;
-            return this;
         }
 
-        public Builder setRecoilReturnVelocity(float returnVelocity) {
+        public void setRecoilReturnVelocity(float returnVelocity) {
             this.recoilReturnVelocity = returnVelocity;
-            return this;
         }
 
         @Override
         public Turret build() {
+            if (head == null || base == null) {
+                throw new IllegalStateException("Can't build a turret without a base or head");
+            }
             return new Turret(this);
         }
     }

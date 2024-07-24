@@ -17,6 +17,7 @@ public class Constants {
     public static String SHIP_TEXTURE = "sprites/ship.png";
     public static String TURRET_BASE_TEXTURE = "sprites/turret_base.png";
     public static String TURRET_HEAD_TEXTURE = "sprites/turret_head.png";
+    public static String TURRET_HEAD_MULTI_TEXTURE = "sprites/turret_multi_head.png";
     public static String GROUND_TEXTURE = "maps/ground/1.png";
     public static String HEALTH_BORDER_TEXTURE = "sprites/health_border.png";
     public static String GREEN_BAR_TEXTURE = "sprites/green_bar.png";

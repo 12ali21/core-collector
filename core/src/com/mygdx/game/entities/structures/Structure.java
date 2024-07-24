@@ -93,12 +93,11 @@ public abstract class Structure extends Entity {
             }
         }
 
-        public Builder setBounds(int x, int y) {
+        public void setBounds(int x, int y) {
             bounds = new Bounds(x - width / 2, y - height / 2, width, height);
             for (StructurePart part : parts) {
                 part.sprite.setOriginBasedPosition(x, y);
             }
-            return this;
         }
 
         public Bounds getBounds() {
