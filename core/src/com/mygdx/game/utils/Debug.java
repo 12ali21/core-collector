@@ -34,6 +34,7 @@ public class Debug {
     private static final HashMap<String, Label> logs;
     private static final HashMap<String, Rectangle> rects;
     private static final HashMap<String, Vector2> points;
+    private static final HashMap<String, Line> lines;
     private static final Runtime runtime;
     private static final ShapeRenderer shapeRenderer;
     private static float timeBuffer = 0;
@@ -77,6 +78,7 @@ public class Debug {
         logs = new HashMap<>();
         rects = new HashMap<>();
         points = new HashMap<>();
+        lines = new HashMap<>();
         shapeRenderer = new ShapeRenderer();
 
         log(FPS_TAG, "");
@@ -106,6 +108,17 @@ public class Debug {
             rect.set(rectangle);
         }
         rects.put(tag, rect);
+    }
+
+    public static void drawLine(String tag, Vector2 s, Vector2 e) {
+        Line line = lines.get(tag);
+        if (line == null) {
+            line = new Line(s, e);
+        } else {
+            line.start.set(s);
+            line.end.set(e);
+        }
+        lines.put(tag, line);
     }
 
     public static void log(String tag, Object info) {
@@ -152,8 +165,8 @@ public class Debug {
         timeBuffer += delta;
         if (timeBuffer >= 1) {
             log("Memory", ""
-                    + (runtime.totalMemory() - runtime.freeMemory()) / 1024 * 1024 + "MB / "
-                    + runtime.maxMemory() / 1024 * 1024 + "MB");
+                    + (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024) + "MB / "
+                    + runtime.maxMemory() / (1024 * 1024) + "MB");
             log(FPS_TAG, "" + frames / timeBuffer);
             timeBuffer = 0;
             frames = 0;
@@ -174,11 +187,16 @@ public class Debug {
                 shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
             }
 
+            for (Line line : lines.values()) {
+                shapeRenderer.line(line.start, line.end);
+            }
+
             shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.setColor(Color.RED);
             for (Vector2 point : points.values()) {
                 shapeRenderer.circle(point.x, point.y, 0.1f, 90);
             }
+
             shapeRenderer.end();
 
             rects.clear();
@@ -191,5 +209,15 @@ public class Debug {
 
     public static interface Callback {
         void run();
+    }
+
+    private static class Line {
+        Vector2 start;
+        Vector2 end;
+
+        public Line(Vector2 start, Vector2 end) {
+            this.start = start;
+            this.end = end;
+        }
     }
 }
