@@ -37,6 +37,7 @@ public class Debug {
     private static final HashMap<String, Line> lines;
     private static final Runtime runtime;
     private static final ShapeRenderer shapeRenderer;
+    private static boolean doDebugging = true;
     private static float timeBuffer = 0;
     private static Camera gameCamera;
     private static int frames;
@@ -161,6 +162,8 @@ public class Debug {
     }
 
     public static void render(float delta) {
+        if (!doDebugging) return;
+
         frames++;
         timeBuffer += delta;
         if (timeBuffer >= 1) {
@@ -201,6 +204,14 @@ public class Debug {
 
             rects.clear();
         }
+    }
+
+    public static boolean isDebugging() {
+        return doDebugging;
+    }
+
+    public static void setDebugging(boolean debugging) {
+        Debug.doDebugging = debugging;
     }
 
     public static void dispose() {

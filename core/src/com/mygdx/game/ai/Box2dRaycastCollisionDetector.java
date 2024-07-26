@@ -52,8 +52,10 @@ public class Box2dRaycastCollisionDetector implements RaycastCollisionDetector<V
 
         @Override
         public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-            if (outputCollision != null) outputCollision.set(point, normal);
-            collided = true;
+            if (!(fixture.getUserData() instanceof Agent)) {
+                if (outputCollision != null) outputCollision.set(point, normal);
+                collided = true;
+            }
             return fraction;
         }
     }

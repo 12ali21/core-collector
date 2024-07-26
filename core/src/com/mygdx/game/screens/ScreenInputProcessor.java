@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.Debug;
 
 public class ScreenInputProcessor extends InputAdapter implements Updatable {
 
@@ -41,6 +42,10 @@ public class ScreenInputProcessor extends InputAdapter implements Updatable {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             cameraPosition.x += movement;
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+            Debug.setDebugging(!Debug.isDebugging());
         }
     }
 

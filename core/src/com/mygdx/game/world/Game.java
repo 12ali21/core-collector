@@ -24,7 +24,6 @@ import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.AudioAssets;
-import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.map.MapManager;
 
@@ -89,7 +88,7 @@ public class Game implements Drawable, Updatable, Disposable {
 
     @Override
     public void update(float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             isPaused = !isPaused;
             pauseSound.play();
         }
@@ -154,7 +153,7 @@ public class Game implements Drawable, Updatable, Disposable {
             }
         }
         batch.end();
-        if (Constants.DEBUG) {
+        if (Debug.isDebugging()) {
             debugRenderer.render(world, camera.combined);
         }
     }

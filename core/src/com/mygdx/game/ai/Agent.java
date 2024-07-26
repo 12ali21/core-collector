@@ -2,7 +2,7 @@ package com.mygdx.game.ai;
 
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
-import com.badlogic.gdx.ai.steer.SteeringBehavior;
+import com.badlogic.gdx.ai.steer.behaviors.LookWhereYouAreGoing;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,16 +17,18 @@ import com.mygdx.game.world.Game;
 
 
 public class Agent implements Steerable<Vector2> {
+    protected final Body body;
     private final Game game;
-    private final Body body;
-    SteeringBehavior<Vector2> steeringBehavior;
-    Sprite sprite;
-    private SteeringAcceleration<Vector2> steering = new SteeringAcceleration<>(new Vector2());
+    private final Sprite sprite;
+    private final LookWhereYouAreGoing<Vector2> look;
+
+    private SteeringAcceleration<Vector2> angularSteering = new SteeringAcceleration<>(new Vector2());
     private boolean tagged;
     private float maxLinearSpeed = 2f;
-    private float maxLinearAcc = 25f;
-    private float maxAngularSpeed;
-    private float maxAngularAcc;
+    private float maxLinearAcc = 40f;
+    private float maxAngularSpeed = 10;
+    private float maxAngularAcc = 20;
+
 
     public Agent(Game game) {
         this.game = game;
@@ -34,23 +36,18 @@ public class Agent implements Steerable<Vector2> {
         sprite = new Sprite(TextureAssets.get(TextureAssets.ENEMY_SMALL_TEXTURE));
         sprite.setSize(1, 1);
         sprite.setOriginCenter();
-//        DefaultGraphPath<MapNode> testGraphPath = game.map.findPath(1, 1, 25, 15);
-//        Array<Vector2> vertices = new Array<>();
-//        for (MapNode node : testGraphPath) {
-//            vertices.add(new Vector2(node.x + .5f, node.y + .5f));
-//        }
-//        LinePath<Vector2> path = new LinePath<>(vertices, true);
-//
-//        followPath = new FollowPath<>(this, path, 1f);
-//        followPath.setPredictionTime(0.1f);
-//        followPath.setDecelerationRadius(1f);
-//        followPath.setArrivalTolerance(0.1f);
+
+        look = new LookWhereYouAreGoing<>(this)
+                .setTimeToTarget(0.5f)
+                .setDecelerationRadius(MathUtils.PI / 2f);
+
+
     }
 
     private Body makeBody(Vector2 position) {
         final Body body;
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.2f, 0.4f);
+        shape.setAsBox(0.4f, 0.2f);
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position.x, position.y);
@@ -64,57 +61,26 @@ public class Agent implements Steerable<Vector2> {
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
         fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0.5f;
+        fixtureDef.restitution = 0f;
         body.createFixture(fixtureDef).setUserData(this);
         return body;
     }
 
     public void update(float delta) {
-        if (steeringBehavior != null) {
-            steeringBehavior.calculateSteering(steering);
-            Debug.drawPoint("agent pos" + this, getPosition());
-            applySteering(steering, delta);
-        }
+        Debug.log("Agent Speed", getLinearVelocity().len());
+        Debug.drawPoint("agent pos" + this, getPosition());
 
         // Update orientation and angular velocity
-        body.applyTorque(steering.angular, true);
-
-//        else {
-//            // If we haven't got any velocity, then we can do nothing.
-//            if (!linearVelocity.isZero(getZeroLinearSpeedThreshold())) {
-//                float newOrientation = vectorToAngle(linearVelocity);
-//                angularVelocity = (newOrientation - getRotation() * MathUtils.degreesToRadians) * delta; // this is superfluous if independentFacing is always true
-//                setRotation(newOrientation * MathUtils.radiansToDegrees);
-//            }
-//        }
+        look.calculateSteering(angularSteering);
+        body.applyTorque(angularSteering.angular, true);
+        System.out.println(angularSteering.angular);
     }
 
     public void render() {
         sprite.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
-        sprite.setRotation(body.getAngle() * MathUtils.radiansToDegrees);
+        sprite.setRotation((body.getAngle() * MathUtils.radiansToDegrees) + 90);
         sprite.draw(game.getBatch());
-    }
 
-    protected void applySteering(SteeringAcceleration<Vector2> steering, float deltaTime) {
-
-        // Update position and linear velocity.
-        if (!steering.linear.isZero()) {
-            // this method internally scales the force by deltaTime
-            body.applyForceToCenter(steering.linear, true);
-        }
-
-
-        // If we haven't got any velocity, then we can do nothing.
-//        Vector2 linVel = getLinearVelocity();
-//        if (!linVel.isZero(getZeroLinearSpeedThreshold())) {
-//            float newOrientation = vectorToAngle(linVel);
-//            body.setAngularVelocity((newOrientation - getAngularVelocity()) * deltaTime); // this is superfluous if independentFacing is always true
-//            body.setTransform(body.getPosition(), newOrientation);
-//        }
-    }
-
-    public void setSteeringBehavior(SteeringBehavior<Vector2> steeringBehavior) {
-        this.steeringBehavior = steeringBehavior;
     }
 
     @Override
@@ -127,9 +93,10 @@ public class Agent implements Steerable<Vector2> {
         return body.getAngularVelocity();
     }
 
+    // The radius of the circle that encloses this agent
     @Override
     public float getBoundingRadius() {
-        return 1;
+        return 0.5f;
     }
 
     @Override
@@ -144,7 +111,7 @@ public class Agent implements Steerable<Vector2> {
 
     @Override
     public float getZeroLinearSpeedThreshold() {
-        return 0.001f;
+        return 0.5f;
     }
 
     @Override
