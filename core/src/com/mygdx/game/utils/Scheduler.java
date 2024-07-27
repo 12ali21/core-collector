@@ -9,6 +9,10 @@ public class Scheduler {
     private float accumulator;
     private boolean running;
 
+    public Scheduler(SchedulerCallback callback, float interval) {
+        this(callback, interval, false, false);
+    }
+
     public Scheduler(SchedulerCallback callback, float interval, boolean continuous, boolean repeat) {
         this.callback = callback;
         this.interval = interval;
@@ -29,9 +33,9 @@ public class Scheduler {
         return running;
     }
 
-    public void update(float delta) {
+    public boolean update(float delta) {
         if (!running) {
-            return;
+            return false;
         }
 
         accumulator += delta;
@@ -42,9 +46,12 @@ public class Scheduler {
             } else {
                 stop();
             }
+            return true;
         } else if (continuous) {
             callback.run();
+            return true;
         }
+        return false;
     }
 
     public interface SchedulerCallback {

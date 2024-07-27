@@ -14,6 +14,7 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Debug;
+import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
 
@@ -22,14 +23,13 @@ public class Turret extends Structure {
     private final float rangeRadius;
     private final float rotationSpeed;
     private final float bulletSpeed;
-    private final float bulletCooldown;
     private final Recoil recoil;
     private final StateMachine<Turret, TurretState> stateMachine;
     private final SpatialSoundNonLooping shootSound;
     private final SpatialSoundLooping rotateSound;
+    private final Scheduler fireScheduler;
     private float headRotation = 0;
     private Enemy target;
-    private float cooldownTimer = 0;
 
     protected Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
@@ -37,7 +37,6 @@ public class Turret extends Structure {
         this.rangeRadius = builder.rangeRadius;
         this.rotationSpeed = builder.rotationSpeed;
         this.bulletSpeed = builder.bulletSpeed;
-        this.bulletCooldown = builder.cooldown;
         head.sprite.setRotation(headRotation);
         recoil = new Recoil(
                 builder.recoilImpulse,
@@ -55,6 +54,13 @@ public class Turret extends Structure {
         rotateSound = game.audio.newLoopingSpatialSoundEffect(AudioAssets.TURRET_ROTATE);
         rotateSound.setPosition(getCenter());
         rotateSound.setVolume(0.3f);
+
+        fireScheduler = new Scheduler(() -> {
+            if (target != null) {
+                fire();
+            }
+        }, builder.cooldown, false, true);
+        fireScheduler.start();
     }
 
     /**
@@ -139,18 +145,15 @@ public class Turret extends Structure {
         return getCenter().add(offset);
     }
 
-    protected boolean fire(float delta) {
-        cooldownTimer -= delta;
-        if (cooldownTimer > 0) {
-            return false;
-        }
+    private void fire() {
         Bullet bullet = new Bullet(game, getFiringPosition(), headRotation, bulletSpeed);
         shootSound.play();
         game.addEntity(bullet);
-        cooldownTimer = bulletCooldown;
-
         recoil.fire();
-        return true;
+    }
+
+    protected boolean shoot(float delta) {
+        return fireScheduler.update(delta);
     }
 
     @Override
@@ -196,7 +199,7 @@ public class Turret extends Structure {
                     if (entity.target.isAlive()) {
                         if (entity.faceTarget(Gdx.graphics.getDeltaTime())) {
                             entity.rotateSound.pause();
-                            entity.fire(Gdx.graphics.getDeltaTime());
+                            entity.shoot(Gdx.graphics.getDeltaTime());
                         } else {
                             entity.rotateSound.resume();
                         }

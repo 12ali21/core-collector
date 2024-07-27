@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.enemies.RedCreep;
+import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
@@ -14,7 +15,8 @@ public class Bullet extends EntityObj {
     private static final float SCALE = 0.01f;
     private final Body body;
     private final float damage = 10f;
-    private float lifetime = 2f;
+    private final float lifetime = 2f;
+    private final Scheduler destroyScheduler;
 
     public Bullet(Game game, Vector2 position, float direction, float speed) {
         super(game);
@@ -32,6 +34,8 @@ public class Bullet extends EntityObj {
         Vector2 velocity = new Vector2(1, 0);
         velocity.rotateDeg(direction);
         body.setLinearVelocity(velocity.scl(speed));
+        destroyScheduler = new Scheduler(this::kill, lifetime);
+        destroyScheduler.start();
     }
 
     public static boolean handleContact(Contact contact) {
@@ -101,11 +105,8 @@ public class Bullet extends EntityObj {
 
     @Override
     public void update(float deltaTime) {
-        lifetime -= deltaTime;
-        if (lifetime < 0) {
-            kill();
-        }
         sprite.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
+        destroyScheduler.update(deltaTime);
     }
 
     public float getDamage() {

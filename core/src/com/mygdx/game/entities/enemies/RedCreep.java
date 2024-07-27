@@ -22,6 +22,7 @@ public class RedCreep extends Enemy {
         Texture t = TextureAssets.get(TextureAssets.ENEMY_SMALL_TEXTURE);
         sprite = new Sprite(t);
         sprite.setSize(1, 1);
+        sprite.setScale(0.8f);
         sprite.setOriginCenter();
         sprite.setOriginBasedPosition(position.x + 0.5f, position.y + 0.5f);
         health.setOffset(new Vector2(0, -0.5f));
