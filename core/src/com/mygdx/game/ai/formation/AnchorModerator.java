@@ -10,17 +10,17 @@ import com.mygdx.game.ai.GameLocation;
 
 public class AnchorModerator extends FormationMotionModerator<Vector2> {
     public static final float OFFSET = 0.2f;
-    Array<FormationMember> members;
-    private Vector2 avgPos = new Vector2();
-    private Vector2 avgVel = new Vector2();
+    private final Vector2 avgPos = new Vector2();
+    private final Vector2 avgVel = new Vector2();
+    Array<FormationMembership> members;
 
-    public AnchorModerator(Array<FormationMember> members) {
+    public AnchorModerator(Array<FormationMembership> members) {
         this.members = members;
     }
 
     private void calculateAvgPosition() {
         avgPos.setZero();
-        for (FormationMember member : members) {
+        for (FormationMembership member : members) {
             avgPos.add(member.getPosition());
         }
         avgPos.scl(1f / members.size);
@@ -28,7 +28,7 @@ public class AnchorModerator extends FormationMotionModerator<Vector2> {
 
     private void calculateAvgVelocity() {
         avgVel.setZero();
-        for (FormationMember member : members) {
+        for (FormationMembership member : members) {
             avgVel.add(member.getLinearVelocity());
         }
         avgVel.scl(1f / members.size);

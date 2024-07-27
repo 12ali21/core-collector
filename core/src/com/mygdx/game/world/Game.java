@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
-import com.mygdx.game.ai.formation.FormationManager;
 import com.mygdx.game.audio.AudioManager;
 import com.mygdx.game.audio.NonSpatialSound;
 import com.mygdx.game.entities.Bullet;
@@ -47,7 +46,6 @@ public class Game implements Drawable, Updatable, Disposable {
     private final MyContactListener contactListener;
     private final NonSpatialSound pauseSound;
     private final Music ambientMusic;
-    private final FormationManager formationManager;
     private boolean isSorted = false;
     private boolean isPaused = false;
 
@@ -77,8 +75,6 @@ public class Game implements Drawable, Updatable, Disposable {
             addEntity(enemy);
             enemies.add(enemy);
         });
-
-        formationManager = new FormationManager(this);
     }
 
     private void setContactListeners() {
@@ -102,7 +98,6 @@ public class Game implements Drawable, Updatable, Disposable {
         hoveredTile.findPosition(mousePos);
 
         structureBuilder.update(delta);
-        formationManager.update(delta);
 
         // Update entities
         for (Iterator<Entity> itr = entitiesUpdate.iterator(); itr.hasNext(); ) {
@@ -141,7 +136,6 @@ public class Game implements Drawable, Updatable, Disposable {
             entitiesRender.sort((a, b) -> Float.compare(a.getRenderPriority(), b.getRenderPriority()));
             isSorted = true;
         }
-        formationManager.render();
 
         // Render entities
         for (Iterator<Entity> itr = entitiesRender.iterator(); itr.hasNext(); ) {

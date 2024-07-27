@@ -1,37 +1,21 @@
 package com.mygdx.game.entities.enemies;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
-import com.badlogic.gdx.ai.fsm.State;
-import com.badlogic.gdx.ai.fsm.StateMachine;
-import com.badlogic.gdx.ai.msg.Telegram;
-import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.utils.Debug;
+import com.mygdx.game.ai.EnemyAgent;
+import com.mygdx.game.utils.Bodies;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
-import com.mygdx.game.world.map.MapNode;
-
-import java.util.Iterator;
 
 public class RedCreep extends Enemy {
 
     private static final float ATTACKING_RANGE = 1;
     private static final float DAMAGE = 50;
     private static final float DAMAGE_COOLDOWN = 1f;
-    private final StateMachine<RedCreep, RedCreepState> stateMachine;
-    private float timer = 0f;
-    private Iterator<MapNode> pathIterator;
-    private MapNode currentDest;
-    private Structure target;
 
     public RedCreep(Game game, Vector2 position) {
         super(game, 100);
@@ -42,93 +26,32 @@ public class RedCreep extends Enemy {
         sprite.setOriginBasedPosition(position.x + 0.5f, position.y + 0.5f);
         health.setOffset(new Vector2(0, -0.5f));
 
-        body = makeBody(position);
-        stateMachine = new DefaultStateMachine<>(this, RedCreepState.IDLE);
+        this.body = makeBody(position);
+        this.agent = new EnemyAgent(game, body, ATTACKING_RANGE, DAMAGE, DAMAGE_COOLDOWN);
 
         movementSpeed = 2;
     }
 
     private Body makeBody(Vector2 position) {
         final Body body;
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.2f, 0.4f);
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position.x, position.y);
 
-        body = game.getWorld().createBody(bodyDef);
-        body.setLinearDamping(1f);
-        body.setFixedRotation(true);
-        body.setUserData(this);
-
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        fixtureDef.density = 1f;
-        fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0.5f;
-        body.createFixture(fixtureDef).setUserData(this);
+        fixtureDef.density = 1.5f;
+        fixtureDef.friction = 0.2f;
+        fixtureDef.restitution = 0f;
+
+        body = Bodies.createEllipse(game, bodyDef, 0.2f, 0.4f, 8, fixtureDef);
+        body.setLinearDamping(1f);
+        body.setAngularDamping(2f);
+        body.setUserData(this);
         return body;
     }
 
-    public void setTarget(Structure target) {
-        Vector2 position = body.getPosition();
-        this.target = target;
-        DefaultGraphPath<MapNode> path = game.map.findPath((int) position.x, (int) position.y, (int) target.getCenter().x, (int) target.getCenter().y);
-        pathIterator = path.iterator();
-    }
-
-    private void rotateTo(float angle) {
-        if (Math.abs(angle - body.getAngle()) > 0.05f) {
-            // rotate towards the target (clockwise or counter-clockwise depending on the shortest path
-            float rotationSpeed = 5 * Math.signum(angle - body.getAngle());
-            body.setAngularVelocity(rotationSpeed);
-        } else {
-            body.setAngularVelocity(0f);
-        }
-    }
-
-    private boolean moveTo(float x, float y) {
-        Debug.log("Moving to", x + ", " + y);
-        Debug.log("Current position", body.getPosition());
-        Vector2 position = body.getPosition();
-        Vector2 target = new Vector2(x, y);
-        Vector2 direction = target.cpy().sub(position).nor();
-        body.setLinearVelocity(direction.scl(movementSpeed));
-        rotateTo(direction.angleRad() + (float) Math.PI / 2);
-        return position.dst(target) < 0.1f;
-    }
-
-    private void moveTowardsTarget() {
-        if (currentDest == null) {
-            if (pathIterator.hasNext()) {
-                currentDest = pathIterator.next();
-            }
-        } else {
-            // move to the center of the destination tile
-            boolean res = moveTo(currentDest.x + 0.5f, currentDest.y + 0.5f);
-            if (res)
-                currentDest = null;
-        }
-    }
-
-    private void stopMoving() {
-        body.setLinearVelocity(0, 0);
-        body.setAngularVelocity(0);
-    }
-
-    private boolean targetWithinRange() {
-        Vector2 position = body.getPosition();
-        float dist = target.getCenter().dst(position);
-        return dist < ATTACKING_RANGE;
-    }
-
-    private void attackTarget() {
-        float delta = Gdx.graphics.getDeltaTime();
-        timer -= delta;
-        if (timer < 0) {
-            target.getHealth().damage(DAMAGE);
-            timer = DAMAGE_COOLDOWN;
-        }
+    public void stagger(float time) {
+        agent.stagger(time);
     }
 
     @Override
@@ -139,8 +62,7 @@ public class RedCreep extends Enemy {
 
     @Override
     public void update(float deltaTime) {
-        stateMachine.update();
-        Debug.log("Enemy state", "" + stateMachine.getCurrentState());
+        agent.update(deltaTime);
         super.update(deltaTime);
     }
 
@@ -149,99 +71,4 @@ public class RedCreep extends Enemy {
         super.dispose();
         game.getWorld().destroyBody(body);
     }
-
-    /**
-     * ------------- STATES -------------
-     */
-    private enum RedCreepState implements State<RedCreep> {
-        // wander around and look for targets
-        IDLE() {
-            @Override
-            public void update(RedCreep entity) {
-                // find the closest structure and the path to it
-                Array<Structure> structures = entity.getWorld().map.getStructures();
-                Vector2 position = entity.body.getPosition();
-
-                Structure target = null;
-                float closest = Float.MAX_VALUE;
-                for (Structure s : structures) {
-                    Vector2 sPos = s.getCenter();
-                    float dist = Vector2.dst(position.x, position.y, sPos.x, sPos.y);
-                    if (dist < closest) {
-                        closest = dist;
-                        target = s;
-                    }
-                }
-                if (target != null) {
-                    entity.setTarget(target);
-                    entity.stateMachine.changeState(MOVING);
-                }
-            }
-        },
-
-        // move towards the found target
-        MOVING() {
-            @Override
-            public void enter(RedCreep entity) {
-                if (entity.pathIterator.hasNext())
-                    entity.currentDest = entity.pathIterator.next();
-                else if (entity.target.isAlive())
-                    entity.stateMachine.changeState(ATTACKING);
-            }
-
-            @Override
-            public void update(RedCreep entity) {
-                // if the target dies while moving, go back to idle
-                if (entity.target != null && entity.target.isAlive()) {
-                    entity.moveTowardsTarget();
-                    // if reached the attacking range, go to attacking
-                    if (entity.targetWithinRange()) {
-                        entity.currentDest = null;
-                        entity.stateMachine.changeState(ATTACKING);
-                    }
-                } else {
-                    entity.target = null;
-                    entity.stateMachine.changeState(IDLE);
-                }
-            }
-
-            @Override
-            public void exit(RedCreep entity) {
-                entity.stopMoving();
-            }
-        },
-
-        ATTACKING() {
-            @Override
-            public void update(RedCreep entity) {
-                if (entity.target.isAlive()) {
-                    entity.attackTarget();
-                } else {
-                    entity.target = null;
-                    entity.stateMachine.changeState(IDLE);
-                }
-            }
-        };
-
-        @Override
-        public void enter(RedCreep entity) {
-
-        }
-
-        @Override
-        public void update(RedCreep entity) {
-
-        }
-
-        @Override
-        public void exit(RedCreep entity) {
-
-        }
-
-        @Override
-        public boolean onMessage(RedCreep entity, Telegram telegram) {
-            return false;
-        }
-    }
-
 }

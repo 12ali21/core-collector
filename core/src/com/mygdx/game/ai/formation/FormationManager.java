@@ -17,7 +17,7 @@ import com.mygdx.game.world.map.MapNode;
 public class FormationManager {
     private final Game game;
     Formation<Vector2> formation;
-    Array<FormationMember> members;
+    Array<FormationMembership> members;
     FormationAnchor anchor;
     FollowPath<Vector2, LinePath.LinePathParam> followPath;
 
@@ -56,7 +56,7 @@ public class FormationManager {
         FormationMotionModerator<Vector2> motionModerator = new AnchorModerator(members);
         formation = new Formation<>(anchor, pattern, new FreeSlotAssignmentStrategy<>(), motionModerator);
 
-        for (FormationMember member : members) {
+        for (FormationMembership member : members) {
             formation.addMember(member);
         }
     }
@@ -87,16 +87,16 @@ public class FormationManager {
         anchor.update(delta);
         formation.updateSlots();
 
-        for (FormationMember member : members) {
+        for (FormationMembership member : members) {
             member.update(delta);
         }
     }
 
     public void render() {
         anchor.render();
-        for (FormationMember member : members) {
-            member.render();
-        }
+//        for (FormationMember member : members) {
+//            member.render();
+//        }
 
         for (int i = 0; i < members.size; i++) {
             SlotAssignment<Vector2> assignment = formation.getSlotAssignmentAt(i);
@@ -107,7 +107,8 @@ public class FormationManager {
         }
     }
 
-    private FormationMember createFormationMember() {
-        return new FormationMember(game);
+    private FormationMembership createFormationMember() {
+//        return new FormationMember(game);
+        return null;
     }
 }

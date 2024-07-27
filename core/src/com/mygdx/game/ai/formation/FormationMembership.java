@@ -8,26 +8,26 @@ import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.ai.Agent;
 import com.mygdx.game.ai.GameLocation;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
-public class FormationMember extends Agent implements com.badlogic.gdx.ai.fma.FormationMember<Vector2> {
+public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fma.FormationMember<Vector2> {
 
     private static final float EPSILON = 0.05f;
     private final Arrive<Vector2> arriveTarget;
     private final SteeringAcceleration<Vector2> steering = new SteeringAcceleration<>(new Vector2());
+    private final GameLocation slotLocation;
     private boolean onPath = false;
-    private GameLocation slotLocation;
     private GridPoint2 lastPathTarget;
     private FollowPath<Vector2, LinePath.LinePathParam> followPath;
 
 
-    public FormationMember(Game game) {
-        super(game);
+    public FormationMembership(Game game, Body body) {
+        super(game, body);
         this.slotLocation = new GameLocation();
 
         arriveTarget = new Arrive<>(this, this.getTargetLocation())
@@ -48,14 +48,6 @@ public class FormationMember extends Agent implements com.badlogic.gdx.ai.fma.Fo
         } else {
             return false;
         }
-    }
-
-    private LinePath<Vector2> convertToLinePath(GraphPath<MapNode> graphPath) {
-        Array<Vector2> waypoints = new Array<>(graphPath.getCount());
-        for (MapNode node : graphPath) {
-            waypoints.add(new Vector2(node.x, node.y));
-        }
-        return new LinePath<>(waypoints, true);
     }
 
     @Override
@@ -112,18 +104,6 @@ public class FormationMember extends Agent implements com.badlogic.gdx.ai.fma.Fo
 //            }
 //        }
 
-    }
-
-    @Override
-    public void render() {
-        super.render();
-
-//        if (rayConfig != null) {
-//            for (Ray<Vector2> ray : rayConfig.getRays()) {
-//                Debug.drawLine("" + ray, ray.start, ray.end);
-//            }
-//            Debug.log("Ray count: ", rayConfig.getRays().length);
-//        }
     }
 
     @Override

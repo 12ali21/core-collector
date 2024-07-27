@@ -1,99 +1,45 @@
 package com.mygdx.game.ai;
 
+import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.LookWhereYouAreGoing;
+import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.ai.utils.Location;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Updatable;
 import com.mygdx.game.utils.Debug;
-import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
+import com.mygdx.game.world.map.MapNode;
 
 
-public class Agent implements Steerable<Vector2> {
+public class Agent implements Steerable<Vector2>, Updatable {
     protected final Body body;
     protected final Game game;
-    private final Sprite sprite;
     private final LookWhereYouAreGoing<Vector2> look;
+    private final GridPoint2 gridPos = new GridPoint2();
 
-    private SteeringAcceleration<Vector2> angularSteering = new SteeringAcceleration<>(new Vector2());
+    private final SteeringAcceleration<Vector2> angularSteering = new SteeringAcceleration<>(new Vector2());
     private boolean tagged;
     private float maxLinearSpeed = 5f;
     private float maxLinearAcc = 2f;
     private float maxAngularSpeed = 10;
-    private float maxAngularAcc = 20;
+    private float maxAngularAcc = 10f;
 
 
-    public Agent(Game game) {
+    public Agent(Game game, Body body) {
         this.game = game;
-        body = makeBody(new Vector2(1.5f, 1.5f));
-        sprite = new Sprite(TextureAssets.get(TextureAssets.ENEMY_SMALL_TEXTURE));
-        sprite.setSize(1, 1);
-        sprite.setOriginCenter();
+        this.body = body;
 
-        look = new LookWhereYouAreGoing<>(this).setTimeToTarget(0.5f).setDecelerationRadius(MathUtils.PI / 2f);
-
-
+        look = new LookWhereYouAreGoing<>(this).setTimeToTarget(1f)
+                .setDecelerationRadius(MathUtils.PI / 4f);
     }
 
-    private Body createEllipse(BodyDef bodyDef, float rX, float rY, int segments, FixtureDef upperHalfDef, FixtureDef lowerHalfDef) {
-        if (segments <= 4) {
-            throw new IllegalArgumentException("can't make an ellipse with " + segments + " segments");
-        }
-        Body body = game.getWorld().createBody(bodyDef);
-        PolygonShape shape = new PolygonShape();
-        Vector2[] vertices = new Vector2[segments];
-        for (int i = 0; i < segments - 2; i++) {
-            float angle = (float) i / (segments - 3) * MathUtils.PI;
-            vertices[i] = new Vector2(MathUtils.cos(angle) * rX, MathUtils.sin(angle) * rX + (rY - rX));
-        }
-        vertices[segments - 2] = new Vector2(rX, 0);
-        vertices[segments - 1] = new Vector2(-rX, 0);
-
-        shape.set(vertices);
-        upperHalfDef.shape = shape;
-        body.createFixture(upperHalfDef).setUserData(this);
-        for (int i = 0; i < segments - 2; i++) {
-            float angle = (float) i / (segments - 3) * MathUtils.PI;
-            vertices[i] = new Vector2(MathUtils.cos(angle) * rX, -MathUtils.sin(angle) * rX - (rY - rX));
-        }
-        vertices[segments - 2] = new Vector2(rX, 0);
-        vertices[segments - 1] = new Vector2(-rX, 0);
-
-        shape.set(vertices);
-        lowerHalfDef.shape = shape;
-        body.createFixture(lowerHalfDef).setUserData(this);
-        return body;
-    }
-
-    private Body makeBody(Vector2 position) {
-        final Body body;
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(position.x, position.y);
-
-        FixtureDef upperHalfDef = new FixtureDef();
-        upperHalfDef.density = 1.5f;
-        upperHalfDef.friction = 0.2f;
-        upperHalfDef.restitution = 0f;
-
-        FixtureDef lowerHalfDef = new FixtureDef();
-        lowerHalfDef.density = 1.5f;
-        lowerHalfDef.friction = 0.2f;
-        lowerHalfDef.restitution = 0f;
-
-        body = createEllipse(bodyDef, 0.2f, 0.4f, 8, upperHalfDef, lowerHalfDef);
-        body.setLinearDamping(1f);
-        body.setAngularDamping(2f);
-        return body;
-    }
-
+    @Override
     public void update(float delta) {
         Debug.log("Agent Speed", getLinearVelocity().len());
         Debug.drawPoint("agent pos" + this, getPosition());
@@ -101,13 +47,18 @@ public class Agent implements Steerable<Vector2> {
         // Update orientation and angular velocity
         look.calculateSteering(angularSteering);
         body.applyTorque(angularSteering.angular, true);
+
+        Debug.drawLine("agent vel", getPosition(), getPosition().cpy().add(getLinearVelocity()));
+        Vector2 v = new Vector2();
+        Debug.drawLine("agent orientation", getPosition(), angleToVector(v, getOrientation()).add(getPosition()));
     }
 
-    public void render() {
-        sprite.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
-        sprite.setRotation((body.getAngle() * MathUtils.radiansToDegrees));
-        sprite.draw(game.getBatch());
-
+    protected LinePath<Vector2> convertToLinePath(GraphPath<MapNode> graphPath) {
+        Array<Vector2> waypoints = new Array<>(graphPath.getCount());
+        for (MapNode node : graphPath) {
+            waypoints.add(new Vector2(node.x, node.y));
+        }
+        return new LinePath<>(waypoints, true);
     }
 
     @Override
@@ -189,6 +140,11 @@ public class Agent implements Steerable<Vector2> {
     @Override
     public Vector2 getPosition() {
         return body.getPosition();
+    }
+
+    public GridPoint2 getGridPosition() {
+        gridPos.set((int) getPosition().x, (int) getPosition().y);
+        return gridPos;
     }
 
     @Override

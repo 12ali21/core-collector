@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.entities.enemies.Enemy;
+import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
@@ -34,8 +35,8 @@ public class Bullet extends EntityObj {
     }
 
     public static boolean handleContact(Contact contact) {
-        Object userDataA = contact.getFixtureA().getUserData();
-        Object userDataB = contact.getFixtureB().getUserData();
+        Object userDataA = contact.getFixtureA().getBody().getUserData();
+        Object userDataB = contact.getFixtureB().getBody().getUserData();
         if (userDataA == null || userDataB == null) {
             return false;
         }
@@ -61,6 +62,8 @@ public class Bullet extends EntityObj {
         }
         if (bullet != null && enemy != null) {
             bullet.kill();
+            if (enemy instanceof RedCreep)
+                ((RedCreep) enemy).stagger(0.3f); // Slow down the enemy for 0.3 second
             enemy.getHealth().damage(bullet.getDamage());
             return true;
         }
@@ -86,6 +89,7 @@ public class Bullet extends EntityObj {
         fixtureDef.shape = shape;
         fixtureDef.density = 10f;
         fixtureDef.restitution = 0f;
+        fixtureDef.isSensor = true;
         body.createFixture(fixtureDef).setUserData(this);
         return body;
     }
