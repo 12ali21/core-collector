@@ -64,6 +64,9 @@ public class FormationManager {
     private LinePath<Vector2> calculatePath(int x, int y) {
         Vector2 cur = anchor.getPosition();
         DefaultGraphPath<MapNode> testGraphPath = game.map.findPath((int) cur.x, (int) cur.y, x, y);
+        if (testGraphPath == null) {
+            return null;
+        }
         Array<Vector2> vertices = new Array<>();
         for (MapNode node : testGraphPath) {
             vertices.add(new Vector2(node.x + .5f, node.y + .5f));
@@ -74,8 +77,11 @@ public class FormationManager {
     public void update(float delta) {
         if (Gdx.input.justTouched()) {
             Vector3 pos = game.unproject(Gdx.input.getX(), Gdx.input.getY());
-            followPath.setPath(calculatePath((int) pos.x, (int) pos.y));
-            anchor.setSteeringBehavior(followPath);
+            LinePath<Vector2> path = calculatePath((int) pos.x, (int) pos.y);
+            if (path != null) {
+                followPath.setPath(path);
+                anchor.setSteeringBehavior(followPath);
+            }
         }
 
         anchor.update(delta);

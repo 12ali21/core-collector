@@ -18,14 +18,14 @@ import com.mygdx.game.world.Game;
 
 public class Agent implements Steerable<Vector2> {
     protected final Body body;
-    private final Game game;
+    protected final Game game;
     private final Sprite sprite;
     private final LookWhereYouAreGoing<Vector2> look;
 
     private SteeringAcceleration<Vector2> angularSteering = new SteeringAcceleration<>(new Vector2());
     private boolean tagged;
-    private float maxLinearSpeed = 2f;
-    private float maxLinearAcc = 40f;
+    private float maxLinearSpeed = 5f;
+    private float maxLinearAcc = 2f;
     private float maxAngularSpeed = 10;
     private float maxAngularAcc = 20;
 

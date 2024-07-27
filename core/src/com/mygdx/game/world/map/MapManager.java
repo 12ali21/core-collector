@@ -129,8 +129,15 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         return (TiledMapTileLayer) map.getLayers().get(WALL_LAYER);
     }
 
-    public boolean isTileOccupied(int x, int y) {
+    private boolean isWithinBorder(int x, int y) {
         if (x < 0 || x >= nodes.length || y < 0 || y >= nodes[0].length) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isTileOccupied(int x, int y) {
+        if (!isWithinBorder(x, y)) {
             return true;
         }
         return nodes[x][y] == null || nodes[x][y].hasStructure();
@@ -189,10 +196,14 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     }
 
     public DefaultGraphPath<MapNode> findPath(int startX, int startY, int endX, int endY) {
+        if (!isWithinBorder(startX, startY) || !isWithinBorder(endX, endY)) {
+            return null;
+        }
         DefaultGraphPath<MapNode> path = new DefaultGraphPath<>();
-
         MapNode startNode = nodes[startX][startY];
         MapNode endNode = nodes[endX][endY];
+        if (startNode == null || endNode == null)
+            return null;
         pathFinder.searchNodePath(startNode, endNode, heuristic, path);
         return path;
     }
