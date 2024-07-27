@@ -47,7 +47,7 @@ public class Agent implements Steerable<Vector2> {
     private Body makeBody(Vector2 position) {
         final Body body;
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.4f, 0.2f);
+        shape.setAsBox(0.2f, 0.4f);
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position.x, position.y);
@@ -73,12 +73,11 @@ public class Agent implements Steerable<Vector2> {
         // Update orientation and angular velocity
         look.calculateSteering(angularSteering);
         body.applyTorque(angularSteering.angular, true);
-        System.out.println(angularSteering.angular);
     }
 
     public void render() {
         sprite.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
-        sprite.setRotation((body.getAngle() * MathUtils.radiansToDegrees) + 90);
+        sprite.setRotation((body.getAngle() * MathUtils.radiansToDegrees));
         sprite.draw(game.getBatch());
 
     }
@@ -176,14 +175,12 @@ public class Agent implements Steerable<Vector2> {
 
     @Override
     public float vectorToAngle(Vector2 vector) {
-        return (float) Math.atan2(-vector.x, vector.y);
+        return LocationUtils.vectorToAngle(vector);
     }
 
     @Override
     public Vector2 angleToVector(Vector2 outVector, float angle) {
-        outVector.x = -(float) Math.sin(angle);
-        outVector.y = (float) Math.cos(angle);
-        return outVector;
+        return LocationUtils.angleToVector(outVector, angle);
     }
 
     @Override

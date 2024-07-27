@@ -1,9 +1,12 @@
-package com.mygdx.game.ai;
+package com.mygdx.game.ai.formation;
 
 import com.badlogic.gdx.ai.fma.FormationMotionModerator;
+import com.badlogic.gdx.ai.fma.FormationPattern;
+import com.badlogic.gdx.ai.fma.SlotAssignment;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.ai.GameLocation;
 
 public class AnchorModerator extends FormationMotionModerator<Vector2> {
     public static final float OFFSET = 0.2f;
@@ -36,5 +39,10 @@ public class AnchorModerator extends FormationMotionModerator<Vector2> {
         calculateAvgPosition();
         calculateAvgVelocity();
 //        anchor.getPosition().set(avgPos.mulAdd(avgVel, OFFSET));
+    }
+
+    @Override
+    public Location<Vector2> calculateDriftOffset(Location<Vector2> centerOfMass, Array<SlotAssignment<Vector2>> slotAssignments, FormationPattern<Vector2> pattern) {
+        return new GameLocation();
     }
 }

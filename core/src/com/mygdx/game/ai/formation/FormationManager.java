@@ -1,27 +1,23 @@
-package com.mygdx.game.ai;
+package com.mygdx.game.ai.formation;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.fma.Formation;
-import com.badlogic.gdx.ai.fma.FormationMotionModerator;
-import com.badlogic.gdx.ai.fma.FormationPattern;
-import com.badlogic.gdx.ai.fma.FreeSlotAssignmentStrategy;
-import com.badlogic.gdx.ai.fma.patterns.OffensiveCircleFormationPattern;
+import com.badlogic.gdx.ai.fma.*;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
 import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
-import com.badlogic.gdx.ai.utils.RaycastCollisionDetector;
+import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
+
 
 public class FormationManager {
     private final Game game;
     Formation<Vector2> formation;
-    FormationMember memberA;
-    FormationMember memberB;
-    FormationMember memberC;
+    Array<FormationMember> members;
     FormationAnchor anchor;
     FollowPath<Vector2, LinePath.LinePathParam> followPath;
 
@@ -40,29 +36,29 @@ public class FormationManager {
         }
         LinePath<Vector2> path = new LinePath<>(vertices, true);
 
-        followPath = new FollowPath<>(anchor, path, 1f);
-        followPath.setPredictionTime(0.1f);
+        followPath = new FollowPath<>(anchor, path, 3f);
+        followPath.setPredictionTime(0);
         followPath.setDecelerationRadius(.5f);
 
         anchor.setSteeringBehavior(followPath);
-        memberA = createFormationMember();
-        memberB = createFormationMember();
-        memberC = createFormationMember();
 
-        Array<FormationMember> members = new Array<>();
-        members.add(memberA);
-        members.add(memberB);
-        members.add(memberC);
 
-        FormationPattern<Vector2> pattern = new OffensiveCircleFormationPattern<>(1);
+        members = new Array<>();
+        members.add(createFormationMember());
+        members.add(createFormationMember());
+        members.add(createFormationMember());
+        members.add(createFormationMember());
+        members.add(createFormationMember());
+        members.add(createFormationMember());
+        members.add(createFormationMember());
+
+        FormationPattern<Vector2> pattern = new SquareFormationPattern();
         FormationMotionModerator<Vector2> motionModerator = new AnchorModerator(members);
         formation = new Formation<>(anchor, pattern, new FreeSlotAssignmentStrategy<>(), motionModerator);
 
-
-        formation.addMember(memberA);
-        formation.addMember(memberB);
-        formation.addMember(memberC);
-
+        for (FormationMember member : members) {
+            formation.addMember(member);
+        }
     }
 
     private LinePath<Vector2> calculatePath(int x, int y) {
@@ -85,23 +81,27 @@ public class FormationManager {
         anchor.update(delta);
         formation.updateSlots();
 
-        memberA.update(delta);
-        memberB.update(delta);
-        memberC.update(delta);
+        for (FormationMember member : members) {
+            member.update(delta);
+        }
     }
 
     public void render() {
-        memberA.render();
-        memberB.render();
-        memberC.render();
+        anchor.render();
+        for (FormationMember member : members) {
+            member.render();
+        }
+
+        for (int i = 0; i < members.size; i++) {
+            SlotAssignment<Vector2> assignment = formation.getSlotAssignmentAt(i);
+            if (assignment != null) {
+                Location<Vector2> slotPosition = assignment.member.getTargetLocation();
+                Debug.drawPoint("slot" + i, slotPosition.getPosition());
+            }
+        }
     }
 
     private FormationMember createFormationMember() {
-
-        RaycastCollisionDetector<Vector2> raycastCollisionDetector = new Box2dRaycastCollisionDetector(game.getWorld());
-
         return new FormationMember(game);
     }
-
-
 }
