@@ -37,32 +37,60 @@ public class Agent implements Steerable<Vector2> {
         sprite.setSize(1, 1);
         sprite.setOriginCenter();
 
-        look = new LookWhereYouAreGoing<>(this)
-                .setTimeToTarget(0.5f)
-                .setDecelerationRadius(MathUtils.PI / 2f);
+        look = new LookWhereYouAreGoing<>(this).setTimeToTarget(0.5f).setDecelerationRadius(MathUtils.PI / 2f);
 
 
     }
 
+    private Body createEllipse(BodyDef bodyDef, float rX, float rY, int segments, FixtureDef upperHalfDef, FixtureDef lowerHalfDef) {
+        if (segments <= 4) {
+            throw new IllegalArgumentException("can't make an ellipse with " + segments + " segments");
+        }
+        Body body = game.getWorld().createBody(bodyDef);
+        PolygonShape shape = new PolygonShape();
+        Vector2[] vertices = new Vector2[segments];
+        for (int i = 0; i < segments - 2; i++) {
+            float angle = (float) i / (segments - 3) * MathUtils.PI;
+            vertices[i] = new Vector2(MathUtils.cos(angle) * rX, MathUtils.sin(angle) * rX + (rY - rX));
+        }
+        vertices[segments - 2] = new Vector2(rX, 0);
+        vertices[segments - 1] = new Vector2(-rX, 0);
+
+        shape.set(vertices);
+        upperHalfDef.shape = shape;
+        body.createFixture(upperHalfDef).setUserData(this);
+        for (int i = 0; i < segments - 2; i++) {
+            float angle = (float) i / (segments - 3) * MathUtils.PI;
+            vertices[i] = new Vector2(MathUtils.cos(angle) * rX, -MathUtils.sin(angle) * rX - (rY - rX));
+        }
+        vertices[segments - 2] = new Vector2(rX, 0);
+        vertices[segments - 1] = new Vector2(-rX, 0);
+
+        shape.set(vertices);
+        lowerHalfDef.shape = shape;
+        body.createFixture(lowerHalfDef).setUserData(this);
+        return body;
+    }
+
     private Body makeBody(Vector2 position) {
         final Body body;
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.2f, 0.4f);
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position.x, position.y);
 
-        body = game.getWorld().createBody(bodyDef);
+        FixtureDef upperHalfDef = new FixtureDef();
+        upperHalfDef.density = 1.5f;
+        upperHalfDef.friction = 0.2f;
+        upperHalfDef.restitution = 0f;
+
+        FixtureDef lowerHalfDef = new FixtureDef();
+        lowerHalfDef.density = 1.5f;
+        lowerHalfDef.friction = 0.2f;
+        lowerHalfDef.restitution = 0f;
+
+        body = createEllipse(bodyDef, 0.2f, 0.4f, 8, upperHalfDef, lowerHalfDef);
         body.setLinearDamping(1f);
         body.setAngularDamping(2f);
-        body.setUserData(this);
-
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        fixtureDef.density = 1f;
-        fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0f;
-        body.createFixture(fixtureDef).setUserData(this);
         return body;
     }
 
