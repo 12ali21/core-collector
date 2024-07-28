@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.generator.MapGenerator;
@@ -114,13 +115,13 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
             addNodeNeighbour(x, y + 1, node, 1);
 
             // Diagonal connections if possible
-            if (nodes[x - 1][y] != null && nodes[x][y - 1] != null)
+            if (isWithinBorder(x - 1, y - 1) && nodes[x - 1][y] != null && nodes[x][y - 1] != null)
                 addNodeNeighbour(x - 1, y - 1, node, 1.4f);
-            if (nodes[x + 1][y] != null && nodes[x][y + 1] != null)
+            if (isWithinBorder(x + 1, y + 1) && nodes[x + 1][y] != null && nodes[x][y + 1] != null)
                 addNodeNeighbour(x + 1, y + 1, node, 1.4f);
-            if (nodes[x - 1][y] != null && nodes[x][y + 1] != null)
+            if (isWithinBorder(x - 1, y + 1) && nodes[x - 1][y] != null && nodes[x][y + 1] != null)
                 addNodeNeighbour(x - 1, y + 1, node, 1.4f);
-            if (nodes[x + 1][y] != null && nodes[x][y - 1] != null)
+            if (isWithinBorder(x + 1, y - 1) && nodes[x + 1][y] != null && nodes[x][y - 1] != null)
                 addNodeNeighbour(x + 1, y - 1, node, 1.4f);
         }
     }
@@ -130,7 +131,10 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     }
 
     private boolean isWithinBorder(int x, int y) {
-        if (x < 0 || x >= nodes.length || y < 0 || y >= nodes[0].length) {
+        if (x < Constants.MAP_BORDER_LENGTH ||
+                x >= nodes.length - Constants.MAP_BORDER_LENGTH ||
+                y < Constants.MAP_BORDER_LENGTH ||
+                y >= nodes[0].length - Constants.MAP_BORDER_LENGTH) {
             return false;
         }
         return true;
@@ -226,6 +230,14 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     @Override
     public void dispose() {
         groundTexture.dispose();
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
     }
 
     public enum CellBodyType {

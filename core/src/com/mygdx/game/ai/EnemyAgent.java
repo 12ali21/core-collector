@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.fsm.StateMachine;
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
@@ -40,6 +41,8 @@ public class EnemyAgent extends Agent {
         this.damageCooldown = damageCooldown;
         stateMachine = new DefaultStateMachine<>(this, EnemyState.IDLE);
         membership = new FormationMembership(game, body);
+
+        MessageManager.getInstance().addListener(stateMachine, 1);
     }
 
     public void setTarget(Structure target) {
@@ -188,6 +191,7 @@ public class EnemyAgent extends Agent {
 
         @Override
         public boolean onMessage(EnemyAgent entity, Telegram telegram) {
+            System.out.println("ding ding" + telegram);
             return false;
         }
     }

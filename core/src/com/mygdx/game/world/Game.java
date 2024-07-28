@@ -2,6 +2,7 @@ package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -15,11 +16,12 @@ import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.audio.AudioManager;
 import com.mygdx.game.audio.NonSpatialSound;
-import com.mygdx.game.entities.Bullet;
-import com.mygdx.game.entities.Entity;
-import com.mygdx.game.entities.HoveredTile;
+import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.enemies.RedCreep;
+import com.mygdx.game.entities.others.Bullet;
+import com.mygdx.game.entities.others.Entity;
+import com.mygdx.game.entities.others.HoveredTile;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.AudioAssets;
@@ -46,6 +48,7 @@ public class Game implements Drawable, Updatable, Disposable {
     private final MyContactListener contactListener;
     private final NonSpatialSound pauseSound;
     private final Music ambientMusic;
+    private final EnemiesManager enemiesManager;
     private boolean isSorted = false;
     private boolean isPaused = false;
 
@@ -59,6 +62,9 @@ public class Game implements Drawable, Updatable, Disposable {
         this.camera = camera;
         map = new MapManager(this, "maze");
         audio = new AudioManager(camera);
+
+        camera.position.set(map.getWidth() / 2f, map.getHeight() / 2f, 0);
+        camera.update();
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
@@ -75,6 +81,8 @@ public class Game implements Drawable, Updatable, Disposable {
             addEntity(enemy);
             enemies.add(enemy);
         });
+
+        enemiesManager = new EnemiesManager();
     }
 
     private void setContactListeners() {
@@ -98,7 +106,8 @@ public class Game implements Drawable, Updatable, Disposable {
         hoveredTile.findPosition(mousePos);
 
         structureBuilder.update(delta);
-
+        enemiesManager.update(delta);
+        MessageManager.getInstance().update();
         // Update entities
         for (Iterator<Entity> itr = entitiesUpdate.iterator(); itr.hasNext(); ) {
             Entity entity = itr.next();

@@ -51,7 +51,7 @@ public class GameScreen extends ScreenAdapter {
         if (inputProcessor.isFOVChanged()) {
             camera.zoom = inputProcessor.getZoom();
         }
-        camera.position.set(inputProcessor.getCameraPosition(), 0);
+        camera.position.add(inputProcessor.getCameraMovement());
         camera.update();
         game.update(delta);
     }

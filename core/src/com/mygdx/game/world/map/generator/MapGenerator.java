@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.map.MapManager;
 
@@ -79,8 +80,7 @@ public class MapGenerator {
     }
 
     public TiledMap generate(int width, int height) {
-        if (map != null)
-            throw new IllegalStateException("Map already generated");
+        if (map != null) throw new IllegalStateException("Map already generated");
         map = new TiledMap();
         this.width = width;
         this.height = height;
@@ -90,13 +90,14 @@ public class MapGenerator {
         MapLayers layers = map.getLayers();
         wallLayer = new TiledMapTileLayer(width, height, TILE_SIZE, TILE_SIZE);
         wallLayer.setName(MapManager.WALL_LAYER);
+        int border = Constants.MAP_BORDER_LENGTH;
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (int y = border; y < height - border; y++) {
+            for (int x = border; x < width - border; x++) {
                 float noise = OpenSimplex2S.noise2(seed, x * SCALE, y * SCALE);
                 float normalNoise = (noise + 1) / 2f;
                 // fill with mountain wall
-                if (x == 0 || x == width - 1 || y == 0 || y == height - 1 || (normalNoise > WALL_THRESHOLD)) {
+                if (normalNoise > WALL_THRESHOLD) {
                     TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
                     wallLayer.setCell(x, y, cell);
                 }
@@ -105,8 +106,7 @@ public class MapGenerator {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 TiledMapTileLayer.Cell cell = wallLayer.getCell(x, y);
-                if (cell != null)
-                    cell.setTile(getTile(mountain, x, y));
+                if (cell != null) cell.setTile(getTile(mountain, x, y));
             }
         }
 

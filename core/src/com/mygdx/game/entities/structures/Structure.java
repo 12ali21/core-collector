@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.entities.Entity;
-import com.mygdx.game.entities.HealthPoints;
+import com.mygdx.game.entities.others.Entity;
+import com.mygdx.game.entities.others.HealthPoints;
 import com.mygdx.game.world.Game;
 
 public abstract class Structure extends Entity {

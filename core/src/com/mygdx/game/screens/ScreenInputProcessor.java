@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
@@ -12,7 +12,7 @@ import com.mygdx.game.utils.Debug;
 public class ScreenInputProcessor extends InputAdapter implements Updatable {
 
 
-    private final Vector2 cameraPosition = new Vector2(0, 0);
+    private final Vector3 cameraMovement = new Vector3();
     private float zoom = 1f;
     private boolean FOVChanged = false;
 
@@ -26,22 +26,23 @@ public class ScreenInputProcessor extends InputAdapter implements Updatable {
 
     @Override
     public void update(float delta) {
-        float movement = Constants.PAN_SPEED * delta * 1f;
+        cameraMovement.setZero();
+        float movement = Constants.PAN_SPEED * delta * zoom;
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
             movement *= 2;
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            cameraPosition.y += movement;
+            cameraMovement.y += movement;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            cameraPosition.y -= movement;
+            cameraMovement.y -= movement;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            cameraPosition.x -= movement;
+            cameraMovement.x -= movement;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            cameraPosition.x += movement;
+            cameraMovement.x += movement;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
@@ -58,7 +59,7 @@ public class ScreenInputProcessor extends InputAdapter implements Updatable {
         return zoom;
     }
 
-    public Vector2 getCameraPosition() {
-        return cameraPosition;
+    public Vector3 getCameraMovement() {
+        return cameraMovement;
     }
 }

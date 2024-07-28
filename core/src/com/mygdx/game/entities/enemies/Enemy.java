@@ -2,8 +2,8 @@ package com.mygdx.game.entities.enemies;
 
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ai.EnemyAgent;
-import com.mygdx.game.entities.EntityObj;
-import com.mygdx.game.entities.HealthPoints;
+import com.mygdx.game.entities.others.EntityObj;
+import com.mygdx.game.entities.others.HealthPoints;
 import com.mygdx.game.world.Game;
 
 public abstract class Enemy extends EntityObj {
