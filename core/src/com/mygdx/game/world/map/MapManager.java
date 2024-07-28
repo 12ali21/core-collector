@@ -131,13 +131,14 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     }
 
     private boolean isWithinBorder(int x, int y) {
-        if (x < Constants.MAP_BORDER_LENGTH ||
-                x >= nodes.length - Constants.MAP_BORDER_LENGTH ||
-                y < Constants.MAP_BORDER_LENGTH ||
-                y >= nodes[0].length - Constants.MAP_BORDER_LENGTH) {
-            return false;
-        }
-        return true;
+        return x >= Constants.MAP_BORDER_LENGTH &&
+                x < nodes.length - Constants.MAP_BORDER_LENGTH &&
+                y >= Constants.MAP_BORDER_LENGTH &&
+                y < nodes[0].length - Constants.MAP_BORDER_LENGTH;
+    }
+
+    private boolean isNotWithinBoundary(int x, int y) {
+        return x < 0 || x >= nodes.length || y < 0 || y >= nodes[0].length;
     }
 
     public boolean isTileOccupied(int x, int y) {
@@ -190,7 +191,7 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     }
 
     private void addNodeNeighbour(int x, int y, MapNode node, float cost) {
-        if (x < 0 || x >= nodes.length || y < 0 || y >= nodes[0].length) {
+        if (isNotWithinBoundary(x, y)) {
             return;
         }
         MapNode neighbour = nodes[x][y];
@@ -200,7 +201,7 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     }
 
     public DefaultGraphPath<MapNode> findPath(int startX, int startY, int endX, int endY) {
-        if (!isWithinBorder(startX, startY) || !isWithinBorder(endX, endY)) {
+        if (isNotWithinBoundary(startX, startY) || isNotWithinBoundary(endX, endY)) {
             return null;
         }
         DefaultGraphPath<MapNode> path = new DefaultGraphPath<>();

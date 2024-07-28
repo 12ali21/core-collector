@@ -1,103 +1,73 @@
 package com.mygdx.game.ai.formation;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fma.*;
-import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
-import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
-import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.utils.Location;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Updatable;
+import com.mygdx.game.ai.MessageType;
+import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
-import com.mygdx.game.world.map.MapNode;
 
 
-public class FormationManager {
+public class FormationManager implements Updatable {
     private final Game game;
-    Formation<Vector2> formation;
-    Array<FormationMembership> members;
-    FormationAnchor anchor;
-    FollowPath<Vector2, LinePath.LinePathParam> followPath;
+    private final Formation<Vector2> formation;
+    private final FormationAnchor anchor;
+    private final Array<FormationMembership> members = new Array<>();
+    private final Structure target;
+    private boolean isValid = true;
 
 
-    public FormationManager(Game game) {
+    public FormationManager(Game game, Vector2 start, Structure target) {
         this.game = game;
-        anchor = new FormationAnchor();
-        anchor.setMaxLinearSpeed(2f);
-        anchor.setMaxLinearAcceleration(20f);
-        anchor.getPosition().set(1.5f, 1.5f);
-
-        DefaultGraphPath<MapNode> testGraphPath = game.map.findPath(1, 1, 25, 15);
-        Array<Vector2> vertices = new Array<>();
-        for (MapNode node : testGraphPath) {
-            vertices.add(new Vector2(node.x + .5f, node.y + .5f));
-        }
-        LinePath<Vector2> path = new LinePath<>(vertices, true);
-
-        followPath = new FollowPath<>(anchor, path, 3f);
-        followPath.setPredictionTime(0);
-        followPath.setDecelerationRadius(.5f);
-
-        anchor.setSteeringBehavior(followPath);
-
-
-        members = new Array<>();
-        members.add(createFormationMember());
-        members.add(createFormationMember());
-        members.add(createFormationMember());
-        members.add(createFormationMember());
-        members.add(createFormationMember());
-        members.add(createFormationMember());
-        members.add(createFormationMember());
+        this.target = target;
+        anchor = new FormationAnchor(game, start, new GridPoint2((int) target.getCenter().x, (int) target.getCenter().y));
 
         FormationPattern<Vector2> pattern = new SquareFormationPattern();
         FormationMotionModerator<Vector2> motionModerator = new AnchorModerator(members);
         formation = new Formation<>(anchor, pattern, new FreeSlotAssignmentStrategy<>(), motionModerator);
-
-        for (FormationMembership member : members) {
-            formation.addMember(member);
-        }
     }
 
-    private LinePath<Vector2> calculatePath(int x, int y) {
-        Vector2 cur = anchor.getPosition();
-        DefaultGraphPath<MapNode> testGraphPath = game.map.findPath((int) cur.x, (int) cur.y, x, y);
-        if (testGraphPath == null) {
-            return null;
-        }
-        Array<Vector2> vertices = new Array<>();
-        for (MapNode node : testGraphPath) {
-            vertices.add(new Vector2(node.x + .5f, node.y + .5f));
-        }
-        return new LinePath<>(vertices, true);
+    public void addMember(FormationMembership membership) {
+        if (!isValid)
+            throw new IllegalStateException("This formation doesn't exist");
+        members.add(membership);
+        formation.addMember(membership);
     }
 
+    public Vector2 getPosition() {
+        return anchor.getPosition();
+    }
+
+    private void breakFormation() {
+        for (FormationMembership membership : members) {
+            MessageManager.getInstance().dispatchMessage(
+                    null,
+                    membership.getOwner().getTelegraph(),
+                    MessageType.BREAK_FORMATION.ordinal(),
+                    target
+            );
+        }
+        dispose();
+    }
+
+    @Override
     public void update(float delta) {
-        if (Gdx.input.justTouched()) {
-            Vector3 pos = game.unproject(Gdx.input.getX(), Gdx.input.getY());
-            LinePath<Vector2> path = calculatePath((int) pos.x, (int) pos.y);
-            if (path != null) {
-                followPath.setPath(path);
-                anchor.setSteeringBehavior(followPath);
-            }
-        }
-
+        if (!isValid)
+            throw new IllegalStateException("This formation doesn't exist");
         anchor.update(delta);
         formation.updateSlots();
-
-        for (FormationMembership member : members) {
-            member.update(delta);
+        if (anchor.distanceToTarget() < Constants.BREAK_FORMATION_RANGE) {
+            breakFormation();
+            return;
         }
-    }
 
-    public void render() {
-        anchor.render();
-//        for (FormationMember member : members) {
-//            member.render();
-//        }
-
+        // Debug rendering
         for (int i = 0; i < members.size; i++) {
             SlotAssignment<Vector2> assignment = formation.getSlotAssignmentAt(i);
             if (assignment != null) {
@@ -107,8 +77,15 @@ public class FormationManager {
         }
     }
 
-    private FormationMembership createFormationMember() {
-//        return new FormationMember(game);
-        return null;
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public Array<FormationMembership> getMembers() {
+        return members;
+    }
+
+    public void dispose() {
+        isValid = false;
     }
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
@@ -13,8 +14,8 @@ import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ai.formation.FormationMembership;
+import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
@@ -40,20 +41,22 @@ public class EnemyAgent extends Agent {
         this.damage = damage;
         this.damageCooldown = damageCooldown;
         stateMachine = new DefaultStateMachine<>(this, EnemyState.IDLE);
-        membership = new FormationMembership(game, body);
+        membership = new FormationMembership(game, body, this);
 
         MessageManager.getInstance().addListener(stateMachine, 1);
     }
 
-    public void setTarget(Structure target) {
+    public boolean setTarget(Structure target) {
         GridPoint2 position = getGridPosition();
-        this.target = target;
         DefaultGraphPath<MapNode> graphPath = game.map.findPath(
                 position.x,
                 position.y,
                 (int) target.getCenter().x,
                 (int) target.getCenter().y
         );
+        if (graphPath == null) {
+            return false;
+        }
         LinePath<Vector2> path = convertToLinePath(graphPath);
         if (followPathBehavior == null) {
             followPathBehavior = new FollowPath<>(this, path, 0.5f)
@@ -62,9 +65,24 @@ public class EnemyAgent extends Agent {
         } else {
             followPathBehavior.setPath(path);
         }
+        this.target = target;
+        return true;
     }
 
-    public void followPath() {
+    public boolean canJoinFormation() {
+        return stateMachine.getCurrentState().equals(EnemyState.IDLE) ||
+                stateMachine.getCurrentState().equals(EnemyState.MOVING);
+    }
+
+    public FormationMembership getMembership() {
+        return membership;
+    }
+
+    private void followFormation() {
+        membership.update();
+    }
+
+    private void followPath() {
         followPathBehavior.calculateSteering(steeringOutput);
         applySteering(steeringOutput);
     }
@@ -99,14 +117,17 @@ public class EnemyAgent extends Agent {
         scheduler.start();
     }
 
-    @Override
     public void update(float delta) {
         if (scheduler != null && scheduler.isRunning()) {
             scheduler.update(delta);
         }
 
-        super.update(delta);
+        super.update();
         stateMachine.update();
+    }
+
+    public Telegraph getTelegraph() {
+        return stateMachine;
     }
 
     /*
@@ -119,22 +140,11 @@ public class EnemyAgent extends Agent {
             @Override
             public void update(EnemyAgent entity) {
                 // find the closest structure and the path to it
-                Array<Structure> structures = entity.game.map.getStructures();
-                Vector2 position = entity.getPosition();
-
-                Structure target = null;
-                float closest = Float.MAX_VALUE;
-                for (Structure s : structures) {
-                    Vector2 sPos = s.getCenter();
-                    float dist = Vector2.dst(position.x, position.y, sPos.x, sPos.y);
-                    if (dist < closest) {
-                        closest = dist;
-                        target = s;
-                    }
-                }
+                Structure target = EnemiesManager.getClosestStructure(entity.game, entity.getPosition());
                 if (target != null) {
-                    entity.setTarget(target);
-                    entity.stateMachine.changeState(MOVING);
+                    if (entity.setTarget(target)) {
+                        entity.stateMachine.changeState(MOVING);
+                    }
                 }
             }
         },
@@ -162,6 +172,23 @@ public class EnemyAgent extends Agent {
             }
         },
 
+        //TODO
+        AGGRO() {
+            @Override
+            public void update(EnemyAgent entity) {
+                if (entity.target != null && entity.target.isAlive()) {
+                    entity.followPath();
+                    // if reached the attacking range, go to attacking
+                    if (entity.targetWithinRange()) {
+                        entity.stateMachine.changeState(ATTACKING);
+                    }
+                } else {
+                    entity.target = null;
+                    entity.stateMachine.changeState(IDLE);
+                }
+            }
+        },
+
         ATTACKING() {
             @Override
             public void update(EnemyAgent entity) {
@@ -172,6 +199,13 @@ public class EnemyAgent extends Agent {
                     entity.stateMachine.changeState(IDLE);
                 }
             }
+        },
+
+        FOLLOW_FORMATION() {
+            @Override
+            public void update(EnemyAgent entity) {
+                entity.followFormation();
+            }
         };
 
         @Override
@@ -181,6 +215,7 @@ public class EnemyAgent extends Agent {
 
         @Override
         public void update(EnemyAgent entity) {
+            // TODO: go back to land if out of border
 
         }
 
@@ -191,7 +226,12 @@ public class EnemyAgent extends Agent {
 
         @Override
         public boolean onMessage(EnemyAgent entity, Telegram telegram) {
-            System.out.println("ding ding" + telegram);
+            if (telegram.message == MessageType.JOIN_FORMATION.ordinal()) {
+                entity.stateMachine.changeState(FOLLOW_FORMATION);
+            } else if (telegram.message == MessageType.BREAK_FORMATION.ordinal()) {
+                entity.setTarget((Structure) telegram.extraInfo);
+                entity.stateMachine.changeState(AGGRO);
+            }
             return false;
         }
     }

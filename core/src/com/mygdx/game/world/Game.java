@@ -18,7 +18,6 @@ import com.mygdx.game.audio.AudioManager;
 import com.mygdx.game.audio.NonSpatialSound;
 import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
-import com.mygdx.game.entities.enemies.RedCreep;
 import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.others.Entity;
 import com.mygdx.game.entities.others.HoveredTile;
@@ -44,7 +43,6 @@ public class Game implements Drawable, Updatable, Disposable {
     private final Array<Entity> entitiesRender = new Array<>();
     private final Array<Entity> entitiesUpdate = new Array<>();
     private final Array<Entity> entitiesToAdd = new Array<>();
-    private final Array<Enemy> enemies = new Array<>();
     private final MyContactListener contactListener;
     private final NonSpatialSound pauseSound;
     private final Music ambientMusic;
@@ -76,13 +74,8 @@ public class Game implements Drawable, Updatable, Disposable {
         ambientMusic.setVolume(0.4f);
         ambientMusic.play();
 
-        Debug.addButton("Spawn Enemy", () -> {
-            Enemy enemy = new RedCreep(this, new Vector2(1.5f, 1.5f));
-            addEntity(enemy);
-            enemies.add(enemy);
-        });
 
-        enemiesManager = new EnemiesManager();
+        enemiesManager = new EnemiesManager(this);
     }
 
     private void setContactListeners() {
@@ -118,8 +111,6 @@ public class Game implements Drawable, Updatable, Disposable {
                     Structure s = (Structure) entity;
                     Bounds bounds = s.getBounds();
                     map.removeStructure(s, bounds.x, bounds.y, bounds.width, bounds.height);
-                } else if (entity instanceof Enemy) {
-                    enemies.removeValue((Enemy) entity, true);
                 }
                 entity.dispose();
                 itr.remove();
@@ -230,7 +221,7 @@ public class Game implements Drawable, Updatable, Disposable {
     }
 
     public Array<Enemy> getEnemies() {
-        return enemies;
+        return enemiesManager.getEnemies();
     }
 
     @Override

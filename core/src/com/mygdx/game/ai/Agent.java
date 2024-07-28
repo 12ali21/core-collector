@@ -11,13 +11,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.Updatable;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
 
-public class Agent implements Steerable<Vector2>, Updatable {
+public class Agent implements Steerable<Vector2> {
     protected final Body body;
     protected final Game game;
     private final LookWhereYouAreGoing<Vector2> look;
@@ -39,11 +38,7 @@ public class Agent implements Steerable<Vector2>, Updatable {
                 .setDecelerationRadius(MathUtils.PI / 4f);
     }
 
-    @Override
-    public void update(float delta) {
-        Debug.log("Agent Speed", getLinearVelocity().len());
-        Debug.drawPoint("agent pos" + this, getPosition());
-
+    public void update() {
         // Update orientation and angular velocity
         look.calculateSteering(angularSteering);
         body.applyTorque(angularSteering.angular, true);
@@ -56,7 +51,7 @@ public class Agent implements Steerable<Vector2>, Updatable {
     protected LinePath<Vector2> convertToLinePath(GraphPath<MapNode> graphPath) {
         Array<Vector2> waypoints = new Array<>(graphPath.getCount());
         for (MapNode node : graphPath) {
-            waypoints.add(new Vector2(node.x, node.y));
+            waypoints.add(new Vector2(node.x + 0.5f, node.y + 0.5f));
         }
         return new LinePath<>(waypoints, true);
     }

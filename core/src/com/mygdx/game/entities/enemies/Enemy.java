@@ -33,4 +33,8 @@ public abstract class Enemy extends EntityObj {
         Vector2 pos = getCenter();
         health.setPosition(pos);
     }
+
+    public EnemyAgent getAgent() {
+        return agent;
+    }
 }

@@ -10,8 +10,8 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.ai.Agent;
+import com.mygdx.game.ai.EnemyAgent;
 import com.mygdx.game.ai.GameLocation;
-import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
@@ -21,13 +21,15 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
     private final Arrive<Vector2> arriveTarget;
     private final SteeringAcceleration<Vector2> steering = new SteeringAcceleration<>(new Vector2());
     private final GameLocation slotLocation;
+    private final EnemyAgent owner;
     private boolean onPath = false;
     private GridPoint2 lastPathTarget;
     private FollowPath<Vector2, LinePath.LinePathParam> followPath;
 
 
-    public FormationMembership(Game game, Body body) {
+    public FormationMembership(Game game, Body body, EnemyAgent owner) {
         super(game, body);
+        this.owner = owner;
         this.slotLocation = new GameLocation();
 
         arriveTarget = new Arrive<>(this, this.getTargetLocation())
@@ -51,8 +53,8 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
     }
 
     @Override
-    public void update(float delta) {
-        super.update(delta);
+    public void update() {
+        super.update();
 
         Vector2 tmp = getPosition();
         GridPoint2 curPoint = new GridPoint2((int) tmp.x, (int) tmp.y);
@@ -81,7 +83,7 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
         } else { // follow the path
             followPath.calculateSteering(steering);
         }
-        Debug.log(this + "path", curPoint + " " + onPath + ": " + lastPathTarget);
+//        Debug.log(this + "path", curPoint + " " + onPath + ": " + lastPathTarget);
 
         body.applyForceToCenter(steering.linear, true);
 
@@ -109,5 +111,9 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
     @Override
     public Location<Vector2> getTargetLocation() {
         return slotLocation;
+    }
+
+    public EnemyAgent getOwner() {
+        return owner;
     }
 }
