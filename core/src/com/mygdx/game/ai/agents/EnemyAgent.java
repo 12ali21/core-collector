@@ -1,4 +1,4 @@
-package com.mygdx.game.ai;
+package com.mygdx.game.ai.agents;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
@@ -15,6 +15,8 @@ import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.mygdx.game.ai.GameLocation;
+import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.ai.formation.FormationMembership;
 import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;

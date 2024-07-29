@@ -1,4 +1,4 @@
-package com.mygdx.game.ai;
+package com.mygdx.game.ai.agents;
 
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
@@ -8,11 +8,13 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.mygdx.game.ai.GameLocation;
+import com.mygdx.game.ai.LocationUtils;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 
 
-public class Agent implements Steerable<Vector2> {
+public abstract class Agent implements Steerable<Vector2> {
     protected final Body body;
     protected final Game game;
     private final LookWhereYouAreGoing<Vector2> look;
