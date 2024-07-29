@@ -16,6 +16,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.ai.formation.FormationMembership;
 import com.mygdx.game.entities.enemies.EnemiesManager;
+import com.mygdx.game.entities.enemies.Enemy;
+import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
@@ -24,19 +26,20 @@ import com.mygdx.game.world.map.MapNode;
 public class EnemyAgent extends Agent {
     private final StateMachine<EnemyAgent, EnemyState> stateMachine;
     private final FormationMembership membership;
+    private final Enemy owner;
     private final float attackingRange;
     private final float damage;
     private final float damageCooldown;
     private final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<>(new Vector2());
-    float maxSpeedHolder = 0;
-    Scheduler scheduler;
+    private Scheduler scheduler;
     private FollowPath<Vector2, LinePath.LinePathParam> followPathBehavior;
     private Structure target;
     private float timer = 0;
     private boolean staggered;
 
-    public EnemyAgent(Game game, Body body, float attackingRange, float damage, float damageCooldown) {
+    public EnemyAgent(Game game, Enemy owner, Body body, float attackingRange, float damage, float damageCooldown) {
         super(game, body);
+        this.owner = owner;
         this.attackingRange = attackingRange;
         this.damage = damage;
         this.damageCooldown = damageCooldown;
@@ -226,11 +229,18 @@ public class EnemyAgent extends Agent {
 
         @Override
         public boolean onMessage(EnemyAgent entity, Telegram telegram) {
-            if (telegram.message == MessageType.JOIN_FORMATION.ordinal()) {
+            if (telegram.message == MessageType.JOIN_FORMATION.ordinal()) { // Joining Formation
                 entity.stateMachine.changeState(FOLLOW_FORMATION);
-            } else if (telegram.message == MessageType.BREAK_FORMATION.ordinal()) {
+            } else if (telegram.message == MessageType.BREAK_FORMATION.ordinal()) { // Breaking Formation
                 entity.setTarget((Structure) telegram.extraInfo);
                 entity.stateMachine.changeState(AGGRO);
+            } else if (telegram.message == MessageType.DAMAGE.ordinal()) { // Taking Damage
+                Bullet bullet = (Bullet) telegram.extraInfo;
+                entity.stagger(0.3f);
+                entity.owner.damage(bullet.getDamage());
+                if (entity.stateMachine.getCurrentState() == FOLLOW_FORMATION) {
+                    entity.membership.requestFormationBreak(bullet.getOwner());
+                }
             }
             return false;
         }

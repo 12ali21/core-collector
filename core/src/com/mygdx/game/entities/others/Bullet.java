@@ -1,11 +1,13 @@
 package com.mygdx.game.entities.others;
 
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.entities.enemies.Enemy;
-import com.mygdx.game.entities.enemies.RedCreep;
+import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
@@ -17,9 +19,11 @@ public class Bullet extends EntityObj {
     private final float damage = 10f;
     private final float lifetime = 2f;
     private final Scheduler destroyScheduler;
+    private final Structure owner;
 
-    public Bullet(Game game, Vector2 position, float direction, float speed) {
+    public Bullet(Game game, Structure owner, float direction, float speed, Vector2 position) {
         super(game);
+        this.owner = owner;
 
         Texture t = TextureAssets.get(TextureAssets.BULLET_TEXTURE);
         sprite = new Sprite(t);
@@ -51,7 +55,7 @@ public class Bullet extends EntityObj {
             bullet = (Bullet) userDataA;
             if (userDataB instanceof Enemy) {
                 enemy = (Enemy) userDataB;
-            } else if (userDataB.equals(MapManager.CellBodyType.WALL)) {
+            } else if (userDataB.equals(MapManager.CellBodyType.WALL)) { //collision with wall
                 bullet.kill();
                 return true;
             }
@@ -59,16 +63,19 @@ public class Bullet extends EntityObj {
             bullet = (Bullet) userDataB;
             if (userDataA instanceof Enemy) {
                 enemy = (Enemy) userDataA;
-            } else if (userDataA.equals(MapManager.CellBodyType.WALL)) {
+            } else if (userDataA.equals(MapManager.CellBodyType.WALL)) { //collision with wall
                 bullet.kill();
                 return true;
             }
         }
         if (bullet != null && enemy != null) {
+            MessageManager.getInstance().dispatchMessage(
+                    null,
+                    enemy.getAgent().getTelegraph(),
+                    MessageType.DAMAGE.ordinal(),
+                    bullet
+            );
             bullet.kill();
-            if (enemy instanceof RedCreep)
-                ((RedCreep) enemy).stagger(0.3f); // Slow down the enemy for 0.3 second
-            enemy.getHealth().damage(bullet.getDamage());
             return true;
         }
         return false;
@@ -111,6 +118,10 @@ public class Bullet extends EntityObj {
 
     public float getDamage() {
         return damage;
+    }
+
+    public Structure getOwner() {
+        return owner;
     }
 
     @Override

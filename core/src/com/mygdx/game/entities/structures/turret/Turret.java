@@ -146,7 +146,7 @@ public class Turret extends Structure {
     }
 
     private void fire() {
-        Bullet bullet = new Bullet(game, getFiringPosition(), headRotation, bulletSpeed);
+        Bullet bullet = new Bullet(game, this, headRotation, bulletSpeed, getFiringPosition());
         shootSound.play();
         game.addEntity(bullet);
         recoil.fire();

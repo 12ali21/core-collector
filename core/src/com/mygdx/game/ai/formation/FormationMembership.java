@@ -1,5 +1,7 @@
 package com.mygdx.game.ai.formation;
 
+import com.badlogic.gdx.ai.msg.MessageManager;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.Arrive;
@@ -12,6 +14,8 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.ai.Agent;
 import com.mygdx.game.ai.EnemyAgent;
 import com.mygdx.game.ai.GameLocation;
+import com.mygdx.game.ai.MessageType;
+import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
@@ -25,6 +29,7 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
     private boolean onPath = false;
     private GridPoint2 lastPathTarget;
     private FollowPath<Vector2, LinePath.LinePathParam> followPath;
+    private Telegraph formationTelegraph;
 
 
     public FormationMembership(Game game, Body body, EnemyAgent owner) {
@@ -115,5 +120,18 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
 
     public EnemyAgent getOwner() {
         return owner;
+    }
+
+    public void registerTelegraph(Telegraph formationManager) {
+        formationTelegraph = formationManager;
+    }
+
+    public void requestFormationBreak(Structure owner) {
+        MessageManager.getInstance().dispatchMessage(
+                null,
+                formationTelegraph,
+                MessageType.BREAK_FORMATION.ordinal(),
+                owner
+        );
     }
 }

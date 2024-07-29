@@ -37,4 +37,8 @@ public abstract class Enemy extends EntityObj {
     public EnemyAgent getAgent() {
         return agent;
     }
+
+    public void damage(float amount) {
+        health.damage(amount);
+    }
 }

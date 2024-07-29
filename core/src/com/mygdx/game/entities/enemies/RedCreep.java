@@ -28,7 +28,7 @@ public class RedCreep extends Enemy {
         health.setOffset(new Vector2(0, -0.5f));
 
         this.body = makeBody(position);
-        this.agent = new EnemyAgent(game, body, ATTACKING_RANGE, DAMAGE, DAMAGE_COOLDOWN);
+        this.agent = new EnemyAgent(game, this, body, ATTACKING_RANGE, DAMAGE, DAMAGE_COOLDOWN);
 
         movementSpeed = 2;
     }

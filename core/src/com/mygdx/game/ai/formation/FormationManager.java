@@ -2,6 +2,8 @@ package com.mygdx.game.ai.formation;
 
 import com.badlogic.gdx.ai.fma.*;
 import com.badlogic.gdx.ai.msg.MessageManager;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
@@ -14,12 +16,12 @@ import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
 
 
-public class FormationManager implements Updatable {
+public class FormationManager implements Updatable, Telegraph {
     private final Game game;
     private final Formation<Vector2> formation;
     private final FormationAnchor anchor;
     private final Array<FormationMembership> members = new Array<>();
-    private final Structure target;
+    private Structure target;
     private boolean isValid = true;
 
 
@@ -36,6 +38,7 @@ public class FormationManager implements Updatable {
     public void addMember(FormationMembership membership) {
         if (!isValid)
             throw new IllegalStateException("This formation doesn't exist");
+        membership.registerTelegraph(this);
         members.add(membership);
         formation.addMember(membership);
     }
@@ -87,5 +90,15 @@ public class FormationManager implements Updatable {
 
     public void dispose() {
         isValid = false;
+    }
+
+    @Override
+    public boolean handleMessage(Telegram msg) {
+        if (msg.message == MessageType.BREAK_FORMATION.ordinal()) {
+            target = (Structure) msg.extraInfo;
+            breakFormation();
+            return true;
+        }
+        return false;
     }
 }
