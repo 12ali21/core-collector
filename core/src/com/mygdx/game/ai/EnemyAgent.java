@@ -4,12 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.fsm.StateMachine;
-import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
+import com.badlogic.gdx.ai.steer.behaviors.Arrive;
 import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
+import com.badlogic.gdx.ai.steer.limiters.LinearLimiter;
 import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
@@ -19,9 +20,13 @@ import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Scheduler;
+import com.mygdx.game.utils.Utils;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
+
+import static com.mygdx.game.utils.Utils.convertToLinePath;
 
 public class EnemyAgent extends Agent {
     private final StateMachine<EnemyAgent, EnemyState> stateMachine;
@@ -31,6 +36,10 @@ public class EnemyAgent extends Agent {
     private final float damage;
     private final float damageCooldown;
     private final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<>(new Vector2());
+    private final LinearLimiter walkLimiter;
+    private final LinearLimiter runLimiter;
+    private final Arrive<Vector2> arriveTarget;
+    private LinearLimiter currentLimiter;
     private Scheduler scheduler;
     private FollowPath<Vector2, LinePath.LinePathParam> followPathBehavior;
     private Structure target;
@@ -46,10 +55,15 @@ public class EnemyAgent extends Agent {
         stateMachine = new DefaultStateMachine<>(this, EnemyState.IDLE);
         membership = new FormationMembership(game, body, this);
 
-        MessageManager.getInstance().addListener(stateMachine, 1);
+        walkLimiter = new LinearLimiter(getMaxLinearAcceleration(), getMaxLinearSpeed());
+        runLimiter = new LinearLimiter(getMaxLinearAcceleration() * 2,
+                getMaxLinearSpeed() * 2);
+        currentLimiter = walkLimiter;
+
+        arriveTarget = new Arrive<>(this);
     }
 
-    public boolean setTarget(Structure target) {
+    public boolean setTarget(Structure target) throws Utils.SingleNodePathException {
         GridPoint2 position = getGridPosition();
         DefaultGraphPath<MapNode> graphPath = game.map.findPath(
                 position.x,
@@ -64,9 +78,11 @@ public class EnemyAgent extends Agent {
         if (followPathBehavior == null) {
             followPathBehavior = new FollowPath<>(this, path, 0.5f)
                     .setDecelerationRadius(1f)
-                    .setTimeToTarget(0.1f);
+                    .setTimeToTarget(0.1f)
+                    .setLimiter(currentLimiter);
         } else {
-            followPathBehavior.setPath(path);
+            followPathBehavior.setPath(path)
+                    .setLimiter(currentLimiter);
         }
         this.target = target;
         return true;
@@ -106,12 +122,16 @@ public class EnemyAgent extends Agent {
     }
 
     private void attackTarget() {
-        float delta = Gdx.graphics.getDeltaTime();
-        timer -= delta;
-        if (timer < 0) {
-            target.getHealth().damage(damage);
-            timer = damageCooldown;
+        if (targetWithinRange()) {
+            float delta = Gdx.graphics.getDeltaTime();
+            timer -= delta;
+            if (timer < 0) {
+                target.getHealth().damage(damage);
+                timer = damageCooldown;
+            }
         }
+        arriveTarget.calculateSteering(steeringOutput);
+        applySteering(steeringOutput);
     }
 
     public void stagger(float time) {
@@ -133,6 +153,20 @@ public class EnemyAgent extends Agent {
         return stateMachine;
     }
 
+    private void walk() {
+        currentLimiter = walkLimiter;
+        if (followPathBehavior != null) {
+            followPathBehavior.setLimiter(currentLimiter);
+        }
+    }
+
+    private void run() {
+        currentLimiter = runLimiter;
+        if (followPathBehavior != null) {
+            followPathBehavior.setLimiter(currentLimiter);
+        }
+    }
+
     /*
      * ------------- STATES -------------
      */
@@ -145,8 +179,12 @@ public class EnemyAgent extends Agent {
                 // find the closest structure and the path to it
                 Structure target = EnemiesManager.getClosestStructure(entity.game, entity.getPosition());
                 if (target != null) {
-                    if (entity.setTarget(target)) {
-                        entity.stateMachine.changeState(MOVING);
+                    try {
+                        if (entity.setTarget(target)) {
+                            entity.stateMachine.changeState(MOVING);
+                        }
+                    } catch (Utils.SingleNodePathException e) { // already there
+                        entity.stateMachine.changeState(ATTACKING);
                     }
                 }
             }
@@ -155,28 +193,37 @@ public class EnemyAgent extends Agent {
         // move towards the found target
         MOVING() {
             @Override
+            public void enter(EnemyAgent entity) {
+                entity.walk();
+            }
+
+            @Override
             public void update(EnemyAgent entity) {
                 // if the target dies while moving, go back to idle
                 if (entity.target != null && entity.target.isAlive()) {
-                    entity.followPath();
-                    // if reached the attacking range, go to attacking
-                    if (entity.targetWithinRange()) {
-                        entity.stateMachine.changeState(ATTACKING);
+                    if (entity.getPosition().dst(entity.target.getCenter()) < Constants.AGGRO_RANGE) {
+                        entity.stateMachine.changeState(AGGRO);
+                    } else {
+                        entity.followPath();
+                        // if reached the attacking range, go to attacking
+                        if (entity.targetWithinRange()) {
+                            entity.stateMachine.changeState(ATTACKING);
+                        }
                     }
                 } else {
                     entity.target = null;
                     entity.stateMachine.changeState(IDLE);
                 }
             }
-
-            @Override
-            public void exit(EnemyAgent entity) {
-
-            }
         },
 
         //TODO
         AGGRO() {
+            @Override
+            public void enter(EnemyAgent entity) {
+                entity.run();
+            }
+
             @Override
             public void update(EnemyAgent entity) {
                 if (entity.target != null && entity.target.isAlive()) {
@@ -193,6 +240,11 @@ public class EnemyAgent extends Agent {
         },
 
         ATTACKING() {
+            @Override
+            public void enter(EnemyAgent entity) {
+                entity.arriveTarget.setTarget(new GameLocation(entity.target.getCenter()));
+            }
+
             @Override
             public void update(EnemyAgent entity) {
                 if (entity.target.isAlive()) {
@@ -232,7 +284,11 @@ public class EnemyAgent extends Agent {
             if (telegram.message == MessageType.JOIN_FORMATION.ordinal()) { // Joining Formation
                 entity.stateMachine.changeState(FOLLOW_FORMATION);
             } else if (telegram.message == MessageType.BREAK_FORMATION.ordinal()) { // Breaking Formation
-                entity.setTarget((Structure) telegram.extraInfo);
+                try {
+                    entity.setTarget((Structure) telegram.extraInfo);
+                } catch (Utils.SingleNodePathException e) {
+                    entity.stateMachine.changeState(ATTACKING);
+                }
                 entity.stateMachine.changeState(AGGRO);
             } else if (telegram.message == MessageType.DAMAGE.ordinal()) { // Taking Damage
                 Bullet bullet = (Bullet) telegram.extraInfo;

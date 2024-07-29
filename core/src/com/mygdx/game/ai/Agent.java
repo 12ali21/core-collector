@@ -1,19 +1,15 @@
 package com.mygdx.game.ai;
 
-import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.LookWhereYouAreGoing;
-import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
-import com.mygdx.game.world.map.MapNode;
 
 
 public class Agent implements Steerable<Vector2> {
@@ -46,14 +42,6 @@ public class Agent implements Steerable<Vector2> {
         Debug.drawLine("agent vel", getPosition(), getPosition().cpy().add(getLinearVelocity()));
         Vector2 v = new Vector2();
         Debug.drawLine("agent orientation", getPosition(), angleToVector(v, getOrientation()).add(getPosition()));
-    }
-
-    protected LinePath<Vector2> convertToLinePath(GraphPath<MapNode> graphPath) {
-        Array<Vector2> waypoints = new Array<>(graphPath.getCount());
-        for (MapNode node : graphPath) {
-            waypoints.add(new Vector2(node.x + 0.5f, node.y + 0.5f));
-        }
-        return new LinePath<>(waypoints, true);
     }
 
     @Override

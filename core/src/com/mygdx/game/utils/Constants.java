@@ -13,4 +13,5 @@ public class Constants {
     public static final float MAKE_FORMATION_RANGE = 5f;
     public static final int MIN_FORMATION_SIZE = 4;
     public static final float BREAK_FORMATION_RANGE = 5f;
+    public static final float AGGRO_RANGE = BREAK_FORMATION_RANGE;
 }

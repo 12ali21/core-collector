@@ -18,9 +18,9 @@ import com.mygdx.game.world.Game;
 
 public class FormationManager implements Updatable, Telegraph {
     private final Game game;
-    private final Formation<Vector2> formation;
     private final FormationAnchor anchor;
     private final Array<FormationMembership> members = new Array<>();
+    private Formation<Vector2> formation;
     private Structure target;
     private boolean isValid = true;
 
@@ -28,11 +28,14 @@ public class FormationManager implements Updatable, Telegraph {
     public FormationManager(Game game, Vector2 start, Structure target) {
         this.game = game;
         this.target = target;
-        anchor = new FormationAnchor(game, start, new GridPoint2((int) target.getCenter().x, (int) target.getCenter().y));
-
-        FormationPattern<Vector2> pattern = new SquareFormationPattern();
-        FormationMotionModerator<Vector2> motionModerator = new AnchorModerator(members);
-        formation = new Formation<>(anchor, pattern, new FreeSlotAssignmentStrategy<>(), motionModerator);
+        anchor = new FormationAnchor(game, this, start, new GridPoint2((int) target.getCenter().x, (int) target.getCenter().y));
+        if (!anchor.makePath()) {
+            breakFormation();
+        } else {
+            FormationPattern<Vector2> pattern = new SquareFormationPattern();
+            FormationMotionModerator<Vector2> motionModerator = new AnchorModerator(members);
+            formation = new Formation<>(anchor, pattern, new FreeSlotAssignmentStrategy<>(), motionModerator);
+        }
     }
 
     public void addMember(FormationMembership membership) {

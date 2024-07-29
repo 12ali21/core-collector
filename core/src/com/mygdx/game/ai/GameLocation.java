@@ -8,7 +8,11 @@ public class GameLocation implements Location<Vector2> {
     float orientation;
 
     public GameLocation() {
-        this.position = new Vector2();
+        this(new Vector2());
+    }
+
+    public GameLocation(Vector2 position) {
+        this.position = position;
         this.orientation = 0;
     }
 

@@ -58,7 +58,12 @@ public class EnemiesManager implements Updatable {
 
     private void checkEnemies() {
         Vector2 v = new Vector2();
-        for (FormationManager formation : formations) {
+        for (Array.ArrayIterator<FormationManager> iterator = formations.iterator(); iterator.hasNext(); ) {
+            FormationManager formation = iterator.next();
+            if (!formation.isValid()) {
+                iterator.remove();
+                continue;
+            }
             v.set(formation.getPosition());
             for (Enemy candidate : enemies) {
                 if (candidate.getAgent().canJoinFormation()) {

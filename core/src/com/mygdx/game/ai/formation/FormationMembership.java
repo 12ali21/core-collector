@@ -16,6 +16,7 @@ import com.mygdx.game.ai.EnemyAgent;
 import com.mygdx.game.ai.GameLocation;
 import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Utils;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
@@ -79,37 +80,25 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
             onPath = true;
             lastPathTarget = targetPoint;
             if (followPath == null) {
-                followPath = new FollowPath<>(this, convertToLinePath(graphPath))
-                        .setPathOffset(0.5f)
-                        .setTimeToTarget(0.25f);
+                try {
+                    followPath = new FollowPath<>(this, Utils.convertToLinePath(graphPath))
+                            .setPathOffset(0.5f)
+                            .setTimeToTarget(0.25f);
+                } catch (Utils.SingleNodePathException e) {
+                    // is already handled in this method
+                }
             } else {
-                followPath.setPath(convertToLinePath(graphPath));
+                try {
+                    followPath.setPath(Utils.convertToLinePath(graphPath));
+                } catch (Utils.SingleNodePathException e) {
+                    // is already handled in this method
+                }
             }
         } else { // follow the path
             followPath.calculateSteering(steering);
         }
-//        Debug.log(this + "path", curPoint + " " + onPath + ": " + lastPathTarget);
 
         body.applyForceToCenter(steering.linear, true);
-
-
-//        steering.setZero();
-//        obstacleAvoidance.calculateSteering(steering);
-////        System.out.println(steering.linear);
-//
-//        if (!steering.linear.isZero(EPSILON)) {
-//            Vector2 force = steering.linear.cpy();
-//            steering.setZero();
-//            force.mulAdd(steering.linear, 0.5f);
-//            body.applyForceToCenter(force, true);
-//        } else {
-//            steering.setZero();
-//            arriveSB.calculateSteering(steering);
-//            if (!steering.linear.isZero(EPSILON)) {
-//                body.applyForceToCenter(steering.linear, true);
-////            Debug.log("Steering linear" + this, steering.linear);
-//            }
-//        }
 
     }
 

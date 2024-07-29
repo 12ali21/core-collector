@@ -10,43 +10,50 @@ import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.ai.GameLocation;
 import com.mygdx.game.ai.LocationUtils;
 import com.mygdx.game.utils.Debug;
+import com.mygdx.game.utils.Utils;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
 public class FormationAnchor extends SteerableAdapter<Vector2> implements Updatable {
+    private final Game game;
+    private final FormationManager owner;
     private final Vector2 position = new Vector2();
     private final Vector2 linearVelocity = new Vector2();
     private final SteeringAcceleration<Vector2> steering = new SteeringAcceleration<>(new Vector2());
     private final ReachOrientation<Vector2> reachOrientation;
     private final Vector2 target;
-    private final FollowPath<Vector2, LinePath.LinePathParam> followPath;
+    private FollowPath<Vector2, LinePath.LinePathParam> followPath;
     private float maxLinearSpeed = 2f;
     private float maxLinearAcceleration = 2f;
     private float orientation;
 
-    public FormationAnchor(Game game, Vector2 start, GridPoint2 target) {
+    public FormationAnchor(Game game, FormationManager owner, Vector2 start, GridPoint2 target) {
+        this.game = game;
+        this.owner = owner;
         this.target = new Vector2(target.x, target.y);
         reachOrientation = new ReachOrientation<>(this, new GameLocation())
                 .setTimeToTarget(0.1f)
                 .setDecelerationRadius(MathUtils.PI / 4f);
         this.position.set(start);
+    }
 
-
-        DefaultGraphPath<MapNode> graphPath = game.map.findPath((int) start.x, (int) start.y, target.x, target.y);
-        Array<Vector2> vertices = new Array<>();
-        for (MapNode node : graphPath) {
-            vertices.add(new Vector2(node.x + .5f, node.y + .5f));
+    public boolean makePath() {
+        DefaultGraphPath<MapNode> graphPath = game.map.findPath(
+                (int) position.x, (int) position.y, (int) target.x, (int) target.y);
+        LinePath<Vector2> path;
+        try {
+            path = Utils.convertToLinePath(graphPath);
+            followPath = new FollowPath<>(this, path, 3f);
+            followPath.setPredictionTime(0);
+            followPath.setDecelerationRadius(.5f);
+            return true;
+        } catch (Utils.SingleNodePathException e) {
+            return false;
         }
-        LinePath<Vector2> path = new LinePath<>(vertices, true);
-
-        followPath = new FollowPath<>(this, path, 3f);
-        followPath.setPredictionTime(0);
-        followPath.setDecelerationRadius(.5f);
     }
 
     @Override
