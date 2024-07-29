@@ -44,6 +44,9 @@ public class FormationAnchor extends SteerableAdapter<Vector2> implements Updata
     public boolean makePath() {
         DefaultGraphPath<MapNode> graphPath = game.map.findPath(
                 (int) position.x, (int) position.y, (int) target.x, (int) target.y);
+        if (graphPath == null) {
+            return false;
+        }
         LinePath<Vector2> path;
         try {
             path = Utils.convertToLinePath(graphPath);

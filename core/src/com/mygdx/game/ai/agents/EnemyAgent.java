@@ -244,12 +244,16 @@ public class EnemyAgent extends Agent {
         ATTACKING() {
             @Override
             public void enter(EnemyAgent entity) {
-                entity.arriveTarget.setTarget(new GameLocation(entity.target.getCenter()));
+                if (entity.target == null) {
+                    entity.stateMachine.changeState(IDLE);
+                } else {
+                    entity.arriveTarget.setTarget(new GameLocation(entity.target.getCenter()));
+                }
             }
 
             @Override
             public void update(EnemyAgent entity) {
-                if (entity.target.isAlive()) {
+                if (entity.target != null && entity.target.isAlive()) {
                     entity.attackTarget();
                 } else {
                     entity.target = null;

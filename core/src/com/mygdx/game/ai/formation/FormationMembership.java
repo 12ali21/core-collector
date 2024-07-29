@@ -1,7 +1,6 @@
 package com.mygdx.game.ai.formation;
 
 import com.badlogic.gdx.ai.msg.MessageManager;
-import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.Arrive;
@@ -30,7 +29,7 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
     private boolean onPath = false;
     private GridPoint2 lastPathTarget;
     private FollowPath<Vector2, LinePath.LinePathParam> followPath;
-    private Telegraph formationTelegraph;
+    private FormationManager currentFormation;
 
 
     public FormationMembership(Game game, Body body, EnemyAgent owner) {
@@ -111,14 +110,18 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
         return owner;
     }
 
-    public void registerTelegraph(Telegraph formationManager) {
-        formationTelegraph = formationManager;
+    public void registerTelegraph(FormationManager formationManager) {
+        this.currentFormation = formationManager;
+    }
+
+    public boolean isFormationValid() {
+        return currentFormation.isValid();
     }
 
     public void requestFormationBreak(Structure owner) {
         MessageManager.getInstance().dispatchMessage(
                 null,
-                formationTelegraph,
+                currentFormation,
                 MessageType.BREAK_FORMATION.ordinal(),
                 owner
         );

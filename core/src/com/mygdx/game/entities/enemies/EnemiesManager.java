@@ -97,7 +97,10 @@ public class EnemiesManager implements Updatable {
             if (candidates.size >= Constants.MIN_FORMATION_SIZE) {
                 Vector2 startingPoint = candidates.get(0).getCenter(); //TODO
                 Structure target = getClosestStructure(game, startingPoint);
-                if (target == null) return; // if no target where found, stop making formations
+                // if no target where found or the target is close, stop making formations
+                if (target == null || target.getCenter().dst(startingPoint) < Constants.MAKE_FORMATION_RANGE) {
+                    return;
+                }
                 FormationManager formation = new FormationManager(game, startingPoint, target);
                 for (Enemy candidate : candidates) {
                     MessageManager.getInstance().dispatchMessage(
@@ -105,7 +108,11 @@ public class EnemiesManager implements Updatable {
                             candidate.getAgent().getTelegraph(),
                             MessageType.JOIN_FORMATION.ordinal()
                     );
-                    formation.addMember(candidate.getAgent().getMembership());
+                    try {
+                        formation.addMember(candidate.getAgent().getMembership());
+                    } catch (IllegalArgumentException e) {
+                        return; // the formation destroyed after creation
+                    }
                 }
                 formations.add(formation);
             }
