@@ -1,0 +1,207 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "maze.tmx",
+    "expandedProjectPaths": [
+        ".",
+        "tiles/Floors/Tiled Tsx",
+        "tiles",
+        "tiles/Walls/Tiled Tsx",
+        "tiles/Floors",
+        "tiles/Walls"
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "/home/ali/Documents/Code/Java/Libgdx/Tiled/Projects/core_collector/Tiles/Walls/Tiled Tsx/Wall-Concrete_03-64x64.tsx": {
+            "scaleInDock": 1
+        },
+        "maze.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 200.5,
+                "y": 130.5
+            }
+        },
+        "testing.tmx": {
+            "scale": 0.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 640,
+                "y": 639
+            }
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Dirt 1 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Dirt 2 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Metal 1 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Sand 1 64x64.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Sand 2 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Stone 1 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Stone 2 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Stone 3 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Wood 1 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor - Wood 2 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Dirt03-64x64.tsx": {
+            "scaleInDock": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Dirt_01-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Dirt_02-64x64.tsx": {
+            "scaleInDock": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Dirt_04-64x64.tsx": {
+            "scaleInDock": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Sand_01-64x64.tsx": {
+            "scaleInDock": 0.75,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Sand_02-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Sand_03-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Floors/Tiled Tsx/Floor-Sand_04-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall - Brick 1 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall - Brick 2 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall - Brick 3 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall - Concrete 1 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall - Dirt 1 64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Concrete_01-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Concrete_02-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Concrete_03-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Dirt_01-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Dirt_02-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Dirt_03-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Dirt_04-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Metal_01-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Metal_02-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Sand_01-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Sand_02-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Sand_03-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Sand_04-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/Walls/Tiled Tsx/Wall-Stone_01-64x64.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "map.height": 100,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 64,
+    "map.tileWidth": 64,
+    "map.width": 100,
+    "openFiles": [
+        "testing.tmx",
+        "tiles/Floors/Tiled Tsx/Floor-Dirt_01-64x64.tsx",
+        "maze.tmx"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "testing.tmx",
+        "tiles/Floors/Tiled Tsx/Floor-Dirt_01-64x64.tsx",
+        "maze.tmx",
+        "tiles/Walls/Tiled Tsx/Wall - Brick 1 64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall-Sand_04-64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall-Sand_03-64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall-Sand_02-64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall-Sand_01-64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall - Brick 2 64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall - Brick 3 64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall - Dirt 1 64x64.tsx",
+        "tiles/Walls/Tiled Tsx/Wall-Dirt_01-64x64.tsx"
+    ]
+}
