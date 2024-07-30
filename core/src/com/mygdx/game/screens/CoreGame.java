@@ -10,7 +10,9 @@ import com.mygdx.game.utils.Debug;
 import com.mygdx.game.utils.TextureAssets;
 
 public class CoreGame extends ApplicationAdapter {
-    Screen gameScreen;
+    private Screen gameScreen;
+    private Screen mainMenuScreen;
+    private Screen currentScreen;
     private AssetManager assets;
     private boolean loaded;
 
@@ -20,7 +22,13 @@ public class CoreGame extends ApplicationAdapter {
         TextureAssets.loadAll(assets);
         AudioAssets.loadAll(assets);
 
-        gameScreen = new GameScreen();
+        mainMenuScreen = new MainMenuScreen(() -> System.out.println("New game"), () -> {
+            gameScreen = new GameScreen();
+            gameScreen.show();
+            currentScreen = gameScreen;
+        });
+        currentScreen = mainMenuScreen;
+//        gameScreen = new GameScreen();
 //		gameScreen.show();
     }
 
@@ -29,23 +37,23 @@ public class CoreGame extends ApplicationAdapter {
         ScreenUtils.clear(0, 0, 0, 1);
         if (assets.update()) {
             if (!loaded) {
-                gameScreen.show();
+                currentScreen.show();
             }
             loaded = true;
-            gameScreen.render(Gdx.graphics.getDeltaTime());
+            currentScreen.render(Gdx.graphics.getDeltaTime());
             Debug.render(Gdx.graphics.getDeltaTime());
         }
     }
 
     @Override
     public void resize(int width, int height) {
-        gameScreen.resize(width, height);
+        currentScreen.resize(width, height);
         Debug.resize(width, height);
     }
 
     @Override
     public void dispose() {
-        gameScreen.dispose();
+        currentScreen.dispose();
         TextureAssets.unloadAll(assets);
         AudioAssets.unloadAll(assets);
         assets.dispose();
