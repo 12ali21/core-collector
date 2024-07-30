@@ -6,6 +6,7 @@ import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -24,6 +25,7 @@ import com.mygdx.game.entities.others.HoveredTile;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Ship;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.entities.structures.Structures;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.map.MapManager;
@@ -62,7 +64,8 @@ public class Game implements Drawable, Updatable, Disposable {
         this.batch = batch;
         this.camera = camera;
         map = new MapManager(this, "maze");
-        map.emptySpace((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f), 16, 16);
+        GridPoint2 mapCenter = new GridPoint2((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f));
+        map.emptySpace(mapCenter.x, mapCenter.y, 16, 16);
         audio = new AudioManager(camera);
 
         camera.position.set(map.getWidth() / 2f, map.getHeight() / 2f, 0);
@@ -78,8 +81,10 @@ public class Game implements Drawable, Updatable, Disposable {
         ambientMusic.setVolume(0.4f);
         ambientMusic.play();
 
-
         enemiesManager = new EnemiesManager(this);
+
+        ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
+        addStructure(ship);
     }
 
     private void setContactListeners() {

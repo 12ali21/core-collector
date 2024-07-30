@@ -37,10 +37,6 @@ public class StructureBuilder implements Updatable, Drawable {
                 inBuildMode = true;
                 GridPoint2 mousePos = getGridMousePosition();
                 currentStructure = Structures.burstTurret(game, mousePos.x, mousePos.y);
-            } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-                inBuildMode = true;
-                GridPoint2 mousePos = getGridMousePosition();
-                currentStructure = Structures.ship(game, mousePos.x, mousePos.y);
             }
         } else {
             GridPoint2 mousePos = getGridMousePosition();
