@@ -1,6 +1,7 @@
 package com.mygdx.game.ui;
 
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Disposable;
@@ -12,6 +13,8 @@ import com.mygdx.game.utils.TextureAssets;
 
 public class UIManager implements Drawable, Updatable, Disposable {
     private final Stage stage;
+    private final TextButton shipButton;
+    private final Button buildButton;
 
     public UIManager() {
         Skin skin = Constants.SKIN;
@@ -25,7 +28,7 @@ public class UIManager implements Drawable, Updatable, Disposable {
         stage.addActor(root);
 
         // Structure Builder Button
-        Button buildButton = new Button(skin);
+        buildButton = new Button(skin);
         root.add(buildButton)
                 .expand()
                 .bottom()
@@ -36,7 +39,7 @@ public class UIManager implements Drawable, Updatable, Disposable {
 
 
         // Ship Button
-        TextButton shipButton = new TextButton("START", skin);
+        shipButton = new TextButton(Constants.START, skin);
         root.add(shipButton)
                 .size(250f, 100f)
                 .expand()
@@ -44,6 +47,14 @@ public class UIManager implements Drawable, Updatable, Disposable {
                 .right();
         shipButton.getLabel().setFontScale(1.2f);
 
+    }
+
+    public void setShipButtonListener(EventListener listener) {
+        shipButton.addListener(listener);
+    }
+
+    public void setBuildButtonListener(EventListener listener) {
+        buildButton.addListener(listener);
     }
 
     @Override

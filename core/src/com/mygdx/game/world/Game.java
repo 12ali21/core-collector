@@ -59,12 +59,14 @@ public class Game implements Drawable, Updatable, Disposable {
 
     public Game(Batch batch, OrthographicCamera camera, UIManager ui) {
         this.world = new World(new Vector2(0, 0), true);
-        contactListener = new MyContactListener();
-        setContactListeners();
-
         this.debugRenderer = new Box2DDebugRenderer();
         this.batch = batch;
         this.camera = camera;
+        this.ui = ui;
+
+        contactListener = new MyContactListener();
+        setContactListeners();
+
         map = new MapManager(this, "maze");
         GridPoint2 mapCenter = new GridPoint2((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f));
         map.emptySpace(mapCenter.x, mapCenter.y, 16, 16);
@@ -88,7 +90,6 @@ public class Game implements Drawable, Updatable, Disposable {
         ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
         addStructure(ship);
 
-        this.ui = ui;
     }
 
     private void setContactListeners() {

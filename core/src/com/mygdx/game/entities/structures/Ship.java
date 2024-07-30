@@ -1,12 +1,57 @@
 package com.mygdx.game.entities.structures;
 
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.world.Game;
 
 public class Ship extends Structure {
 
+    private boolean isStarting = false;
+    private boolean started = false;
+    private Music startingSFX;
+
     public Ship(Builder builder) {
         super(builder);
+
+        game.ui.setShipButtonListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                TextButton button = (TextButton) actor;
+                if (button.getLabel().getText().toString().equals(Constants.START)) {
+                    button.setText(Constants.LAUNCH);
+                    start();
+                }
+            }
+        });
+    }
+
+    private void start() {
+        isStarting = true;
+        startingSFX = game.audio.newMusic(AudioAssets.SHIP_START);
+        startingSFX.play();
+    }
+
+    private void checkStarting() {
+        if (isStarting && !startingSFX.isPlaying()) { // finished starting
+            started = true;
+            isStarting = false;
+            Music music = game.audio.newMusic(AudioAssets.SHIP_MINE);
+            music.setLooping(true);
+            music.play();
+        }
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        checkStarting();
+        if (started) {
+            // TODO: do something
+        }
     }
 
     public static class Builder extends Structure.Builder {

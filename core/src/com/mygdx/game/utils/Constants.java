@@ -20,4 +20,6 @@ public class Constants {
     public static final float AGGRO_RANGE = BREAK_FORMATION_RANGE;
 
     public static final int SHIP_SIZE = 16;
+    public static final String START = "START";
+    public static final String LAUNCH = "LAUNCH";
 }
