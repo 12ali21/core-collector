@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.utils.Constants;
 
 public class MainMenuScreen extends ScreenAdapter {
 
@@ -24,7 +25,7 @@ public class MainMenuScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        skin = new Skin(Gdx.files.internal("ui/sgx-ui.json"));
+        skin = Constants.SKIN;
 
         stage = new Stage(new ScreenViewport());
         stage.setDebugAll(false);

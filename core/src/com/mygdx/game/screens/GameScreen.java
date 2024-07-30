@@ -6,6 +6,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.ui.UIManager;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.Game;
@@ -17,6 +18,7 @@ public class GameScreen extends ScreenAdapter {
     private ScreenInputProcessor inputProcessor;
     private InputMultiplexer inputMux;
     private Game game;
+    private UIManager ui;
 
     public GameScreen() {
     }
@@ -34,13 +36,15 @@ public class GameScreen extends ScreenAdapter {
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
 
-        game = new Game(batch, camera);
+        ui = new UIManager();
+        game = new Game(batch, camera, ui);
 
         // setup input processor
         inputProcessor = new ScreenInputProcessor();
         inputMux = new InputMultiplexer();
         inputMux.addProcessor(inputProcessor);
         inputMux.addProcessor(Debug.getStage());
+        inputMux.addProcessor(ui.getProcessor());
         Gdx.input.setInputProcessor(inputMux);
 
     }
@@ -69,6 +73,7 @@ public class GameScreen extends ScreenAdapter {
         camera.viewportWidth = Constants.VIEWPORT_SIZE;
         camera.viewportHeight = Constants.VIEWPORT_SIZE * height / width;
         camera.update();
+        if (ui != null) ui.resize(width, height);
     }
 
     @Override

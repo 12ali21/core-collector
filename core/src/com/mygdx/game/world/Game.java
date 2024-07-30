@@ -26,6 +26,7 @@ import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Ship;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.Structures;
+import com.mygdx.game.ui.UIManager;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.map.MapManager;
@@ -35,6 +36,7 @@ import java.util.Iterator;
 public class Game implements Drawable, Updatable, Disposable {
     public final MapManager map;
     public final AudioManager audio;
+    public final UIManager ui;
 
     private final World world;
     private final Batch batch;
@@ -55,7 +57,7 @@ public class Game implements Drawable, Updatable, Disposable {
 
     private Ship ship;
 
-    public Game(Batch batch, OrthographicCamera camera) {
+    public Game(Batch batch, OrthographicCamera camera, UIManager ui) {
         this.world = new World(new Vector2(0, 0), true);
         contactListener = new MyContactListener();
         setContactListeners();
@@ -85,6 +87,8 @@ public class Game implements Drawable, Updatable, Disposable {
 
         ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
         addStructure(ship);
+
+        this.ui = ui;
     }
 
     private void setContactListeners() {
@@ -128,6 +132,7 @@ public class Game implements Drawable, Updatable, Disposable {
 
         registerEntities();
         audio.update(delta);
+        ui.update(delta);
     }
 
     public Vector3 unproject(float x, float y) {
@@ -159,6 +164,7 @@ public class Game implements Drawable, Updatable, Disposable {
         if (Debug.isDebugging()) {
             debugRenderer.render(world, camera.combined);
         }
+        ui.render();
     }
 
     /**

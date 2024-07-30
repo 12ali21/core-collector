@@ -1,6 +1,10 @@
 package com.mygdx.game.utils;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+
 public class Constants {
+    public static final Skin SKIN = new Skin(Gdx.files.internal("ui/skin-ui.json"));
     public static final boolean DEBUG = true;
     public static final float VIEWPORT_SIZE = 50;
     public static final float ZOOM_LIMIT_LOW = 0.1f;
