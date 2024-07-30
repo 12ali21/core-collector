@@ -29,23 +29,22 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     private final TiledMap map;
     private final OrthogonalTiledMapRenderer renderer;
     private final Array<Structure> structures = new Array<>();
-
-    private final IndexedAStarPathFinder<MapNode> pathFinder;
-    private final Array<MapNode> nodesList = new Array<>();
-    private final MapNode[][] nodes;
     private final EuclideanHeuristic heuristic;
-
     private final float width;
     private final float height;
     private final float TILE_SIZE = 64f;
-
-
-    Texture groundTexture;
+    private final Texture groundTexture;
+    private final Body[][] wallBodies;
+    private final MapNode[][] nodes;
+    private final Array<MapNode> nodesList = new Array<>();
+    private final MapGenerator generator;
+    private IndexedAStarPathFinder<MapNode> pathFinder;
+    private int nodeIndex;
 
     public MapManager(Game game, String mapName) {
         this.game = game;
         // Load the map
-        MapGenerator generator = new MapGenerator(12345);
+        generator = new MapGenerator(12345);
 //        map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
         map = generator.generate(200, 200);
         float unitScale = 1 / TILE_SIZE;
@@ -59,12 +58,12 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         width = wallLayer.getWidth();
         height = wallLayer.getHeight();
 
-        createBodies(wallLayer);
         heuristic = new EuclideanHeuristic();
         nodes = new MapNode[wallLayer.getWidth()][wallLayer.getHeight()];
+        wallBodies = new Body[wallLayer.getWidth()][wallLayer.getHeight()];
+        createBodies(wallLayer);
         createGroundNodes(wallLayer);
         pathFinder = new IndexedAStarPathFinder<>(this, true);
-
 //
     }
 
@@ -84,6 +83,7 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
                     fixtureDef.shape = shape;
                     fixtureDef.restitution = 0f;
                     wallBody.createFixture(fixtureDef).setUserData(CellBodyType.WALL);
+                    wallBodies[x][y] = wallBody;
                 }
             }
         }
@@ -92,11 +92,11 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
 
     private void createGroundNodes(TiledMapTileLayer wallLayer) {
         // create the nodes
-        int index = 0;
+        nodeIndex = 0;
         for (int y = 0; y < wallLayer.getWidth(); y++) {
             for (int x = 0; x < wallLayer.getHeight(); x++) {
                 if (wallLayer.getCell(x, y) == null) {
-                    MapNode node = new MapNode(index++, x, y);
+                    MapNode node = new MapNode(nodeIndex++, x, y);
                     nodesList.add(node);
                     nodes[x][y] = node;
                 }
@@ -105,31 +105,70 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
 
         // create the connections between nodes
         for (MapNode node : nodesList) {
-            int x = node.x;
-            int y = node.y;
-
-            // Horizontal and vertical connections
-            addNodeNeighbour(x - 1, y, node, 1);
-            addNodeNeighbour(x + 1, y, node, 1);
-            addNodeNeighbour(x, y - 1, node, 1);
-            addNodeNeighbour(x, y + 1, node, 1);
-
-            // Diagonal connections if possible
-            if (isWithinBorder(x - 1, y - 1) && nodes[x - 1][y] != null && nodes[x][y - 1] != null)
-                addNodeNeighbour(x - 1, y - 1, node, 1.4f);
-            if (isWithinBorder(x + 1, y + 1) && nodes[x + 1][y] != null && nodes[x][y + 1] != null)
-                addNodeNeighbour(x + 1, y + 1, node, 1.4f);
-            if (isWithinBorder(x - 1, y + 1) && nodes[x - 1][y] != null && nodes[x][y + 1] != null)
-                addNodeNeighbour(x - 1, y + 1, node, 1.4f);
-            if (isWithinBorder(x + 1, y - 1) && nodes[x + 1][y] != null && nodes[x][y - 1] != null)
-                addNodeNeighbour(x + 1, y - 1, node, 1.4f);
+            addConnectionsFromNode(node.x, node.y);
         }
     }
 
-    public TiledMapTileLayer getWallLayer() {
-        return (TiledMapTileLayer) map.getLayers().get(WALL_LAYER);
+    /**
+     * Adds connections from the given node to its neighbours
+     *
+     * @param x the x coordinate of the node
+     * @param y the y coordinate of the node
+     */
+    private void addConnectionsFromNode(int x, int y) {
+        // Horizontal and vertical connections
+        addNodeNeighbour(x, y, x - 1, y, 1f);
+        addNodeNeighbour(x, y, x + 1, y, 1f);
+        addNodeNeighbour(x, y, x, y - 1, 1f);
+        addNodeNeighbour(x, y, x, y + 1, 1f);
+
+        // Diagonal connections if possible
+        if (isWithinBorder(x - 1, y - 1) && nodes[x - 1][y] != null && nodes[x][y - 1] != null)
+            addNodeNeighbour(x, y, x - 1, y - 1, 1.4f);
+        if (isWithinBorder(x + 1, y + 1) && nodes[x + 1][y] != null && nodes[x][y + 1] != null)
+            addNodeNeighbour(x, y, x + 1, y + 1, 1.4f);
+        if (isWithinBorder(x - 1, y + 1) && nodes[x - 1][y] != null && nodes[x][y + 1] != null)
+            addNodeNeighbour(x, y, x - 1, y + 1, 1.4f);
+        if (isWithinBorder(x + 1, y - 1) && nodes[x + 1][y] != null && nodes[x][y - 1] != null)
+            addNodeNeighbour(x, y, x + 1, y - 1, 1.4f);
     }
 
+    /**
+     * Adds connections from the neighbouring nodes to the given node
+     *
+     * @param x x-coordinate of the node
+     * @param y y-coordinate of the node
+     */
+    public void addConnectionsToNode(int x, int y) {
+        addNodeNeighbour(x - 1, y, x, y, 1f);
+        addNodeNeighbour(x + 1, y, x, y, 1f);
+        addNodeNeighbour(x, y - 1, x, y, 1f);
+        addNodeNeighbour(x, y + 1, x, y, 1f);
+
+        // Diagonal connections if possible
+        if (isWithinBorder(x, y) && nodes[x - 1][y] != null && nodes[x][y - 1] != null)
+            addNodeNeighbour(x - 1, y - 1, x, y, 1.4f);
+        if (isWithinBorder(x, y) && nodes[x + 1][y] != null && nodes[x][y + 1] != null)
+            addNodeNeighbour(x + 1, y + 1, x, y, 1.4f);
+        if (isWithinBorder(x, y) && nodes[x - 1][y] != null && nodes[x][y + 1] != null)
+            addNodeNeighbour(x - 1, y + 1, x, y, 1.4f);
+        if (isWithinBorder(x, y) && nodes[x + 1][y] != null && nodes[x][y - 1] != null)
+            addNodeNeighbour(x + 1, y - 1, x, y, 1.4f);
+    }
+
+    private void addNodeNeighbour(int nodeX, int nodeY, int neighborX, int neighborY, float cost) {
+        if (isWithinBoundary(nodeX, nodeY) && isWithinBoundary(neighborX, neighborY)) {
+            MapNode node = nodes[nodeX][nodeY];
+            MapNode neighbour = nodes[neighborX][neighborY];
+            if (node != null && neighbour != null) {
+                node.addConnection(neighbour, cost);
+            }
+        }
+    }
+
+    /**
+     * Checks if the given coordinates are within the map excluding the border
+     */
     private boolean isWithinBorder(int x, int y) {
         return x >= Constants.MAP_BORDER_LENGTH &&
                 x < nodes.length - Constants.MAP_BORDER_LENGTH &&
@@ -137,10 +176,16 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
                 y < nodes[0].length - Constants.MAP_BORDER_LENGTH;
     }
 
-    private boolean isNotWithinBoundary(int x, int y) {
-        return x < 0 || x >= nodes.length || y < 0 || y >= nodes[0].length;
+    /**
+     * Checks if the given coordinates are within the map
+     */
+    private boolean isWithinBoundary(int x, int y) {
+        return x >= 0 && x < nodes.length && y >= 0 && y < nodes[0].length;
     }
 
+    /**
+     * Checks if the given coordinates are occupied by a structure or a wall
+     */
     public boolean isTileOccupied(int x, int y) {
         if (!isWithinBorder(x, y)) {
             return true;
@@ -148,6 +193,12 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         return nodes[x][y] == null || nodes[x][y].hasStructure();
     }
 
+    /**
+     * Puts a new structure on the map with its width and height
+     *
+     * @param x the x coordinate of the bottom left corner of the structure
+     * @param y the y coordinate of the bottom left corner of the structure
+     */
     public void putNewStructure(Structure structure, int x, int y, int width, int height) {
         for (int i = x; i < x + width; i++) {
             for (int j = y; j < y + height; j++) {
@@ -157,6 +208,12 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         structures.add(structure);
     }
 
+    /**
+     * Removes a structure from the map with its width and height
+     *
+     * @param x the x coordinate of the bottom left corner of the structure
+     * @param y the y coordinate of the bottom left corner of the structure
+     */
     public void removeStructure(Structure structure, int x, int y, int width, int height) {
         for (int i = x; i < x + width; i++) {
             for (int j = y; j < y + height; j++) {
@@ -168,6 +225,39 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
 
     public Array<Structure> getStructures() {
         return structures;
+    }
+
+    public void emptySpace(int cX, int cY, int hWidth, int hHeight) {
+        TiledMapTileLayer wallLayer = getWallLayer();
+        Array<MapNode> newNodes = new Array<>();
+        for (int x = cX - hWidth; x < cX + hWidth; x++) {
+            for (int y = cY - hHeight; y < cY + hHeight; y++) {
+                // If the node is a wall node:
+                // 1.Convert it to a ground node
+                if (nodes[x][y] == null) {
+                    nodes[x][y] = new MapNode(nodeIndex++, x, y);
+                    nodesList.add(nodes[x][y]);
+                    newNodes.add(nodes[x][y]);
+                    // add connections to the new node
+                    addConnectionsToNode(x, y);
+                }
+                // 2.Destroy the wall body and remove the wall cell
+                if (wallBodies[x][y] != null) {
+                    game.getWorld().destroyBody(wallBodies[x][y]);
+                    wallBodies[x][y] = null;
+                }
+                wallLayer.setCell(x, y, null);
+            }
+        }
+
+        // To make sure the new nodes are connected to the rest of the map
+        for (MapNode node : newNodes) {
+            addConnectionsFromNode(node.x, node.y);
+        }
+        // Reassign the wall shapes
+        generator.assignTiles();
+        // Need to update the pathfinder with the new nodes
+        pathFinder = new IndexedAStarPathFinder<>(this, true);
     }
 
     //TODO: don't draw the whole ground, only the visible part
@@ -190,18 +280,8 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         batch.end();
     }
 
-    private void addNodeNeighbour(int x, int y, MapNode node, float cost) {
-        if (isNotWithinBoundary(x, y)) {
-            return;
-        }
-        MapNode neighbour = nodes[x][y];
-        if (neighbour != null) {
-            node.addConnection(neighbour, cost);
-        }
-    }
-
     public DefaultGraphPath<MapNode> findPath(int startX, int startY, int endX, int endY) {
-        if (isNotWithinBoundary(startX, startY) || isNotWithinBoundary(endX, endY)) {
+        if (!isWithinBoundary(startX, startY) || !isWithinBoundary(endX, endY)) {
             return null;
         }
         DefaultGraphPath<MapNode> path = new DefaultGraphPath<>();
@@ -211,6 +291,10 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
             return null;
         pathFinder.searchNodePath(startNode, endNode, heuristic, path);
         return path;
+    }
+
+    public TiledMapTileLayer getWallLayer() {
+        return (TiledMapTileLayer) map.getLayers().get(WALL_LAYER);
     }
 
     @Override
@@ -241,8 +325,9 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         return height;
     }
 
+
     public enum CellBodyType {
         WALL, STRUCTURE
-    }
 
+    }
 }

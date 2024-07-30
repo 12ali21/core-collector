@@ -70,6 +70,7 @@ public class MapGenerator {
     }
 
     public final long seed;
+    private final TextureRegion[][] mountain;
     TiledMapTileLayer wallLayer;
     private TiledMap map;
     private int width;
@@ -77,6 +78,8 @@ public class MapGenerator {
 
     public MapGenerator(long seed) {
         this.seed = seed;
+        Texture mountainWallTexture = TextureAssets.get(TextureAssets.DIRT_WALL_TEXTURE);
+        mountain = TextureRegion.split(mountainWallTexture, TILE_SIZE, TILE_SIZE);
     }
 
     public TiledMap generate(int width, int height) {
@@ -85,8 +88,6 @@ public class MapGenerator {
         this.width = width;
         this.height = height;
 
-        Texture mountainWallTexture = TextureAssets.get(TextureAssets.DIRT_WALL_TEXTURE);
-        TextureRegion[][] mountain = TextureRegion.split(mountainWallTexture, TILE_SIZE, TILE_SIZE);
         MapLayers layers = map.getLayers();
         wallLayer = new TiledMapTileLayer(width, height, TILE_SIZE, TILE_SIZE);
         wallLayer.setName(MapManager.WALL_LAYER);
@@ -103,15 +104,19 @@ public class MapGenerator {
                 }
             }
         }
+
+        assignTiles();
+        layers.add(wallLayer);
+        return map;
+    }
+
+    public void assignTiles() {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 TiledMapTileLayer.Cell cell = wallLayer.getCell(x, y);
                 if (cell != null) cell.setTile(getTile(mountain, x, y));
             }
         }
-
-        layers.add(wallLayer);
-        return map;
     }
 
     private boolean isWall(int x, int y) {

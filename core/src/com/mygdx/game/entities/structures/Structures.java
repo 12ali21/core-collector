@@ -1,11 +1,12 @@
-package com.mygdx.game.entities.structures.turret;
+package com.mygdx.game.entities.structures;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.entities.structures.turret.BurstTurret;
+import com.mygdx.game.entities.structures.turret.Turret;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
-public class Turrets {
+public class Structures {
     private static Structure.StructurePart makeHead(Game game, TextureAssets assets, int x, int y) {
         Sprite headSprite = new Sprite(TextureAssets.get(assets));
         headSprite.setSize(2, 2);
@@ -46,6 +47,14 @@ public class Turrets {
         builder.setFireRate(360);
         builder.setBounds(x, y);
         builder.setRangeRadius(20f);
+        return builder;
+    }
+
+    public static Ship.Builder ship(Game game, int x, int y) {
+        Sprite body = new Sprite(TextureAssets.get(TextureAssets.SHIP_TEXTURE));
+        Ship.Builder builder = new Ship.Builder(game);
+        builder.setMainPart(new Structure.StructurePart(game, body));
+        builder.setBounds(x, y);
         return builder;
     }
 }

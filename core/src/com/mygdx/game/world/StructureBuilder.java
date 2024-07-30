@@ -8,7 +8,7 @@ import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.entities.structures.turret.Turrets;
+import com.mygdx.game.entities.structures.Structures;
 
 public class StructureBuilder implements Updatable, Drawable {
     private final Game game;
@@ -32,11 +32,15 @@ public class StructureBuilder implements Updatable, Drawable {
             if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
                 inBuildMode = true;
                 GridPoint2 mousePos = getGridMousePosition();
-                currentStructure = Turrets.basicTurret(game, mousePos.x, mousePos.y);
+                currentStructure = Structures.basicTurret(game, mousePos.x, mousePos.y);
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
                 inBuildMode = true;
                 GridPoint2 mousePos = getGridMousePosition();
-                currentStructure = Turrets.burstTurret(game, mousePos.x, mousePos.y);
+                currentStructure = Structures.burstTurret(game, mousePos.x, mousePos.y);
+            } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
+                inBuildMode = true;
+                GridPoint2 mousePos = getGridMousePosition();
+                currentStructure = Structures.ship(game, mousePos.x, mousePos.y);
             }
         } else {
             GridPoint2 mousePos = getGridMousePosition();

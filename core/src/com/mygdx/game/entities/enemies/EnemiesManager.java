@@ -73,7 +73,11 @@ public class EnemiesManager implements Updatable {
                                 candidate.getAgent().getTelegraph(),
                                 MessageType.JOIN_FORMATION.ordinal()
                         );
-                        formation.addMember(candidate.getAgent().getMembership());
+                        try {
+                            formation.addMember(candidate.getAgent().getMembership());
+                        } catch (IllegalStateException e) {
+                            return; // the formation destroyed
+                        }
                     }
                 }
             }
@@ -110,7 +114,7 @@ public class EnemiesManager implements Updatable {
                     );
                     try {
                         formation.addMember(candidate.getAgent().getMembership());
-                    } catch (IllegalArgumentException e) {
+                    } catch (IllegalStateException e) {
                         return; // the formation destroyed after creation
                     }
                 }

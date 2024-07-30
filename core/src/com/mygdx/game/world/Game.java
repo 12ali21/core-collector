@@ -22,6 +22,7 @@ import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.others.Entity;
 import com.mygdx.game.entities.others.HoveredTile;
 import com.mygdx.game.entities.structures.Bounds;
+import com.mygdx.game.entities.structures.Ship;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Debug;
@@ -50,6 +51,8 @@ public class Game implements Drawable, Updatable, Disposable {
     private boolean isSorted = false;
     private boolean isPaused = false;
 
+    private Ship ship;
+
     public Game(Batch batch, OrthographicCamera camera) {
         this.world = new World(new Vector2(0, 0), true);
         contactListener = new MyContactListener();
@@ -59,6 +62,7 @@ public class Game implements Drawable, Updatable, Disposable {
         this.batch = batch;
         this.camera = camera;
         map = new MapManager(this, "maze");
+        map.emptySpace((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f), 16, 16);
         audio = new AudioManager(camera);
 
         camera.position.set(map.getWidth() / 2f, map.getHeight() / 2f, 0);
