@@ -1,9 +1,10 @@
 package com.mygdx.game.entities.structures;
 
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.mygdx.game.audio.SpatialMusic;
+import com.mygdx.game.audio.SpatialSoundLooping;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.world.Game;
@@ -12,7 +13,7 @@ public class Ship extends Structure {
 
     private boolean isStarting = false;
     private boolean started = false;
-    private Music startingSFX;
+    private SpatialMusic startingSFX;
 
     public Ship(Builder builder) {
         super(builder);
@@ -31,16 +32,18 @@ public class Ship extends Structure {
 
     private void start() {
         isStarting = true;
-        startingSFX = game.audio.newMusic(AudioAssets.SHIP_START);
-        startingSFX.play();
+        startingSFX = game.audio.newSpatialMusicSFX(AudioAssets.SHIP_START);
+        startingSFX.setPosition(getCenter());
+        startingSFX.getMusic().play();
     }
 
     private void checkStarting() {
-        if (isStarting && !startingSFX.isPlaying()) { // finished starting
+        if (isStarting && !startingSFX.getMusic().isPlaying()) { // finished starting
+            startingSFX.dispose();
             started = true;
             isStarting = false;
-            Music music = game.audio.newMusic(AudioAssets.SHIP_MINE);
-            music.setLooping(true);
+            SpatialSoundLooping music = game.audio.newLoopingSpatialSoundEffect(AudioAssets.SHIP_MINE);
+            music.setPosition(getCenter());
             music.play();
         }
     }

@@ -15,6 +15,7 @@ public class AudioManager implements Disposable {
     private final Vector2 cameraPosition = new Vector2();
     private final Array<SpatialSoundEffect> spatialSoundEffects = new Array<>();
     private final Array<NonSpatialSound> simpleSoundEffects = new Array<>();
+    private final Array<SpatialMusic> musicSoundEffects = new Array<>();
     private final Array<Music> musics = new Array<>();
     private float soundEffectsVolume = 1f;
     private float musicVolume = 1f;
@@ -58,6 +59,15 @@ public class AudioManager implements Disposable {
         return music;
     }
 
+    public SpatialMusic newSpatialMusicSFX(AudioAssets assets) {
+        Music music = loadMusic(assets);
+        SpatialMusic spatialMusic = new SpatialMusic(music);
+        spatialMusic.setGlobalVolume(soundEffectsVolume);
+        musics.add(music);
+        musicSoundEffects.add(spatialMusic);
+        return spatialMusic;
+    }
+
     public void update(float deltaTime) {
         cameraPosition.set(camera.position.x, camera.position.y);
         for (SpatialSoundEffect spatialSoundEffect : spatialSoundEffects) {
@@ -67,6 +77,16 @@ public class AudioManager implements Disposable {
                 spatialSoundEffect.update(deltaTime);
             } else {
                 spatialSoundEffects.removeValue(spatialSoundEffect, true);
+            }
+        }
+
+        for (SpatialMusic spatialMusic : musicSoundEffects) {
+            if (spatialMusic.isValid()) {
+                spatialMusic.setCameraPosition(cameraPosition);
+                spatialMusic.setCameraZoom(camera.zoom);
+                spatialMusic.update(deltaTime);
+            } else {
+                musicSoundEffects.removeValue(spatialMusic, true);
             }
         }
     }
@@ -86,6 +106,10 @@ public class AudioManager implements Disposable {
         for (Music music : musics) {
             music.dispose();
         }
+
+        for (SpatialMusic music : musicSoundEffects) {
+            music.dispose();
+        }
     }
 
     public void setSoundEffectsVolume(float globalVolume) {
@@ -96,6 +120,10 @@ public class AudioManager implements Disposable {
 
         for (SoundEffect soundEffect : simpleSoundEffects) {
             soundEffect.setGlobalVolume(globalVolume);
+        }
+
+        for (SpatialMusic music : musicSoundEffects) {
+            music.setGlobalVolume(globalVolume);
         }
     }
 

@@ -9,7 +9,7 @@ public enum AudioAssets {
     PAUSE_SOUND("audio/soundeffects/pause.wav", false),
     TURRET_ROTATE("audio/soundeffects/turret_rotate.wav", false),
     SHIP_START("audio/soundeffects/miner_start.wav", true),
-    SHIP_MINE("audio/soundeffects/miner_mine.wav", true),
+    SHIP_MINE("audio/soundeffects/miner_mine.wav", false),
     AMBIENT_MUSIC("audio/music/soft_wind.wav", true);
 
     private static AssetManager manager;
