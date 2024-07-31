@@ -1,6 +1,10 @@
 package com.mygdx.game.entities.enemies;
 
 import com.badlogic.gdx.ai.msg.MessageManager;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Updatable;
@@ -12,12 +16,18 @@ import com.mygdx.game.utils.Debug;
 import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
 
-public class EnemiesManager implements Updatable {
+public class EnemiesManager implements Updatable, Telegraph {
+    private static final float MEAN = 10;
+    private static final float DEVIATION = 2f;
 
     private final Game game;
     private final Array<Enemy> enemies = new Array<>();
     private final Scheduler removeDeadScheduler;
     private final Array<FormationManager> formations = new Array<>();
+    private final RandomXS128 random;
+    private boolean shipStarted = false;
+    private Phase currentPhase = Phase.WAITING;
+    private Scheduler waveScheduler;
 
     public EnemiesManager(Game game) {
         this.game = game;
@@ -29,6 +39,9 @@ public class EnemiesManager implements Updatable {
 
         removeDeadScheduler = new Scheduler(this::removeDeadEnemies, 1f, false, true);
         removeDeadScheduler.start();
+
+        MessageManager.getInstance().addListener(this, MessageType.SHIP_STARTED.ordinal());
+        random = new RandomXS128();
     }
 
     public static Structure getClosestStructure(Game game, Vector2 position) {
@@ -134,8 +147,64 @@ public class EnemiesManager implements Updatable {
         }
     }
 
+    private float getRandomSpawnTime() {
+        // return a random number between 1 and 3 in gaussian distribution
+        float rand = (float) (random.nextGaussian() * DEVIATION + MEAN);
+        rand = MathUtils.clamp(rand, 5f, 15f);
+        return rand;
+    }
+
+    private void spawnEnemy(Vector2 position) {
+        Enemy enemy = new RedCreep(game, new Vector2(position));
+        game.addEntity(enemy);
+        enemies.add(enemy);
+    }
+
+    private Vector2 getRandomSpawnPosition() {
+        int side = MathUtils.random(0, 3);
+        Vector2 position;
+        switch (side) {
+            case 0:
+                position = new Vector2(MathUtils.random(1, Constants.MAP_WIDTH - 1), Constants.MAP_HEIGHT);
+                break;
+            case 1:
+                position = new Vector2(MathUtils.random(1, Constants.MAP_WIDTH - 1), 0);
+                break;
+            case 2:
+                position = new Vector2(0, MathUtils.random(1, Constants.MAP_HEIGHT - 1));
+                break;
+            default:
+                position = new Vector2(Constants.MAP_WIDTH, MathUtils.random(1, Constants.MAP_HEIGHT - 1));
+        }
+        return position;
+    }
+
+    private void spawnWave() {
+        int waveSize = MathUtils.random(4, 6);
+        Vector2 position = getRandomSpawnPosition();
+
+        for (int i = 0; i < waveSize; i++) {
+            spawnEnemy(position);
+            if (position.x == 0 || position.x == Constants.MAP_WIDTH) {
+                position.y += 1f / waveSize;
+            } else if (position.y == 0 || position.y == Constants.MAP_HEIGHT) {
+                position.x += 1f / waveSize;
+            }
+        }
+        waveScheduler = new Scheduler(this::spawnWave, getRandomSpawnTime());
+        waveScheduler.start();
+    }
+
     @Override
     public void update(float deltaTime) {
+        if (currentPhase == Phase.WAITING) {
+            if (shipStarted) {
+                currentPhase = Phase.PHASE_1;
+                spawnWave();
+            }
+        } else if (currentPhase == Phase.PHASE_1) {
+            waveScheduler.update(deltaTime);
+        }
         removeDeadScheduler.update(deltaTime);
         updateFormations(deltaTime);
         checkEnemies();
@@ -143,5 +212,19 @@ public class EnemiesManager implements Updatable {
 
     public Array<Enemy> getEnemies() {
         return enemies;
+    }
+
+    @Override
+    public boolean handleMessage(Telegram msg) {
+        if (msg.message == MessageType.SHIP_STARTED.ordinal()) {
+            shipStarted = true;
+            return true;
+        }
+        return false;
+    }
+
+    private enum Phase {
+        WAITING,
+        PHASE_1
     }
 }

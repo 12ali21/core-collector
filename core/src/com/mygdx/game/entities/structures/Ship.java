@@ -1,8 +1,10 @@
 package com.mygdx.game.entities.structures;
 
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.audio.SpatialMusic;
 import com.mygdx.game.audio.SpatialSoundLooping;
 import com.mygdx.game.utils.AudioAssets;
@@ -45,6 +47,7 @@ public class Ship extends Structure {
             SpatialSoundLooping music = game.audio.newLoopingSpatialSoundEffect(AudioAssets.SHIP_MINE);
             music.setPosition(getCenter());
             music.play();
+            MessageManager.getInstance().dispatchMessage(MessageType.SHIP_STARTED.ordinal());
         }
     }
 

@@ -46,7 +46,7 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         // Load the map
         generator = new MapGenerator(12345);
 //        map = new TmxMapLoader().load("maps/" + mapName + ".tmx");
-        map = generator.generate(200, 200);
+        map = generator.generate(Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
         float unitScale = 1 / TILE_SIZE;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale, game.getBatch());
         renderer.setView(game.getCamera());
