@@ -3,6 +3,8 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.msg.MessageManager;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -15,6 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
+import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.audio.AudioManager;
 import com.mygdx.game.audio.NonSpatialSound;
 import com.mygdx.game.entities.enemies.EnemiesManager;
@@ -33,7 +36,7 @@ import com.mygdx.game.world.map.MapManager;
 
 import java.util.Iterator;
 
-public class Game implements Drawable, Updatable, Disposable {
+public class Game implements Drawable, Updatable, Disposable, Telegraph {
     public final MapManager map;
     public final AudioManager audio;
     public final UIManager ui;
@@ -52,6 +55,7 @@ public class Game implements Drawable, Updatable, Disposable {
     private final NonSpatialSound pauseSound;
     private final Music ambientMusic;
     private final EnemiesManager enemiesManager;
+    private Music curr_BGM;
     private boolean isSorted = false;
     private boolean isPaused = false;
 
@@ -89,6 +93,12 @@ public class Game implements Drawable, Updatable, Disposable {
 
         ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
         addStructure(ship);
+
+        curr_BGM = audio.newMusic(AudioAssets.PRE_MINE_MUSIC_1);
+        curr_BGM.setLooping(true);
+        curr_BGM.setVolume(0.3f);
+        curr_BGM.play();
+        MessageManager.getInstance().addListener(this, MessageType.SHIP_STARTED.ordinal());
 
     }
 
@@ -247,5 +257,17 @@ public class Game implements Drawable, Updatable, Disposable {
         map.dispose();
         ambientMusic.dispose();
         audio.dispose();
+    }
+
+    @Override
+    public boolean handleMessage(Telegram msg) {
+        if (msg.message == MessageType.SHIP_STARTED.ordinal()) {
+            curr_BGM.stop();
+            curr_BGM.dispose();
+            curr_BGM = audio.newMusic(AudioAssets.POST_MINE_MUSIC_1);
+            curr_BGM.setLooping(true);
+            curr_BGM.play();
+        }
+        return false;
     }
 }

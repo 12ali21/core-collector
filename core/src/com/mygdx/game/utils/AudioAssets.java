@@ -10,7 +10,10 @@ public enum AudioAssets {
     TURRET_ROTATE("audio/soundeffects/turret_rotate.wav", false),
     SHIP_START("audio/soundeffects/miner_start.wav", true),
     SHIP_MINE("audio/soundeffects/miner_mine.wav", false),
-    AMBIENT_MUSIC("audio/music/soft_wind.wav", true);
+    AMBIENT_MUSIC("audio/music/soft_wind.wav", true),
+    PRE_MINE_MUSIC_1("audio/music/Suspensify.wav", true),
+    POST_MINE_MUSIC_1("audio/music/Hitman.mp3", true),
+    POST_MINE_MUSIC_2("audio/music/Harmful or Fatal.mp3", true);
 
     private static AssetManager manager;
 
