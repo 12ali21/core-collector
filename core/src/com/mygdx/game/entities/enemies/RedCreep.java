@@ -40,11 +40,11 @@ public class RedCreep extends Enemy {
         bodyDef.position.set(position.x, position.y);
 
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.density = 1.5f;
+        fixtureDef.density = 3f;
         fixtureDef.friction = 0.2f;
         fixtureDef.restitution = 0f;
 
-        body = Bodies.createEllipse(game, bodyDef, 0.2f, 0.4f, 8, fixtureDef);
+        body = Bodies.createEllipse(game, bodyDef, 0.14f, 0.35f, 8, fixtureDef);
         body.setLinearDamping(1f);
         body.setAngularDamping(2f);
         body.setUserData(this);
