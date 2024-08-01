@@ -67,7 +67,8 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
         GridPoint2 targetPoint = new GridPoint2((int) tmp.x, (int) tmp.y);
         // if the target is adjacent or diagonally adjacent arrive at it
         if (targetPoint.dst(curPoint) <= 1f + EPSILON
-                || canReachDiagonal(curPoint.x, curPoint.y, targetPoint.x, targetPoint.y)) {
+                || canReachDiagonal(curPoint.x, curPoint.y, targetPoint.x, targetPoint.y)
+                || !game.map.isWithinBoundary(curPoint.x, curPoint.y)) {
             onPath = false;
             arriveTarget.calculateSteering(steering);
         } else if (!onPath || (lastPathTarget != null && !lastPathTarget.equals(targetPoint))) { // if not already following a path or the target changed

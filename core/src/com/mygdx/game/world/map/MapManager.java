@@ -169,7 +169,7 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     /**
      * Checks if the given coordinates are within the map excluding the border
      */
-    private boolean isWithinBorder(int x, int y) {
+    public boolean isWithinBorder(int x, int y) {
         return x >= Constants.MAP_BORDER_LENGTH &&
                 x < nodes.length - Constants.MAP_BORDER_LENGTH &&
                 y >= Constants.MAP_BORDER_LENGTH &&
@@ -179,7 +179,7 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     /**
      * Checks if the given coordinates are within the map
      */
-    private boolean isWithinBoundary(int x, int y) {
+    public boolean isWithinBoundary(int x, int y) {
         return x >= 0 && x < nodes.length && y >= 0 && y < nodes[0].length;
     }
 
