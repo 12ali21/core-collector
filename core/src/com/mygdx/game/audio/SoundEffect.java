@@ -7,6 +7,7 @@ public abstract class SoundEffect implements Disposable {
     protected final Sound sound;
     protected boolean valid = true;
     protected float volume = 1f;
+    protected float volumeOffset = 1f;
     protected float globalVolume = 1f;
 
     public SoundEffect(Sound sound) {
@@ -21,12 +22,14 @@ public abstract class SoundEffect implements Disposable {
 
     public abstract void resume();
 
-    public void setVolume(float volume) {
-        this.volume = volume;
+    public void setVolumeOffset(float volume) {
+        this.volumeOffset = volume;
+        this.volume = volumeOffset * globalVolume;
     }
 
     void setGlobalVolume(float volume) {
         this.globalVolume = volume;
+        this.volume = volumeOffset * globalVolume;
     }
 
     public boolean isValid() {

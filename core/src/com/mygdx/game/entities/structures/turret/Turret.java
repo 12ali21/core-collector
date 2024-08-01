@@ -48,12 +48,11 @@ public class Turret extends Structure {
         health.setWidth(1.5f);
         health.setOffset(new Vector2(0, -1));
 
-        shootSound = game.audio.newNonLoopingSpatialSoundEffect(AudioAssets.CANON_SHOOT);
+        shootSound = game.audio.newNonLoopingSpatialSoundEffect(AudioAssets.CANON_SHOOT, 0.8f);
         shootSound.setPosition(getCenter());
 
-        rotateSound = game.audio.newLoopingSpatialSoundEffect(AudioAssets.TURRET_ROTATE);
+        rotateSound = game.audio.newLoopingSpatialSoundEffect(AudioAssets.TURRET_ROTATE, 0.3f);
         rotateSound.setPosition(getCenter());
-        rotateSound.setVolume(0.3f);
 
         fireScheduler = new Scheduler(() -> {
             if (target != null) {

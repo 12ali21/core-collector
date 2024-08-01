@@ -32,22 +32,25 @@ public class AudioManager implements Disposable {
         return AudioAssets.getMusic(assets);
     }
 
-    public SpatialSoundNonLooping newNonLoopingSpatialSoundEffect(AudioAssets assets) {
+    public SpatialSoundNonLooping newNonLoopingSpatialSoundEffect(AudioAssets assets, float volumeOffset) {
         SpatialSoundNonLooping soundEffect = new SpatialSoundNonLooping(loadSound(assets));
+        soundEffect.setVolumeOffset(volumeOffset);
         soundEffect.setGlobalVolume(soundEffectsVolume);
         spatialSoundEffects.add(soundEffect);
         return soundEffect;
     }
 
-    public SpatialSoundLooping newLoopingSpatialSoundEffect(AudioAssets assets) {
+    public SpatialSoundLooping newLoopingSpatialSoundEffect(AudioAssets assets, float volumeOffset) {
         SpatialSoundLooping soundEffect = new SpatialSoundLooping(loadSound(assets));
+        soundEffect.setVolumeOffset(volumeOffset);
         soundEffect.setGlobalVolume(soundEffectsVolume);
         spatialSoundEffects.add(soundEffect);
         return soundEffect;
     }
 
-    public NonSpatialSound newNonSpatialSoundEffect(AudioAssets assets) {
+    public NonSpatialSound newNonSpatialSoundEffect(AudioAssets assets, float volumeOffset) {
         NonSpatialSound soundEffect = new NonSpatialSound(loadSound(assets));
+        soundEffect.setVolumeOffset(volumeOffset);
         soundEffect.setGlobalVolume(soundEffectsVolume);
         simpleSoundEffects.add(soundEffect);
         return soundEffect;
@@ -59,9 +62,10 @@ public class AudioManager implements Disposable {
         return music;
     }
 
-    public SpatialMusic newSpatialMusicSFX(AudioAssets assets) {
+    public SpatialMusic newSpatialMusicSFX(AudioAssets assets, float volumeOffset) {
         Music music = loadMusic(assets);
         SpatialMusic spatialMusic = new SpatialMusic(music);
+        spatialMusic.setVolumeOffset(volumeOffset);
         spatialMusic.setGlobalVolume(soundEffectsVolume);
         musics.add(music);
         musicSoundEffects.add(spatialMusic);
@@ -123,7 +127,7 @@ public class AudioManager implements Disposable {
         }
 
         for (SpatialMusic music : musicSoundEffects) {
-            music.setGlobalVolume(globalVolume);
+            music.setGlobalVolume(musicVolume);
         }
     }
 

@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.GridPoint2;
@@ -19,6 +18,7 @@ import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.audio.AudioManager;
+import com.mygdx.game.audio.BackgroundMusic;
 import com.mygdx.game.audio.NonSpatialSound;
 import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
@@ -53,13 +53,11 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
     private final Array<Entity> entitiesToAdd = new Array<>();
     private final MyContactListener contactListener;
     private final NonSpatialSound pauseSound;
-    private final Music ambientMusic;
     private final EnemiesManager enemiesManager;
-    private Music curr_BGM;
+    private final BackgroundMusic backgroundMusic;
+    private final Ship ship;
     private boolean isSorted = false;
     private boolean isPaused = false;
-
-    private Ship ship;
 
     public Game(Batch batch, OrthographicCamera camera, UIManager ui) {
         this.world = new World(new Vector2(0, 0), true);
@@ -75,29 +73,23 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         GridPoint2 mapCenter = new GridPoint2((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f));
         map.emptySpace(mapCenter.x, mapCenter.y, 16, 16);
         audio = new AudioManager(camera);
+        audio.setMusicVolume(0.2f);
+        pauseSound = audio.newNonSpatialSoundEffect(AudioAssets.PAUSE_SOUND, .5f);
+        audio.setSoundEffectsVolume(0.1f);
 
         camera.position.set(map.getWidth() / 2f, map.getHeight() / 2f, 0);
         camera.update();
 
         hoveredTile = new HoveredTile(this);
         addEntity(hoveredTile);
-        pauseSound = audio.newNonSpatialSoundEffect(AudioAssets.PAUSE_SOUND);
-        audio.setSoundEffectsVolume(0.1f);
 
-        ambientMusic = audio.newMusic(AudioAssets.AMBIENT_MUSIC);
-        ambientMusic.setLooping(true);
-        ambientMusic.setVolume(0.4f);
-        ambientMusic.play();
 
         enemiesManager = new EnemiesManager(this);
 
         ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
         addStructure(ship);
 
-        curr_BGM = audio.newMusic(AudioAssets.PRE_MINE_MUSIC_1);
-        curr_BGM.setLooping(true);
-        curr_BGM.setVolume(0.3f);
-        curr_BGM.play();
+        backgroundMusic = new BackgroundMusic(this);
         MessageManager.getInstance().addListener(this, MessageType.SHIP_STARTED.ordinal());
 
     }
@@ -143,6 +135,7 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
 
         registerEntities();
         audio.update(delta);
+        backgroundMusic.update(delta);
         ui.update(delta);
     }
 
@@ -255,19 +248,11 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         world.dispose();
         debugRenderer.dispose();
         map.dispose();
-        ambientMusic.dispose();
         audio.dispose();
     }
 
     @Override
     public boolean handleMessage(Telegram msg) {
-        if (msg.message == MessageType.SHIP_STARTED.ordinal()) {
-            curr_BGM.stop();
-            curr_BGM.dispose();
-            curr_BGM = audio.newMusic(AudioAssets.POST_MINE_MUSIC_1);
-            curr_BGM.setLooping(true);
-            curr_BGM.play();
-        }
         return false;
     }
 }

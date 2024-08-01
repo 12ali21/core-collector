@@ -12,6 +12,7 @@ public class NonSpatialSound extends SoundEffect {
     @Override
     public void play() {
         id = sound.play();
+        sound.setVolume(id, volume);
     }
 
     @Override
@@ -30,8 +31,14 @@ public class NonSpatialSound extends SoundEffect {
     }
 
     @Override
+    public void setVolumeOffset(float volume) {
+        super.setVolumeOffset(volume);
+        sound.setVolume(id, volume); // update volume
+    }
+
+    @Override
     public void setGlobalVolume(float globalVolume) {
         super.setGlobalVolume(globalVolume);
-        sound.setVolume(id, volume * globalVolume);
+        sound.setVolume(id, volume); // update volume
     }
 }

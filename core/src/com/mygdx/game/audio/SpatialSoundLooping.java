@@ -12,6 +12,7 @@ public class SpatialSoundLooping extends SpatialSoundEffect {
     @Override
     public void play() {
         id = sound.play();
+        sound.setVolume(id, this.volume);
         sound.setLooping(id, true);
     }
 

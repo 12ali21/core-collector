@@ -10,7 +10,8 @@ public class SpatialMusic implements Disposable, Updatable {
     private final Vector2 position = new Vector2();
     private final Vector2 cameraPosition = new Vector2();
     private float cameraZoom;
-    private float globalVolume;
+    private float globalVolume = 1f;
+    private float volumeOffset = 1f;
     private float volume = 1f;
     private boolean isValid = true;
 
@@ -27,7 +28,7 @@ public class SpatialMusic implements Disposable, Updatable {
         float distance = position.dst(cameraPosition);
         float volume = 1 - distance / AudioManager.SOUND_DISTANCE_THRESHOLD;
         volume *= 1f / cameraZoom;
-        return Math.min(1, Math.max(0, volume)) * globalVolume * this.volume;
+        return Math.min(1, Math.max(0, volume)) * this.volume;
     }
 
     public void setPosition(Vector2 position) {
@@ -42,8 +43,14 @@ public class SpatialMusic implements Disposable, Updatable {
         cameraZoom = zoom;
     }
 
+    public void setVolumeOffset(float volumeOffset) {
+        this.volumeOffset = volumeOffset;
+        this.volume = volumeOffset * globalVolume;
+    }
+
     public void setGlobalVolume(float volume) {
         globalVolume = volume;
+        this.volume = volumeOffset * globalVolume;
     }
 
     public void setVolume(float volume) {

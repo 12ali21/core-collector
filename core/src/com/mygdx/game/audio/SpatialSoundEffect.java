@@ -24,7 +24,7 @@ public abstract class SpatialSoundEffect extends SoundEffect implements Updatabl
         float distance = position.dst(cameraPosition);
         float volume = 1 - distance / AudioManager.SOUND_DISTANCE_THRESHOLD;
         volume *= 1f / cameraZoom;
-        return Math.min(1, Math.max(0, volume)) * globalVolume * this.volume;
+        return Math.min(1, Math.max(0, volume)) * this.volume;
     }
 
     public void setPosition(Vector2 position) {

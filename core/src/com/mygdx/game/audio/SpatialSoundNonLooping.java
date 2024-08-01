@@ -15,6 +15,7 @@ public class SpatialSoundNonLooping extends SpatialSoundEffect {
     @Override
     public void play() {
         long id = sound.play();
+        sound.setVolume(id, this.volume);
         ids.add(id);
         accumulators.add(0f);
     }

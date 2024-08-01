@@ -34,7 +34,7 @@ public class Ship extends Structure {
 
     private void start() {
         isStarting = true;
-        startingSFX = game.audio.newSpatialMusicSFX(AudioAssets.SHIP_START);
+        startingSFX = game.audio.newSpatialMusicSFX(AudioAssets.SHIP_START, 1f);
         startingSFX.setPosition(getCenter());
         startingSFX.getMusic().play();
     }
@@ -44,7 +44,7 @@ public class Ship extends Structure {
             startingSFX.dispose();
             started = true;
             isStarting = false;
-            SpatialSoundLooping music = game.audio.newLoopingSpatialSoundEffect(AudioAssets.SHIP_MINE);
+            SpatialSoundLooping music = game.audio.newLoopingSpatialSoundEffect(AudioAssets.SHIP_MINE, 1f);
             music.setPosition(getCenter());
             music.play();
             MessageManager.getInstance().dispatchMessage(MessageType.SHIP_STARTED.ordinal());
