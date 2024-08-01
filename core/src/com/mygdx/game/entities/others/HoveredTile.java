@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.utils.Debug;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
@@ -42,5 +43,6 @@ public class HoveredTile extends Entity {
     @Override
     public void update(float deltaTime) {
         sprite.setPosition(x, y);
+        Debug.log("Hovered Tile", "x: " + x + " y: " + y);
     }
 }

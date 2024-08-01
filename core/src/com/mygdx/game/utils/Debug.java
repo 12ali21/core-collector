@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Debug {
     private static final String FPS_TAG = "FPS";
@@ -33,7 +34,7 @@ public class Debug {
     private static final GLProfiler profiler;
     private static final HashMap<String, Label> logs;
     private static final HashMap<String, Rectangle> rects;
-    private static final HashMap<String, Vector2> points;
+    private static final HashMap<String, Point> points;
     private static final HashMap<String, Line> lines;
     private static final Runtime runtime;
     private static final ShapeRenderer shapeRenderer;
@@ -90,11 +91,15 @@ public class Debug {
     }
 
     public static void drawPoint(String tag, Vector2 v) {
-        points.put(tag, v);
+        drawPoint(tag, v.x, v.y, Color.RED);
     }
 
-    public static void drawPoint(String tag, float x, float y) {
-        drawPoint(tag, new Vector2(x, y));
+    public static void drawPoint(String tag, Vector2 v, Color color) {
+        drawPoint(tag, v.x, v.y, color);
+    }
+
+    public static void drawPoint(String tag, float x, float y, Color color) {
+        points.put(tag, new Point(x, y, color));
     }
 
     public static void drawRect(String tag, int x, int y, int width, int height) {
@@ -137,12 +142,12 @@ public class Debug {
         logs.put(tag, label);
     }
 
-    public static void addButton(String tag, Callback callback) {
+    public static void addButton(String tag, Runnable runnable) {
         TextButton button = new TextButton(tag, skin);
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                callback.run();
+                runnable.run();
             }
         });
         table.add(button).left();
@@ -195,8 +200,8 @@ public class Debug {
             }
 
             shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.setColor(Color.RED);
-            for (Vector2 point : points.values()) {
+            for (Point point : points.values()) {
+                shapeRenderer.setColor(point.color);
                 shapeRenderer.circle(point.x, point.y, 0.1f, 90);
             }
 
@@ -218,8 +223,29 @@ public class Debug {
         stage.dispose();
     }
 
-    public static interface Callback {
-        void run();
+    private static class Point {
+        float x;
+        float y;
+        Color color;
+
+        public Point(float x, float y, Color color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Point point = (Point) o;
+            return Float.compare(point.x, x) == 0 && Float.compare(point.y, y) == 0 && Objects.equals(color, point.color);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y, color);
+        }
     }
 
     private static class Line {

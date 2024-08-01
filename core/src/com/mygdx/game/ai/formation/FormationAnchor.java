@@ -7,6 +7,7 @@ import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
 import com.badlogic.gdx.ai.steer.behaviors.ReachOrientation;
 import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.ai.utils.Location;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -62,7 +63,7 @@ public class FormationAnchor extends SteerableAdapter<Vector2> implements Updata
     @Override
     public void update(float deltaTime) {
         followPath.calculateSteering(steering);
-        Debug.drawPoint(this + "pos", position);
+        Debug.drawPoint(this + "pos", position, Color.GREEN);
         position.mulAdd(linearVelocity, deltaTime);
         linearVelocity.mulAdd(steering.linear, deltaTime).limit(maxLinearSpeed);
 

@@ -183,8 +183,15 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         return x >= 0 && x < nodes.length && y >= 0 && y < nodes[0].length;
     }
 
+    public boolean isTileWall(int x, int y) {
+        if (!isWithinBoundary(x, y)) {
+            return true;
+        }
+        return nodes[x][y] == null;
+    }
+
     /**
-     * Checks if the given coordinates are occupied by a structure or a wall
+     * Checks if the given coordinates are occupied by a structure or a wall and are inside border
      */
     public boolean isTileOccupied(int x, int y) {
         if (!isWithinBorder(x, y)) {

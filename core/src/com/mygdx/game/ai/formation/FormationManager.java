@@ -32,7 +32,7 @@ public class FormationManager implements Updatable, Telegraph {
         if (!anchor.makePath()) {
             breakFormation();
         } else {
-            FormationPattern<Vector2> pattern = new SquareFormationPattern();
+            FormationPattern<Vector2> pattern = new SquareFormationPattern(game, anchor);
             FormationMotionModerator<Vector2> motionModerator = new AnchorModerator(members);
             formation = new Formation<>(anchor, pattern, new FreeSlotAssignmentStrategy<>(), motionModerator);
         }
