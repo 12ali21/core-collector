@@ -14,11 +14,11 @@ import com.mygdx.game.world.Game;
 public class RedCreep extends Enemy {
 
     private static final float ATTACKING_RANGE = 1;
-    private static final float DAMAGE = 50;
+    private static final float DAMAGE = 15;
     private static final float DAMAGE_COOLDOWN = 1f;
 
     public RedCreep(Game game, Vector2 position) {
-        super(game, 100);
+        super(game, 30);
         Texture t = TextureAssets.get(TextureAssets.ENEMY_SMALL_TEXTURE);
         sprite = new Sprite(t);
         sprite.setSize(1, 1);

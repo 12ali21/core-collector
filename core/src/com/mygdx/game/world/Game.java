@@ -71,7 +71,7 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
 
         map = new MapManager(this, "maze");
         GridPoint2 mapCenter = new GridPoint2((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f));
-        map.emptySpace(mapCenter.x, mapCenter.y, 16, 16);
+        map.emptySpace(mapCenter.x, mapCenter.y, 10, 10);
         audio = new AudioManager(camera);
         audio.setMusicVolume(0.2f);
         pauseSound = audio.newNonSpatialSoundEffect(AudioAssets.PAUSE_SOUND, .5f);

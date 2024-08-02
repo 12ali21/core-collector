@@ -14,7 +14,7 @@ import java.util.Arrays;
 
 public class MapGenerator {
     public static final boolean[][] TILE_DIRECTIONS = new boolean[47][];
-    private static final double SCALE = 1 / 16f;
+    private static final double SCALE = 1 / 24f;
     private static final int TILE_SIZE = 64;
     private static final float WALL_THRESHOLD = 0.65f;
 

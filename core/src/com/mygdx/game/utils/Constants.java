@@ -13,8 +13,8 @@ public class Constants {
     public static final float PAN_SPEED = 15f;
     public static final float SOUND_EFFECT_LIMIT = 60f; // 1 min
 
-    public static final int MAP_WIDTH = 100;
-    public static final int MAP_HEIGHT = 100;
+    public static final int MAP_WIDTH = 200;
+    public static final int MAP_HEIGHT = 200;
     public static final int MAP_BORDER_LENGTH = 2;
 
     public static final float MAKE_FORMATION_RANGE = 5f;
@@ -22,7 +22,7 @@ public class Constants {
     public static final float BREAK_FORMATION_RANGE = 5f;
     public static final float AGGRO_RANGE = BREAK_FORMATION_RANGE;
 
-    public static final int SHIP_SIZE = 16;
+    public static final int SHIP_SIZE = 8;
     public static final String START = "START";
     public static final String LAUNCH = "LAUNCH";
 }

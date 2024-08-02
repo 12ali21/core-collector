@@ -28,7 +28,7 @@ public class Structures {
         Turret.Builder builder = new Turret.Builder(game, 100);
         builder.setBase(makeBase(game, TextureAssets.TURRET_BASE_TEXTURE, x, y));
         builder.setHead(makeHead(game, TextureAssets.TURRET_HEAD_TEXTURE, x, y));
-        builder.setRotationSpeed(30f);
+        builder.setRotationSpeed(90f);
         builder.setBulletSpeed(30f);
         builder.setFireRate(80);
         builder.setBounds(x, y);
@@ -42,7 +42,7 @@ public class Structures {
         builder.setBurstCount(3);
         builder.setBase(makeBase(game, TextureAssets.TURRET_BASE_TEXTURE, x, y));
         builder.setHead(makeHead(game, TextureAssets.TURRET_HEAD_MULTI_TEXTURE, x, y));
-        builder.setRotationSpeed(30f);
+        builder.setRotationSpeed(90f);
         builder.setBulletSpeed(50f);
         builder.setFireRate(360);
         builder.setBounds(x, y);
