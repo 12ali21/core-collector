@@ -1,6 +1,8 @@
 package com.mygdx.game.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -16,6 +18,7 @@ import com.mygdx.game.Drawable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.TextureAssets;
+import com.mygdx.game.world.Game;
 
 public class UIManager implements Drawable, Updatable, Disposable {
     private final Stage stage;
@@ -23,10 +26,12 @@ public class UIManager implements Drawable, Updatable, Disposable {
     private final Button buildButton;
     private final Table pauseMenu;
     private final Label pausedLabel;
+    private final Game game;
     private final Table optionsMenu;
     private TextureRegionDrawable pauseBackgroundDrawable;
 
-    public UIManager(PauseMenuListener menuListener) {
+    public UIManager(Game game, PauseMenuListener menuListener) {
+        this.game = game;
         Skin skin = Constants.SKIN;
 
         stage = new Stage(new ScreenViewport());
@@ -65,7 +70,6 @@ public class UIManager implements Drawable, Updatable, Disposable {
 
         pauseMenu = buildPauseMenuTable(menuListener, skin);
         optionsMenu = buildOptionsMenuTable(skin);
-
     }
 
     private Table buildPauseMenuTable(PauseMenuListener menuListener, Skin skin) {
@@ -97,7 +101,7 @@ public class UIManager implements Drawable, Updatable, Disposable {
         optionsButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                optionsMenu.setVisible(true);
+                showOptions();
             }
         });
         pauseMenu.add(optionsButton).row();
@@ -114,6 +118,11 @@ public class UIManager implements Drawable, Updatable, Disposable {
         return pauseMenu;
     }
 
+    private void showOptions() {
+        optionsMenu.setVisible(true);
+        //TODO: reset slider positions
+    }
+
     private Table buildOptionsMenuTable(Skin skin) {
         final Table optionsRoot = new Table(skin);
         optionsRoot.setFillParent(true);
@@ -121,16 +130,54 @@ public class UIManager implements Drawable, Updatable, Disposable {
 //        optionsRoot.setBackground(getBackground());
         stage.addActor(optionsRoot);
 
+        Preferences prefs = Gdx.app.getPreferences(Constants.PREFS_NAME);
+
         Window window = new Window("Options", skin);
         window.getTitleLabel().setAlignment(Align.center);
-        optionsRoot.add(window).grow().pad(64).maxSize(800, 800);
+        optionsRoot.add(window).grow().pad(64).maxSize(1000, 800);
 
-        window.add(makeOptionsButtonsTable(skin)).growX().expand().bottom();
+        window.defaults().pad(16, 16, 0, 16).top().expandX().fillX().uniformX();
+        Table bgmOptions = sliderOptionsTable(skin, "Background Music", prefs.getFloat(Constants.PREFS_BGM_VOLUME, 0.5f));
+        Slider bgmSlider = (Slider) bgmOptions.getChild(1);
 
+        Table sfxOptions = sliderOptionsTable(skin, "SFX", prefs.getFloat(Constants.PREFS_SFX_VOLUME, 0.5f));
+        Slider sfxSlider = (Slider) sfxOptions.getChild(1);
+
+        window.add(bgmOptions).row();
+        window.add(sfxOptions).row();
+        window.add(makeOptionsButtonsTable(skin, () -> {
+            prefs.putFloat(Constants.PREFS_BGM_VOLUME, bgmSlider.getValue());
+            prefs.putFloat(Constants.PREFS_SFX_VOLUME, sfxSlider.getValue());
+            prefs.flush();
+            game.updatePreferences();
+        })).growX().expand().bottom();
         return optionsRoot;
     }
 
-    private Table makeOptionsButtonsTable(Skin skin) {
+    private Table sliderOptionsTable(Skin skin, String title, float value) {
+        Table group = new Table(skin);
+
+        Label titleLabel = new Label(title, skin);
+
+        Slider slider = new Slider(0f, 1f, 0.05f, false, skin);
+        slider.setValue(value);
+        Label label = new Label(String.format("%.2f", slider.getValue()), skin);
+        slider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                label.setText(String.format("%.2f", slider.getValue()));
+            }
+        });
+
+        group.defaults().pad(12).expandX().top();
+        group.add(titleLabel).width(250f).left();
+        group.add(slider).minWidth(300f).right().top();
+        group.add(label).minWidth(100f).right().row();
+        group.defaults().reset();
+        return group;
+    }
+
+    private Table makeOptionsButtonsTable(Skin skin, Runnable onAccept) {
         Table buttons = new Table();
 
         buttons.defaults().minWidth(200f).minHeight(75f).uniform();
@@ -148,7 +195,7 @@ public class UIManager implements Drawable, Updatable, Disposable {
         acceptButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                //TODO: apply changes
+                onAccept.run();
                 optionsMenu.setVisible(false);
             }
         });

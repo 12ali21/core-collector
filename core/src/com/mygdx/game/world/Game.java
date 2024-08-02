@@ -3,6 +3,7 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
@@ -33,6 +34,7 @@ import com.mygdx.game.entities.structures.Structures;
 import com.mygdx.game.screens.ScreenInputProcessor;
 import com.mygdx.game.ui.UIManager;
 import com.mygdx.game.utils.AudioAssets;
+import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.map.MapManager;
 
@@ -69,7 +71,7 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         this.batch = batch;
         this.camera = camera;
 
-        ui = new UIManager(new UIManager.PauseMenuListener() {
+        ui = new UIManager(this, new UIManager.PauseMenuListener() {
             @Override
             public void onResume() {
                 isMenuPaused = false;
@@ -98,10 +100,7 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         GridPoint2 mapCenter = new GridPoint2((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f));
         map.emptySpace(mapCenter.x, mapCenter.y, 10, 10);
         audio = new AudioManager(camera);
-        audio.setMusicVolume(0.2f);
         pauseSound = audio.newNonSpatialSoundEffect(AudioAssets.PAUSE_SOUND, .5f);
-        
-        audio.setSoundEffectsVolume(0.1f);
 
         camera.position.set(map.getWidth() / 2f, map.getHeight() / 2f, 0);
         camera.update();
@@ -116,6 +115,7 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         backgroundMusic = new BackgroundMusic(this);
         MessageManager.getInstance().addListener(this, MessageType.SHIP_STARTED.ordinal());
 
+        updatePreferences();
     }
 
     private void setContactListeners() {
@@ -325,5 +325,11 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
     @Override
     public boolean handleMessage(Telegram msg) {
         return false;
+    }
+
+    public void updatePreferences() {
+        Preferences prefs = Gdx.app.getPreferences(Constants.PREFS_NAME);
+        audio.setMusicVolume(prefs.getFloat(Constants.PREFS_BGM_VOLUME, 0.2f));
+        audio.setSoundEffectsVolume(prefs.getFloat(Constants.PREFS_SFX_VOLUME, 0.1f));
     }
 }

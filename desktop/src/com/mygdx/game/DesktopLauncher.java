@@ -9,6 +9,7 @@ public class DesktopLauncher {
     public static void main(String[] arg) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setForegroundFPS(60);
+        config.setMaximized(true);
         config.setAudioConfig(64, 512, 9);
         config.setTitle("Core Collector");
         new Lwjgl3Application(new CoreGame(), config);

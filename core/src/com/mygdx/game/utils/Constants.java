@@ -25,4 +25,9 @@ public class Constants {
     public static final int SHIP_SIZE = 8;
     public static final String START = "START";
     public static final String LAUNCH = "LAUNCH";
+
+    public static final String PREFS_NAME = "com.mygdx.game.prefs";
+    public static final String PREFS_BGM_VOLUME = "musicVolume";
+    public static final String PREFS_SFX_VOLUME = "soundVolume";
+
 }
