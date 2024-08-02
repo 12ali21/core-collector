@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Drawable;
@@ -22,6 +23,8 @@ public class UIManager implements Drawable, Updatable, Disposable {
     private final Button buildButton;
     private final Table pauseMenu;
     private final Label pausedLabel;
+    private final Table optionsMenu;
+    private TextureRegionDrawable pauseBackgroundDrawable;
 
     public UIManager(PauseMenuListener menuListener) {
         Skin skin = Constants.SKIN;
@@ -60,7 +63,14 @@ public class UIManager implements Drawable, Updatable, Disposable {
 
         // Pause Menu
 
-        pauseMenu = new Table();
+        pauseMenu = buildPauseMenuTable(menuListener, skin);
+        optionsMenu = buildOptionsMenuTable(skin);
+
+    }
+
+    private Table buildPauseMenuTable(PauseMenuListener menuListener, Skin skin) {
+        final Table pauseMenu;
+        pauseMenu = new Table(skin);
         pauseMenu.setFillParent(true);
         pauseMenu.setVisible(false);
         pauseMenu.setBackground(getBackground());
@@ -84,6 +94,12 @@ public class UIManager implements Drawable, Updatable, Disposable {
         pauseMenu.add(resumeButton).row();
 
         TextButton optionsButton = new TextButton("Options", skin);
+        optionsButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                optionsMenu.setVisible(true);
+            }
+        });
         pauseMenu.add(optionsButton).row();
 
         TextButton exitButton = new TextButton("Exit", skin);
@@ -95,19 +111,67 @@ public class UIManager implements Drawable, Updatable, Disposable {
         });
         pauseMenu.add(exitButton).row();
         pauseMenu.defaults().reset();
+        return pauseMenu;
+    }
 
+    private Table buildOptionsMenuTable(Skin skin) {
+        final Table optionsRoot = new Table(skin);
+        optionsRoot.setFillParent(true);
+        optionsRoot.setVisible(false);
+//        optionsRoot.setBackground(getBackground());
+        stage.addActor(optionsRoot);
 
+        Window window = new Window("Options", skin);
+        window.getTitleLabel().setAlignment(Align.center);
+        optionsRoot.add(window).grow().pad(64).maxSize(800, 800);
+
+        window.add(makeOptionsButtonsTable(skin)).growX().expand().bottom();
+
+        return optionsRoot;
+    }
+
+    private Table makeOptionsButtonsTable(Skin skin) {
+        Table buttons = new Table();
+
+        buttons.defaults().minWidth(200f).minHeight(75f).uniform();
+
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        cancelButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                optionsMenu.setVisible(false);
+            }
+        });
+        buttons.add(cancelButton).expand().left();
+
+        TextButton acceptButton = new TextButton("Accept", skin);
+        acceptButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                //TODO: apply changes
+                optionsMenu.setVisible(false);
+            }
+        });
+        buttons.add(acceptButton).expand().right();
+        buttons.defaults().reset();
+        return buttons;
     }
 
     private TextureRegionDrawable getBackground() {
+        if (pauseBackgroundDrawable != null) {
+            return pauseBackgroundDrawable;
+        }
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(0, 0, 0, 0.4f);
         pixmap.fill();
-        return new TextureRegionDrawable(new Texture(pixmap));
+        pauseBackgroundDrawable = new TextureRegionDrawable(new Texture(pixmap));
+        return pauseBackgroundDrawable;
     }
 
     public void setPauseMenuVisible(boolean visible) {
         pauseMenu.setVisible(visible);
+        if (!visible && optionsMenu.isVisible())
+            optionsMenu.setVisible(false);
     }
 
     public void setPauseLabelVisible(boolean visible) {

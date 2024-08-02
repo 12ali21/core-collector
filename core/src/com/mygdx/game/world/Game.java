@@ -100,6 +100,7 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         audio = new AudioManager(camera);
         audio.setMusicVolume(0.2f);
         pauseSound = audio.newNonSpatialSoundEffect(AudioAssets.PAUSE_SOUND, .5f);
+        
         audio.setSoundEffectsVolume(0.1f);
 
         camera.position.set(map.getWidth() / 2f, map.getHeight() / 2f, 0);
