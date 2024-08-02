@@ -38,7 +38,7 @@ public class Debug {
     private static final HashMap<String, Line> lines;
     private static final Runtime runtime;
     private static final ShapeRenderer shapeRenderer;
-    private static boolean doDebugging = true;
+    private static boolean doDebugging = false;
     private static float timeBuffer = 0;
     private static Camera gameCamera;
     private static int frames;

@@ -21,6 +21,7 @@ public class BackgroundMusic implements Updatable, Telegraph {
     private MusicState currentState;
     private Music currMusic;
     private float fadeOutVol;
+    private boolean isPlayingMusic = false;
 
     public BackgroundMusic(Game game) {
         this.game = game;
@@ -31,7 +32,7 @@ public class BackgroundMusic implements Updatable, Telegraph {
         Music ambient = game.audio.newMusic(AudioAssets.AMBIENT_MUSIC);
         ambient.setLooping(true);
         ambient.setVolume(0.4f);
-        ambient.play();
+        playMusic(ambient);
     }
 
     private void chooseMineMusic() {
@@ -41,6 +42,12 @@ public class BackgroundMusic implements Updatable, Telegraph {
         } else {
             currMusic = game.audio.newMusic(AudioAssets.POST_MINE_MUSIC_2);
         }
+        isPlayingMusic = true;
+        playMusic(currMusic);
+    }
+
+    private void playMusic(Music currMusic) {
+        isPlayingMusic = true;
         currMusic.play();
     }
 
@@ -54,6 +61,18 @@ public class BackgroundMusic implements Updatable, Telegraph {
         stateMachine.update();
     }
 
+    public void pause() {
+        if (currMusic != null && isPlayingMusic) {
+            currMusic.pause();
+        }
+    }
+
+    public void resume() {
+        if (currMusic != null && isPlayingMusic) {
+            playMusic(currMusic);
+        }
+    }
+
     private enum MusicState implements State<BackgroundMusic> {
         INITIAL() {
             @Override
@@ -62,7 +81,8 @@ public class BackgroundMusic implements Updatable, Telegraph {
                     entity.currMusic = entity.game.audio.newMusic(AudioAssets.PRE_MINE_MUSIC_1);
                     entity.currMusic.setLooping(true);
                     entity.currMusic.setVolume(entity.currMusic.getVolume() * 0.4f);
-                    entity.currMusic.play();
+                    entity.isPlayingMusic = true;
+                    entity.playMusic(entity.currMusic);
                 }
             }
         },

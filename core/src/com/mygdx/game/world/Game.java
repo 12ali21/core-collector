@@ -2,6 +2,7 @@ package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
@@ -29,6 +30,7 @@ import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Ship;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.Structures;
+import com.mygdx.game.screens.ScreenInputProcessor;
 import com.mygdx.game.ui.UIManager;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Debug;
@@ -55,16 +57,39 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
     private final NonSpatialSound pauseSound;
     private final EnemiesManager enemiesManager;
     private final BackgroundMusic backgroundMusic;
-    private final Ship ship;
+    private final ScreenInputProcessor inputProcessor;
     private boolean isSorted = false;
     private boolean isPaused = false;
+    private boolean isMenuPaused = false;
 
-    public Game(Batch batch, OrthographicCamera camera, UIManager ui) {
+
+    public Game(Batch batch, OrthographicCamera camera) {
         this.world = new World(new Vector2(0, 0), true);
         this.debugRenderer = new Box2DDebugRenderer();
         this.batch = batch;
         this.camera = camera;
-        this.ui = ui;
+
+        ui = new UIManager(new UIManager.PauseMenuListener() {
+            @Override
+            public void onResume() {
+                isMenuPaused = false;
+                isPaused = false;
+                pauseSound.play();
+            }
+
+            @Override
+            public void onExit() {
+                Gdx.app.exit();
+            }
+        });
+
+        // setup input processors
+        inputProcessor = new ScreenInputProcessor();
+        InputMultiplexer inputMux = new InputMultiplexer();
+        inputMux.addProcessor(inputProcessor);
+        inputMux.addProcessor(Debug.getStage());
+        inputMux.addProcessor(ui.getProcessor());
+        Gdx.input.setInputProcessor(inputMux);
 
         contactListener = new MyContactListener();
         setContactListeners();
@@ -81,12 +106,10 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         camera.update();
 
         hoveredTile = new HoveredTile(this);
-        addEntity(hoveredTile);
-
 
         enemiesManager = new EnemiesManager(this);
 
-        ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
+        Ship ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
         addStructure(ship);
 
         backgroundMusic = new BackgroundMusic(this);
@@ -101,22 +124,14 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
 
     @Override
     public void update(float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            isPaused = !isPaused;
-            pauseSound.play();
-        }
-        if (isPaused) {
-            return;
-        }
+
+        // handle pause
+        if (handlePause(delta)) return;
 
         world.step(1 / 60f, 6, 2);
 
-        Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
-        hoveredTile.findPosition(mousePos);
+        updateManagers(delta);
 
-        structureBuilder.update(delta);
-        enemiesManager.update(delta);
-        MessageManager.getInstance().update();
         // Update entities
         for (Iterator<Entity> itr = entitiesUpdate.iterator(); itr.hasNext(); ) {
             Entity entity = itr.next();
@@ -134,9 +149,63 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
         }
 
         registerEntities();
+    }
+
+    private void updateManagers(float delta) {
+        structureBuilder.update(delta);
+        enemiesManager.update(delta);
+        MessageManager.getInstance().update();
         audio.update(delta);
         backgroundMusic.update(delta);
         ui.update(delta);
+    }
+
+    private boolean handlePause(float delta) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            if (!isMenuPaused) {
+                isPaused = !isPaused;
+                pauseSound.play();
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (!isMenuPaused) {
+                isMenuPaused = true;
+                isPaused = true;
+                ui.setPauseMenuVisible(true);
+            } else {
+                isMenuPaused = false;
+                isPaused = false;
+                ui.setPauseMenuVisible(false);
+            }
+            pauseSound.play();
+
+        }
+
+        if (!isMenuPaused) {
+            updateCameraMovement(delta);
+
+            Vector3 mousePos = unproject(Gdx.input.getX(), Gdx.input.getY());
+            hoveredTile.findPosition(mousePos);
+            hoveredTile.update(delta);
+        }
+
+        if (isPaused) {
+            backgroundMusic.pause();
+        } else {
+            backgroundMusic.resume();
+        }
+        ui.setPauseLabelVisible(isPaused);
+        return isPaused;
+    }
+
+    private void updateCameraMovement(float delta) {
+        inputProcessor.update(delta);
+
+        if (inputProcessor.isFOVChanged()) {
+            camera.zoom = inputProcessor.getZoom();
+        }
+        camera.position.add(inputProcessor.getCameraMovement());
+        camera.update();
     }
 
     public Vector3 unproject(float x, float y) {
@@ -145,10 +214,11 @@ public class Game implements Drawable, Updatable, Disposable, Telegraph {
 
     @Override
     public void render() {
-        map.render();        // Map renderer has its own batch, so render it first
+        map.render();
         batch.begin();
 
         structureBuilder.render();
+        hoveredTile.render();
         // Sort entities by rendering order
         if (!isSorted) {
             entitiesRender.sort((a, b) -> Float.compare(a.getRenderPriority(), b.getRenderPriority()));

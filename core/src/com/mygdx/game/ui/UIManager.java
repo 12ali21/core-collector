@@ -1,9 +1,14 @@
 package com.mygdx.game.ui;
 
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Drawable;
@@ -15,8 +20,10 @@ public class UIManager implements Drawable, Updatable, Disposable {
     private final Stage stage;
     private final TextButton shipButton;
     private final Button buildButton;
+    private final Table pauseMenu;
+    private final Label pausedLabel;
 
-    public UIManager() {
+    public UIManager(PauseMenuListener menuListener) {
         Skin skin = Constants.SKIN;
 
         stage = new Stage(new ScreenViewport());
@@ -26,6 +33,10 @@ public class UIManager implements Drawable, Updatable, Disposable {
         root.setFillParent(true);
         root.pad(20f);
         stage.addActor(root);
+
+        pausedLabel = new Label("PAUSED", skin);
+        pausedLabel.setVisible(false);
+        root.add(pausedLabel).center().colspan(2).row();
 
         // Structure Builder Button
         buildButton = new Button(skin);
@@ -47,6 +58,60 @@ public class UIManager implements Drawable, Updatable, Disposable {
                 .right();
         shipButton.getLabel().setFontScale(1.2f);
 
+        // Pause Menu
+
+        pauseMenu = new Table();
+        pauseMenu.setFillParent(true);
+        pauseMenu.setVisible(false);
+        pauseMenu.setBackground(getBackground());
+        stage.addActor(pauseMenu);
+
+        pauseMenu.defaults()
+                .space(4f)
+                .uniform()
+                .maxWidth(250f)
+                .height(70f)
+                .growX();
+
+        TextButton resumeButton = new TextButton("Resume", skin);
+        resumeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                menuListener.onResume();
+                setPauseMenuVisible(false);
+            }
+        });
+        pauseMenu.add(resumeButton).row();
+
+        TextButton optionsButton = new TextButton("Options", skin);
+        pauseMenu.add(optionsButton).row();
+
+        TextButton exitButton = new TextButton("Exit", skin);
+        exitButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                menuListener.onExit();
+            }
+        });
+        pauseMenu.add(exitButton).row();
+        pauseMenu.defaults().reset();
+
+
+    }
+
+    private TextureRegionDrawable getBackground() {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0, 0, 0, 0.4f);
+        pixmap.fill();
+        return new TextureRegionDrawable(new Texture(pixmap));
+    }
+
+    public void setPauseMenuVisible(boolean visible) {
+        pauseMenu.setVisible(visible);
+    }
+
+    public void setPauseLabelVisible(boolean visible) {
+        pausedLabel.setVisible(visible);
     }
 
     public void setShipButtonListener(EventListener listener) {
@@ -77,5 +142,11 @@ public class UIManager implements Drawable, Updatable, Disposable {
 
     public InputProcessor getProcessor() {
         return stage;
+    }
+
+    public interface PauseMenuListener {
+        void onResume();
+
+        void onExit();
     }
 }

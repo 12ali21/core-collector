@@ -59,6 +59,7 @@ public class AudioManager implements Disposable {
     public Music newMusic(AudioAssets assets) {
         Music music = loadMusic(assets);
         music.setVolume(musicVolume);
+        musics.add(music);
         return music;
     }
 
