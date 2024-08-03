@@ -46,9 +46,9 @@ public class BackgroundMusic implements Updatable, Telegraph {
         playMusic(currMusic);
     }
 
-    private void playMusic(Music currMusic) {
+    private void playMusic(Music music) {
         isPlayingMusic = true;
-        currMusic.play();
+        music.play();
     }
 
     @Override
@@ -102,6 +102,7 @@ public class BackgroundMusic implements Updatable, Telegraph {
                         entity.currMusic.setVolume(entity.fadeOutVol);
                     } else {
                         entity.currMusic.stop();
+                        entity.isPlayingMusic = false;
                     }
                 }
             }
