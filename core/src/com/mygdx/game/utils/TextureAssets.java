@@ -19,7 +19,7 @@ public enum TextureAssets {
     GREEN_BAR_TEXTURE("sprites/green_bar.png"),
     YELLOW_BAR_TEXTURE("sprites/yellow_bar.png"),
     RED_BAR_TEXTURE("sprites/red_bar.png"),
-    DIRT_WALL_TEXTURE("maps/tiles/Walls/Wall-Dirt_02-64x64.png"),
+    DIRT_WALL_TEXTURE("maps/tiles/Walls/Wall-Dirt_03-64x64.png"),
     BUILDING_ICON("sprites/building_icon.png");
 
     static AssetManager manager;
