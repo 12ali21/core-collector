@@ -14,9 +14,6 @@ import com.badlogic.gdx.ai.steer.limiters.LinearLimiter;
 import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.ai.GameLocation;
 import com.mygdx.game.ai.MessageType;
@@ -53,7 +50,7 @@ public class EnemyAgent extends Agent implements Disposable {
     private boolean staggered;
 
     public EnemyAgent(Game game, Enemy owner, Vector2 position, float attackingRange, float damage, float damageCooldown) {
-        super(game, makeBody(game, position));
+        super(game, Bodies.createCreepBody(game, position));
         this.owner = owner;
         this.attackingRange = attackingRange;
         this.damage = damage;
@@ -70,23 +67,6 @@ public class EnemyAgent extends Agent implements Disposable {
         currentLimiter = walkLimiter;
 
         arriveTarget = new Arrive<>(this); // staying in position next to target when attacking
-    }
-
-    private static Body makeBody(Game game, Vector2 position) {
-        final Body body;
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(position.x, position.y);
-
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.density = 1f;
-        fixtureDef.friction = 0.2f;
-        fixtureDef.restitution = 0f;
-
-        body = Bodies.createEllipse(game, bodyDef, 0.14f, 0.35f, 8, fixtureDef);
-        body.setLinearDamping(1f);
-        body.setAngularDamping(2f);
-        return body;
     }
 
     public boolean setTarget(Structure target) throws Utils.SingleNodePathException {

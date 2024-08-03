@@ -33,7 +33,7 @@ public class EnemiesManager implements Updatable, Telegraph {
         this.game = game;
         Debug.addButton("Spawn Enemy", () -> {
             Enemy enemy = new RedCreep(game, new Vector2(1.5f, 1.5f));
-            game.addEntity(enemy);
+            game.entities.addEntity(enemy);
             enemies.add(enemy);
         });
 
@@ -156,7 +156,7 @@ public class EnemiesManager implements Updatable, Telegraph {
 
     private void spawnEnemy(Vector2 position) {
         Enemy enemy = new RedCreep(game, new Vector2(position));
-        game.addEntity(enemy);
+        game.entities.addEntity(enemy);
         enemies.add(enemy);
     }
 

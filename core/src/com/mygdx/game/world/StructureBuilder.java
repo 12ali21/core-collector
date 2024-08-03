@@ -54,7 +54,7 @@ public class StructureBuilder implements Updatable, Renderable {
                 currentStructure.setGhostValid(true);
                 if (Gdx.input.justTouched()) {
                     Structure structure = currentStructure.build();
-                    game.addStructure(structure);
+                    game.entities.addStructure(structure);
                     inBuildMode = false;
                     currentStructure = null;
                 }

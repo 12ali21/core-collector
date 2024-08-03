@@ -5,8 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ai.msg.MessageManager;
-import com.badlogic.gdx.ai.msg.Telegram;
-import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.GridPoint2;
@@ -18,18 +16,16 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
-import com.mygdx.game.ai.MessageType;
+import com.mygdx.game.ai.agents.BotAgent;
 import com.mygdx.game.audio.AudioManager;
 import com.mygdx.game.audio.BackgroundMusic;
 import com.mygdx.game.audio.NonSpatialSound;
+import com.mygdx.game.entities.bots.EntityManager;
 import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.others.Bullet;
-import com.mygdx.game.entities.others.Entity;
 import com.mygdx.game.entities.others.HoveredTile;
-import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Ship;
-import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.Structures;
 import com.mygdx.game.screens.ScreenInputProcessor;
 import com.mygdx.game.ui.UIManager;
@@ -38,12 +34,12 @@ import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
 import com.mygdx.game.world.map.MapManager;
 
-import java.util.Iterator;
-
-public class Game implements Renderable, Updatable, Disposable, Telegraph {
+public class Game implements Renderable, Updatable, Disposable {
     public final MapManager map;
     public final AudioManager audio;
     public final UIManager ui;
+    public final EntityManager entities;
+    private final EnemiesManager enemies;
 
     private final World world;
     private final Batch batch;
@@ -52,15 +48,11 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
     private final Box2DDebugRenderer debugRenderer;
     private final StructureBuilder structureBuilder = new StructureBuilder(this);
     private final HoveredTile hoveredTile;
-    private final Array<Entity> entitiesRender = new Array<>();
-    private final Array<Entity> entitiesUpdate = new Array<>();
-    private final Array<Entity> entitiesToAdd = new Array<>();
     private final MyContactListener contactListener;
     private final NonSpatialSound pauseSound;
-    private final EnemiesManager enemiesManager;
     private final BackgroundMusic backgroundMusic;
     private final ScreenInputProcessor inputProcessor;
-    private boolean isSorted = false;
+    private final BotAgent botAgent;
     private boolean isPaused = false;
     private boolean isMenuPaused = false;
 
@@ -85,12 +77,15 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
             }
         });
 
+        entities = new EntityManager(this);
+
         // setup input processors
         inputProcessor = new ScreenInputProcessor();
         InputMultiplexer inputMux = new InputMultiplexer();
         inputMux.addProcessor(inputProcessor);
         inputMux.addProcessor(Debug.getStage());
         inputMux.addProcessor(ui.getProcessor());
+        inputMux.addProcessor(entities);
         Gdx.input.setInputProcessor(inputMux);
 
         contactListener = new MyContactListener();
@@ -107,13 +102,14 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
 
         hoveredTile = new HoveredTile(this);
 
-        enemiesManager = new EnemiesManager(this);
+        enemies = new EnemiesManager(this);
 
         Ship ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
-        addStructure(ship);
+        entities.addStructure(ship);
 
         backgroundMusic = new BackgroundMusic(this);
-        MessageManager.getInstance().addListener(this, MessageType.SHIP_STARTED.ordinal());
+
+        botAgent = new BotAgent(this, new Vector2(2, 2));
 
         updatePreferences();
     }
@@ -132,29 +128,12 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
         world.step(1 / 60f, 6, 2);
 
         updateManagers(delta);
-
-        // Update entities
-        for (Iterator<Entity> itr = entitiesUpdate.iterator(); itr.hasNext(); ) {
-            Entity entity = itr.next();
-            if (entity.isAlive()) {
-                entity.update(delta);
-            } else {
-                if (entity instanceof Structure) { // since structure need to be removed from map
-                    Structure s = (Structure) entity;
-                    Bounds bounds = s.getBounds();
-                    map.removeStructure(s, bounds.x, bounds.y, bounds.width, bounds.height);
-                }
-                entity.dispose();
-                itr.remove();
-            }
-        }
-
-        registerEntities();
+        entities.update(delta);
     }
 
     private void updateManagers(float delta) {
         structureBuilder.update(delta);
-        enemiesManager.update(delta);
+        enemies.update(delta);
         MessageManager.getInstance().update();
         audio.update(delta);
         backgroundMusic.update(delta);
@@ -220,43 +199,12 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
 
         structureBuilder.render();
         hoveredTile.render();
-        // Sort entities by rendering order
-        if (!isSorted) {
-            entitiesRender.sort((a, b) -> Float.compare(a.getRenderPriority(), b.getRenderPriority()));
-            isSorted = true;
-        }
-
-        // Render entities
-        for (Iterator<Entity> itr = entitiesRender.iterator(); itr.hasNext(); ) {
-            Entity entity = itr.next();
-            if (entity.isAlive()) {
-                entity.render();
-            } else {
-                itr.remove();
-            }
-        }
+        entities.render();
         batch.end();
         if (Debug.isDebugging()) {
             debugRenderer.render(world, camera.combined);
         }
         ui.render();
-    }
-
-    /**
-     * Add an entity to the world
-     */
-    public void addEntity(Entity entity) {
-        entitiesToAdd.add(entity);
-    }
-
-    /**
-     * Add a structure to the world and map
-     */
-    public void addStructure(Structure structure) {
-        Bounds bounds = structure.getBounds();
-        map.putNewStructure(structure, bounds.x, bounds.y, bounds.width, bounds.height);
-
-        entitiesToAdd.add(structure);
     }
 
     /**
@@ -275,27 +223,6 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
         return false;
     }
 
-    /**
-     * Register new entities this frame to be updated and rendered
-     */
-    private void registerEntities() {
-        if (entitiesToAdd.isEmpty()) {
-            return;
-        }
-        for (Entity e : entitiesToAdd) {
-            // If the entity is a structure, add its parts instead
-            if (e instanceof Structure) {
-                Structure s = (Structure) e;
-                for (Entity e2 : s.getParts()) {
-                    entitiesRender.add(e2);
-                }
-            }
-            entitiesRender.add(e);
-            entitiesUpdate.add(e);
-        }
-        isSorted = false;
-        entitiesToAdd.clear();
-    }
 
     // ---------------- Getters ----------------
     public World getWorld() {
@@ -311,7 +238,7 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
     }
 
     public Array<Enemy> getEnemies() {
-        return enemiesManager.getEnemies();
+        return enemies.getEnemies();
     }
 
     @Override
@@ -320,11 +247,6 @@ public class Game implements Renderable, Updatable, Disposable, Telegraph {
         debugRenderer.dispose();
         map.dispose();
         audio.dispose();
-    }
-
-    @Override
-    public boolean handleMessage(Telegram msg) {
-        return false;
     }
 
     public void updatePreferences() {
