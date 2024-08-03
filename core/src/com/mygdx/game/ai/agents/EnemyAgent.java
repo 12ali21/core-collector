@@ -15,6 +15,9 @@ import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.ai.GameLocation;
 import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.ai.formation.FormationMembership;
@@ -22,6 +25,7 @@ import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.utils.Bodies;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.utils.Utils;
@@ -30,7 +34,7 @@ import com.mygdx.game.world.map.MapNode;
 
 import static com.mygdx.game.utils.Utils.convertToLinePath;
 
-public class EnemyAgent extends Agent {
+public class EnemyAgent extends Agent implements Disposable {
     private final StateMachine<EnemyAgent, EnemyState> stateMachine;
     private final FormationMembership membership;
     private final Enemy owner;
@@ -48,21 +52,41 @@ public class EnemyAgent extends Agent {
     private float timer = 0;
     private boolean staggered;
 
-    public EnemyAgent(Game game, Enemy owner, Body body, float attackingRange, float damage, float damageCooldown) {
-        super(game, body);
+    public EnemyAgent(Game game, Enemy owner, Vector2 position, float attackingRange, float damage, float damageCooldown) {
+        super(game, makeBody(game, position));
         this.owner = owner;
         this.attackingRange = attackingRange;
         this.damage = damage;
         this.damageCooldown = damageCooldown;
         stateMachine = new DefaultStateMachine<>(this, EnemyState.IDLE);
-        membership = new FormationMembership(game, body, this);
+        membership = new FormationMembership(game, this);
+
+        setMaxLinearAcceleration(2f);
+        setMaxLinearSpeed(5f);
 
         walkLimiter = new LinearLimiter(getMaxLinearAcceleration(), getMaxLinearSpeed());
         runLimiter = new LinearLimiter(getMaxLinearAcceleration() * 2,
                 getMaxLinearSpeed() * 2);
         currentLimiter = walkLimiter;
 
-        arriveTarget = new Arrive<>(this);
+        arriveTarget = new Arrive<>(this); // staying in position next to target when attacking
+    }
+
+    private static Body makeBody(Game game, Vector2 position) {
+        final Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(position.x, position.y);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.density = 1f;
+        fixtureDef.friction = 0.2f;
+        fixtureDef.restitution = 0f;
+
+        body = Bodies.createEllipse(game, bodyDef, 0.14f, 0.35f, 8, fixtureDef);
+        body.setLinearDamping(1f);
+        body.setAngularDamping(2f);
+        return body;
     }
 
     public boolean setTarget(Structure target) throws Utils.SingleNodePathException {
@@ -80,7 +104,7 @@ public class EnemyAgent extends Agent {
         if (followPathBehavior == null) {
             followPathBehavior = new FollowPath<>(this, path, 0.5f)
                     .setDecelerationRadius(1f)
-                    .setTimeToTarget(0.1f)
+                    .setTimeToTarget(2f)
                     .setLimiter(currentLimiter);
         } else {
             followPathBehavior.setPath(path)
@@ -100,7 +124,8 @@ public class EnemyAgent extends Agent {
     }
 
     private void followFormation() {
-        membership.update();
+        membership.calculateSteering(steeringOutput);
+        applySteering(steeringOutput);
     }
 
     private void followPath() {
@@ -113,8 +138,10 @@ public class EnemyAgent extends Agent {
         Vector2 linear = steering.linear;
         if (staggered)
             linear.scl(0.5f);
-        body.setLinearVelocity(linear);
-        body.setAngularVelocity(angular);
+        if (!linear.isZero())
+            body.setLinearVelocity(linear);
+        if (angular != 0)
+            body.setAngularVelocity(angular);
     }
 
     private boolean targetWithinRange() {
@@ -167,6 +194,11 @@ public class EnemyAgent extends Agent {
         if (followPathBehavior != null) {
             followPathBehavior.setLimiter(currentLimiter);
         }
+    }
+
+    @Override
+    public void dispose() {
+        game.getWorld().destroyBody(body);
     }
 
     /*

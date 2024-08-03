@@ -25,15 +25,17 @@ public abstract class Agent implements Steerable<Vector2> {
     private float maxLinearSpeed = 5f;
     private float maxLinearAcc = 2f;
     private float maxAngularSpeed = 10;
-    private float maxAngularAcc = 10f;
+    private float maxAngularAcc = 2f;
 
 
     public Agent(Game game, Body body) {
         this.game = game;
         this.body = body;
+        this.body.setUserData(this);
 
-        look = new LookWhereYouAreGoing<>(this).setTimeToTarget(1f)
-                .setDecelerationRadius(MathUtils.PI / 4f);
+        look = new LookWhereYouAreGoing<>(this)
+                .setTimeToTarget(2f)
+                .setDecelerationRadius(MathUtils.PI / 8f);
     }
 
     public void update() {

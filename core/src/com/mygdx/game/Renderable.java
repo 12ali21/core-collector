@@ -1,5 +1,5 @@
 package com.mygdx.game;
 
-public interface Drawable {
+public interface Renderable {
     void render();
 }

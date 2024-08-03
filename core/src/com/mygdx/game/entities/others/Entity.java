@@ -3,11 +3,11 @@ package com.mygdx.game.entities.others;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
-import com.mygdx.game.Drawable;
+import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.world.Game;
 
-public abstract class Entity implements Drawable, Updatable, Disposable {
+public abstract class Entity implements Renderable, Updatable, Disposable {
     protected final Batch batch;
     protected final Game game;
     protected boolean alive = true;
@@ -39,7 +39,6 @@ public abstract class Entity implements Drawable, Updatable, Disposable {
 
     @Override
     public void dispose() {
-
     }
 
     public Game getWorld() {

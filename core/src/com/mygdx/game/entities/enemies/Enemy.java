@@ -1,5 +1,6 @@
 package com.mygdx.game.entities.enemies;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ai.agents.EnemyAgent;
 import com.mygdx.game.entities.others.EntityObj;
@@ -28,10 +29,16 @@ public abstract class Enemy extends EntityObj {
 
     @Override
     public void update(float deltaTime) {
-        sprite.setPosition(body.getPosition().x - 0.5f, body.getPosition().y - 0.5f);
-        sprite.setRotation((float) Math.toDegrees(body.getAngle()));
+        sprite.setPosition(agent.getPosition().x - 0.5f, agent.getPosition().y - 0.5f);
+        sprite.setRotation((float) Math.toDegrees(agent.getOrientation() + MathUtils.HALF_PI));
         Vector2 pos = getCenter();
         health.setPosition(pos);
+    }
+
+
+    @Override
+    public Vector2 getCenter() {
+        return agent.getPosition();
     }
 
     public EnemyAgent getAgent() {
@@ -40,5 +47,10 @@ public abstract class Enemy extends EntityObj {
 
     public void damage(float amount) {
         health.damage(amount);
+    }
+
+    @Override
+    public void dispose() {
+        agent.dispose();
     }
 }

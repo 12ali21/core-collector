@@ -14,13 +14,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.game.Drawable;
+import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
-public class UIManager implements Drawable, Updatable, Disposable {
+public class UIManager implements Renderable, Updatable, Disposable {
     private final Stage stage;
     private final TextButton shipButton;
     private final Button buildButton;

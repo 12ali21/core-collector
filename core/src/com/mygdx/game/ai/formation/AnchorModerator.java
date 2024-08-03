@@ -19,19 +19,19 @@ public class AnchorModerator extends FormationMotionModerator<Vector2> {
     }
 
     private void calculateAvgPosition() {
-        avgPos.setZero();
-        for (FormationMembership member : members) {
-            avgPos.add(member.getPosition());
-        }
-        avgPos.scl(1f / members.size);
+//        avgPos.setZero();
+//        for (FormationMembership member : members) {
+//            avgPos.add(member.getPosition());
+//        }
+//        avgPos.scl(1f / members.size);
     }
 
     private void calculateAvgVelocity() {
-        avgVel.setZero();
-        for (FormationMembership member : members) {
-            avgVel.add(member.getLinearVelocity());
-        }
-        avgVel.scl(1f / members.size);
+//        avgVel.setZero();
+//        for (FormationMembership member : members) {
+//            avgVel.add(member.getLinearVelocity());
+//        }
+//        avgVel.scl(1f / members.size);
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ai.MessageType;
-import com.mygdx.game.entities.enemies.Enemy;
+import com.mygdx.game.ai.agents.EnemyAgent;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.utils.TextureAssets;
@@ -50,19 +50,19 @@ public class Bullet extends EntityObj {
         }
 
         Bullet bullet = null;
-        Enemy enemy = null;
+        EnemyAgent enemy = null;
         if (userDataA instanceof Bullet) {
             bullet = (Bullet) userDataA;
-            if (userDataB instanceof Enemy) {
-                enemy = (Enemy) userDataB;
+            if (userDataB instanceof EnemyAgent) {
+                enemy = (EnemyAgent) userDataB;
             } else if (userDataB.equals(MapManager.CellBodyType.WALL)) { //collision with wall
                 bullet.kill();
                 return true;
             }
         } else if (userDataB instanceof Bullet) {
             bullet = (Bullet) userDataB;
-            if (userDataA instanceof Enemy) {
-                enemy = (Enemy) userDataA;
+            if (userDataA instanceof EnemyAgent) {
+                enemy = (EnemyAgent) userDataA;
             } else if (userDataA.equals(MapManager.CellBodyType.WALL)) { //collision with wall
                 bullet.kill();
                 return true;
@@ -71,7 +71,7 @@ public class Bullet extends EntityObj {
         if (bullet != null && enemy != null) {
             MessageManager.getInstance().dispatchMessage(
                     null,
-                    enemy.getAgent().getTelegraph(),
+                    enemy.getTelegraph(),
                     MessageType.DAMAGE.ordinal(),
                     bullet
             );
@@ -128,5 +128,10 @@ public class Bullet extends EntityObj {
     public void dispose() {
         super.dispose();
         game.getWorld().destroyBody(body);
+    }
+
+    @Override
+    public Vector2 getCenter() {
+        return body.getPosition();
     }
 }

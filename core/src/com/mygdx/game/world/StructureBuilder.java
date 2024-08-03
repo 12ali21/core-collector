@@ -4,13 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.Drawable;
+import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.Structures;
 
-public class StructureBuilder implements Updatable, Drawable {
+public class StructureBuilder implements Updatable, Renderable {
     private final Game game;
     private boolean inBuildMode = false;
     private Structure.Builder currentStructure;

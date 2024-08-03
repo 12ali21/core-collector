@@ -16,7 +16,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.mygdx.game.Drawable;
+import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.ai.MessageType;
 import com.mygdx.game.audio.AudioManager;
@@ -40,7 +40,7 @@ import com.mygdx.game.world.map.MapManager;
 
 import java.util.Iterator;
 
-public class Game implements Drawable, Updatable, Disposable, Telegraph {
+public class Game implements Renderable, Updatable, Disposable, Telegraph {
     public final MapManager map;
     public final AudioManager audio;
     public final UIManager ui;

@@ -4,11 +4,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.Drawable;
+import com.mygdx.game.Renderable;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
-public class HealthPoints implements Drawable {
+public class HealthPoints implements Renderable {
     private static final float YELLOW_THRESHOLD = 0.5f;
     private static final float RED_THRESHOLD = 0.2f;
     private final Vector2 offset = new Vector2(0, 0);

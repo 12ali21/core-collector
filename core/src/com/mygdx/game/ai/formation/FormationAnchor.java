@@ -28,7 +28,7 @@ public class FormationAnchor extends SteerableAdapter<Vector2> implements Updata
     private final ReachOrientation<Vector2> reachOrientation;
     private final Vector2 target;
     private FollowPath<Vector2, LinePath.LinePathParam> followPath;
-    private float maxLinearSpeed = 2f;
+    private float maxLinearSpeed = 1.5f;
     private float maxLinearAcceleration = 2f;
     private float orientation;
 

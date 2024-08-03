@@ -9,38 +9,35 @@ import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.ai.GameLocation;
 import com.mygdx.game.ai.MessageType;
-import com.mygdx.game.ai.agents.Agent;
 import com.mygdx.game.ai.agents.EnemyAgent;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.Utils;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
-public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fma.FormationMember<Vector2> {
+public class FormationMembership implements com.badlogic.gdx.ai.fma.FormationMember<Vector2> {
 
-    private static final float EPSILON = 0.05f;
-    private final Arrive<Vector2> arriveTarget;
-    private final SteeringAcceleration<Vector2> steering = new SteeringAcceleration<>(new Vector2());
     private final GameLocation slotLocation;
+    private final Game game;
     private final EnemyAgent owner;
+    private final Arrive<Vector2> arriveTarget;
+    private FormationManager currentFormation;
+    private FollowPath<Vector2, LinePath.LinePathParam> followPath;
     private boolean onPath = false;
     private GridPoint2 lastPathTarget;
-    private FollowPath<Vector2, LinePath.LinePathParam> followPath;
-    private FormationManager currentFormation;
 
 
-    public FormationMembership(Game game, Body body, EnemyAgent owner) {
-        super(game, body);
+    public FormationMembership(Game game, EnemyAgent owner) {
+        this.game = game;
         this.owner = owner;
         this.slotLocation = new GameLocation();
 
-        arriveTarget = new Arrive<>(this, this.getTargetLocation())
-                .setTimeToTarget(0.2f)
-                .setArrivalTolerance(0.001f)
-                .setDecelerationRadius(1.2f);
+        arriveTarget = new Arrive<>(owner, this.getTargetLocation()) // for arriving at slot position
+                .setTimeToTarget(2f)
+                .setDecelerationRadius(0.1f)
+                .setLimiter(owner);
     }
 
     private boolean canReachDiagonal(int x1, int y1, int x2, int y2) {
@@ -57,16 +54,13 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
         }
     }
 
-    @Override
-    public void update() {
-        super.update();
-
-        Vector2 tmp = getPosition();
+    public void calculateSteering(SteeringAcceleration<Vector2> steering) {
+        Vector2 tmp = owner.getPosition();
         GridPoint2 curPoint = new GridPoint2((int) tmp.x, (int) tmp.y);
         tmp = getTargetLocation().getPosition();
         GridPoint2 targetPoint = new GridPoint2((int) tmp.x, (int) tmp.y);
         // if the target is adjacent or diagonally adjacent arrive at it
-        if (targetPoint.dst(curPoint) <= 1f + EPSILON
+        if (targetPoint.dst(curPoint) <= 1f + 0.05f
                 || canReachDiagonal(curPoint.x, curPoint.y, targetPoint.x, targetPoint.y)
                 || !game.map.isWithinBoundary(curPoint.x, curPoint.y)) {
             onPath = false;
@@ -81,7 +75,7 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
             lastPathTarget = targetPoint;
             if (followPath == null) {
                 try {
-                    followPath = new FollowPath<>(this, Utils.convertToLinePath(graphPath))
+                    followPath = new FollowPath<>(owner, Utils.convertToLinePath(graphPath))
                             .setPathOffset(0.5f)
                             .setTimeToTarget(0.25f);
                 } catch (Utils.SingleNodePathException e) {
@@ -97,9 +91,6 @@ public class FormationMembership extends Agent implements com.badlogic.gdx.ai.fm
         } else { // follow the path
             followPath.calculateSteering(steering);
         }
-
-        body.applyForceToCenter(steering.linear, true);
-
     }
 
     @Override
