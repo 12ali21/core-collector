@@ -9,6 +9,7 @@ public enum TextureAssets {
     ENEMY_BIG_TEXTURE("sprites/enemy_big.png"),
     ENEMY_SMALL_TEXTURE("sprites/enemy_small.png"),
     HOVERED_TILE_TEXTURE("sprites/hovered_tile.png"),
+    SELECTED_TILE_TEXTURE("sprites/selected_tile.png"),
     SHIP_TEXTURE("sprites/ship.png"),
     TURRET_BASE_TEXTURE("sprites/turret_base.png"),
     TURRET_HEAD_TEXTURE("sprites/turret_head.png"),

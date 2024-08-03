@@ -15,7 +15,6 @@ import java.util.Arrays;
 public class MapGenerator {
     public static final boolean[][] TILE_DIRECTIONS = new boolean[47][];
     private static final double SCALE = 1 / 24f;
-    private static final int TILE_SIZE = 64;
     private static final float WALL_THRESHOLD = 0.65f;
 
     static {
@@ -79,7 +78,7 @@ public class MapGenerator {
     public MapGenerator(long seed) {
         this.seed = seed;
         Texture mountainWallTexture = TextureAssets.get(TextureAssets.DIRT_WALL_TEXTURE);
-        mountain = TextureRegion.split(mountainWallTexture, TILE_SIZE, TILE_SIZE);
+        mountain = TextureRegion.split(mountainWallTexture, Constants.TILE_SIZE, Constants.TILE_SIZE);
     }
 
     public TiledMap generate(int width, int height) {
@@ -89,7 +88,7 @@ public class MapGenerator {
         this.height = height;
 
         MapLayers layers = map.getLayers();
-        wallLayer = new TiledMapTileLayer(width, height, TILE_SIZE, TILE_SIZE);
+        wallLayer = new TiledMapTileLayer(width, height, Constants.TILE_SIZE, Constants.TILE_SIZE);
         wallLayer.setName(MapManager.WALL_LAYER);
         int border = Constants.MAP_BORDER_LENGTH;
 

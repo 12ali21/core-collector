@@ -13,6 +13,7 @@ public class Constants {
     public static final float PAN_SPEED = 15f;
     public static final float SOUND_EFFECT_LIMIT = 60f; // 1 min
 
+    public static final int TILE_SIZE = 64;
     public static final int MAP_WIDTH = 200;
     public static final int MAP_HEIGHT = 200;
     public static final int MAP_BORDER_LENGTH = 2;
