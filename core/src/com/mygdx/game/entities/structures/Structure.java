@@ -45,6 +45,11 @@ public abstract class Structure extends Entity implements Selectable {
         // nothing for now (maybe prioritize a target in turret? or face a certain direction?)
     }
 
+    @Override
+    public int getPriority() {
+        return getRenderPriority();
+    }
+
     public Vector2 getCenter() {
         return new Vector2(bounds.x + (float) bounds.width / 2, bounds.y + (float) bounds.height / 2);
     }

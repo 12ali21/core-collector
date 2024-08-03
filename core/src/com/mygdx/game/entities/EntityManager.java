@@ -1,19 +1,16 @@
-package com.mygdx.game.entities.bots;
+package com.mygdx.game.entities;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Renderable;
 import com.mygdx.game.Selectable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.entities.others.Entity;
+import com.mygdx.game.entities.others.Selected;
 import com.mygdx.game.entities.structures.Bounds;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.utils.Constants;
-import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
 import java.util.Iterator;
@@ -24,20 +21,13 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
     private final Array<Entity> entitiesRender = new Array<>();
     private final Array<Entity> entitiesUpdate = new Array<>();
     private final Array<Entity> entitiesToAdd = new Array<>();
-    private final NinePatch selectNinePatch;
     private boolean isSorted = false;
-    private Selectable selected;
-    private static final float SELECTED_OFFSET = 0.1f;
+    private Selected selected;
 
     public EntityManager(Game game) {
         this.game = game;
-        selectNinePatch = new NinePatch(
-                TextureAssets.get(TextureAssets.SELECTED_TILE_TEXTURE),
-                4, 4, 4, 4);
-
-        selectNinePatch.scale(1f / Constants.TILE_SIZE, 1f / Constants.TILE_SIZE);
-        Color color = new Color(1, 1, 1, 0.2f);
-        selectNinePatch.setColor(color);
+        selected = new Selected(game);
+        addEntity(selected);
     }
 
 
@@ -45,25 +35,31 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector3 selectedPosition = game.unproject(screenX, screenY);
         if (button == Input.Buttons.LEFT) {
-            selected = selectableAt(selectedPosition.x, selectedPosition.y);
+            selected.setEntity(selectableAt(selectedPosition.x, selectedPosition.y));
         } else if (button == Input.Buttons.RIGHT) {
             if (selected != null) {
-                selected.setTargetPosition(selectedPosition.x, selectedPosition.y);
+                selected.getEntity().setTargetPosition(selectedPosition.x, selectedPosition.y);
             }
         }
         return false;
     }
 
     private Selectable selectableAt(float x, float y) {
+        Selectable best = null;
+        int bestPriority = Integer.MIN_VALUE;
+
         for (Entity entity : entitiesUpdate) {
             if (entity instanceof Selectable) {
                 Selectable s = (Selectable) entity;
                 if (s.getSelectableBounds().contains(x, y)) {
-                    return s;
+                    if (s.getPriority() > bestPriority) {
+                        best = s;
+                        bestPriority = s.getPriority();
+                    }
                 }
             }
         }
-        return null;
+        return best;
     }
 
     @Override
@@ -115,12 +111,7 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
 
     private void drawSelected() {
         if (selected != null) {
-            selectNinePatch.draw(game.getBatch(),
-                    selected.getSelectableBounds().x + SELECTED_OFFSET,
-                    selected.getSelectableBounds().y + SELECTED_OFFSET,
-                    selected.getSelectableBounds().width - 2 * SELECTED_OFFSET,
-                    selected.getSelectableBounds().height - 2 * SELECTED_OFFSET
-            );
+
         }
     }
 

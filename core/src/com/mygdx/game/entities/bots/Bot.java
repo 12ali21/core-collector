@@ -66,4 +66,9 @@ public class Bot extends EntityObj implements Selectable {
     public void setTargetPosition(float x, float y) {
         agent.setMoveToTarget(x, y);
     }
+
+    @Override
+    public int getPriority() {
+        return getRenderPriority();
+    }
 }

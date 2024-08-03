@@ -12,4 +12,9 @@ public interface Selectable {
      * @param y the y-position in world the mouse was right-clicked
      */
     void setTargetPosition(float x, float y);
+
+    /**
+     * @return the priority (used when there are multiple selectables on top of each other)
+     */
+    int getPriority();
 }
