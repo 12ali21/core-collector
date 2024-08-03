@@ -7,7 +7,6 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
-import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.behaviors.Arrive;
 import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
 import com.badlogic.gdx.ai.steer.limiters.LinearLimiter;
@@ -38,7 +37,6 @@ public class EnemyAgent extends Agent implements Disposable {
     private final float attackingRange;
     private final float damage;
     private final float damageCooldown;
-    private final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<>(new Vector2());
     private final LinearLimiter walkLimiter;
     private final LinearLimiter runLimiter;
     private final Arrive<Vector2> arriveTarget;
@@ -104,24 +102,20 @@ public class EnemyAgent extends Agent implements Disposable {
     }
 
     private void followFormation() {
-        membership.calculateSteering(steeringOutput);
-        applySteering(steeringOutput);
+        membership.calculateSteering(steering);
+        applySteering();
     }
 
     private void followPath() {
-        followPathBehavior.calculateSteering(steeringOutput);
-        applySteering(steeringOutput);
+        followPathBehavior.calculateSteering(steering);
+        applySteering();
     }
 
-    public void applySteering(SteeringAcceleration<Vector2> steering) {
-        float angular = steering.angular;
-        Vector2 linear = steering.linear;
+    @Override
+    public void applySteering() {
         if (staggered)
-            linear.scl(0.5f);
-        if (!linear.isZero())
-            body.setLinearVelocity(linear);
-        if (angular != 0)
-            body.setAngularVelocity(angular);
+            steering.linear.scl(0.5f);
+        super.applySteering();
     }
 
     private boolean targetWithinRange() {
@@ -139,8 +133,8 @@ public class EnemyAgent extends Agent implements Disposable {
                 timer = damageCooldown;
             }
         }
-        arriveTarget.calculateSteering(steeringOutput);
-        applySteering(steeringOutput);
+        arriveTarget.calculateSteering(steering);
+        applySteering();
     }
 
     public void stagger(float time) {

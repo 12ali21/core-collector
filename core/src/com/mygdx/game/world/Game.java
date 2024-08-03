@@ -16,10 +16,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
-import com.mygdx.game.ai.agents.BotAgent;
 import com.mygdx.game.audio.AudioManager;
 import com.mygdx.game.audio.BackgroundMusic;
 import com.mygdx.game.audio.NonSpatialSound;
+import com.mygdx.game.entities.bots.Bot;
 import com.mygdx.game.entities.bots.EntityManager;
 import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
@@ -52,7 +52,7 @@ public class Game implements Renderable, Updatable, Disposable {
     private final NonSpatialSound pauseSound;
     private final BackgroundMusic backgroundMusic;
     private final ScreenInputProcessor inputProcessor;
-    private final BotAgent botAgent;
+    private final Bot bot;
     private boolean isPaused = false;
     private boolean isMenuPaused = false;
 
@@ -109,7 +109,8 @@ public class Game implements Renderable, Updatable, Disposable {
 
         backgroundMusic = new BackgroundMusic(this);
 
-        botAgent = new BotAgent(this, new Vector2(2, 2));
+        bot = new Bot(this, new Vector2(2, 2));
+        entities.addEntity(bot);
 
         updatePreferences();
     }

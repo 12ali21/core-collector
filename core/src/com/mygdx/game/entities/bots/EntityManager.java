@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Renderable;
+import com.mygdx.game.Selectable;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.entities.others.Entity;
 import com.mygdx.game.entities.structures.Bounds;
@@ -25,7 +26,7 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
     private final Array<Entity> entitiesToAdd = new Array<>();
     private final NinePatch selectNinePatch;
     private boolean isSorted = false;
-    private Bounds selectedBounds;
+    private Selectable selected;
     private static final float SELECTED_OFFSET = 0.1f;
 
     public EntityManager(Game game) {
@@ -37,30 +38,27 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
         selectNinePatch.scale(1f / Constants.TILE_SIZE, 1f / Constants.TILE_SIZE);
         Color color = new Color(1, 1, 1, 0.2f);
         selectNinePatch.setColor(color);
-
-
     }
 
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        Vector3 selectedPosition = game.unproject(screenX, screenY);
         if (button == Input.Buttons.LEFT) {
-            Vector3 selectedPosition = game.unproject(screenX, screenY);
-            Structure s = structureAt(selectedPosition.x, selectedPosition.y);
-            if (s != null) {
-                selectedBounds = s.getBounds();
-            } else {
-                selectedBounds = null;
+            selected = selectableAt(selectedPosition.x, selectedPosition.y);
+        } else if (button == Input.Buttons.RIGHT) {
+            if (selected != null) {
+                selected.setTargetPosition(selectedPosition.x, selectedPosition.y);
             }
         }
         return false;
     }
 
-    private Structure structureAt(float x, float y) {
+    private Selectable selectableAt(float x, float y) {
         for (Entity entity : entitiesUpdate) {
-            if (entity instanceof Structure) {
-                Structure s = (Structure) entity;
-                if (s.getBounds().inBounds(x, y)) {
+            if (entity instanceof Selectable) {
+                Selectable s = (Selectable) entity;
+                if (s.getSelectableBounds().contains(x, y)) {
                     return s;
                 }
             }
@@ -70,7 +68,12 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
 
     @Override
     public void update(float deltaTime) {
+        updateEntities(deltaTime);
 
+        registerEntities();
+    }
+
+    private void updateEntities(float deltaTime) {
         // Update entities
         for (Iterator<Entity> itr = entitiesUpdate.iterator(); itr.hasNext(); ) {
             Entity entity = itr.next();
@@ -86,8 +89,6 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
                 itr.remove();
             }
         }
-
-        registerEntities();
     }
 
     @Override
@@ -113,12 +114,12 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
     }
 
     private void drawSelected() {
-        if (selectedBounds != null) {
+        if (selected != null) {
             selectNinePatch.draw(game.getBatch(),
-                    selectedBounds.x + SELECTED_OFFSET,
-                    selectedBounds.y + SELECTED_OFFSET,
-                    selectedBounds.width - 2 * SELECTED_OFFSET,
-                    selectedBounds.height - 2 * SELECTED_OFFSET
+                    selected.getSelectableBounds().x + SELECTED_OFFSET,
+                    selected.getSelectableBounds().y + SELECTED_OFFSET,
+                    selected.getSelectableBounds().width - 2 * SELECTED_OFFSET,
+                    selected.getSelectableBounds().height - 2 * SELECTED_OFFSET
             );
         }
     }

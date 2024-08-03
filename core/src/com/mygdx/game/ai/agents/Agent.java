@@ -17,10 +17,11 @@ import com.mygdx.game.world.Game;
 public abstract class Agent implements Steerable<Vector2> {
     protected final Body body;
     protected final Game game;
-    private final LookWhereYouAreGoing<Vector2> look;
+    protected final LookWhereYouAreGoing<Vector2> look;
     private final GridPoint2 gridPos = new GridPoint2();
 
-    private final SteeringAcceleration<Vector2> angularSteering = new SteeringAcceleration<>(new Vector2());
+    protected final SteeringAcceleration<Vector2> steering = new SteeringAcceleration<>(new Vector2());
+    private float zeroSpeedThreshold = 0.5f;
     private boolean tagged;
     private float maxLinearSpeed = 5f;
     private float maxLinearAcc = 2f;
@@ -34,18 +35,27 @@ public abstract class Agent implements Steerable<Vector2> {
         this.body.setUserData(this);
 
         look = new LookWhereYouAreGoing<>(this)
-                .setTimeToTarget(2f)
-                .setDecelerationRadius(MathUtils.PI / 8f);
+                .setTimeToTarget(4f)
+                .setDecelerationRadius(MathUtils.PI / 4f);
     }
 
     public void update() {
         // Update orientation and angular velocity
-        look.calculateSteering(angularSteering);
-        body.applyTorque(angularSteering.angular, true);
+        look.calculateSteering(steering);
+        body.applyTorque(steering.angular, true);
 
         Debug.drawLine("agent vel", getPosition(), getPosition().cpy().add(getLinearVelocity()));
         Vector2 v = new Vector2();
         Debug.drawLine("agent orientation", getPosition(), angleToVector(v, getOrientation()).add(getPosition()));
+    }
+
+    public void applySteering() {
+        float angular = steering.angular;
+        Vector2 linear = steering.linear;
+        if (!linear.isZero())
+            body.setLinearVelocity(linear);
+        if (angular != 0)
+            body.setAngularVelocity(angular);
     }
 
     @Override
@@ -76,12 +86,12 @@ public abstract class Agent implements Steerable<Vector2> {
 
     @Override
     public float getZeroLinearSpeedThreshold() {
-        return 0.5f;
+        return zeroSpeedThreshold;
     }
 
     @Override
     public void setZeroLinearSpeedThreshold(float value) {
-
+        zeroSpeedThreshold = value;
     }
 
     @Override

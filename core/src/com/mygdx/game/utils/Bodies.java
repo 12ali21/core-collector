@@ -42,7 +42,7 @@ public class Bodies {
 
     private static FixtureDef getTemplateFixtureDef() {
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.density = 1f;
+        fixtureDef.density = 2f;
         fixtureDef.friction = 0.2f;
         fixtureDef.restitution = 0f;
         return fixtureDef;
@@ -63,16 +63,17 @@ public class Bodies {
         BodyDef bodyDef = getTemplateBodyDef(position);
 
         FixtureDef fixtureDef = getTemplateFixtureDef();
+        fixtureDef.density = 8f;
         fixtureDef.isSensor = true; // because it flies
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(0.5f);
+        shape.setRadius(0.25f);
         fixtureDef.shape = shape;
 
         body = game.getWorld().createBody(bodyDef);
         body.createFixture(fixtureDef);
         body.setLinearDamping(1f);
-        body.setAngularDamping(2f);
+        body.setAngularDamping(10f);
         return body;
 
     }

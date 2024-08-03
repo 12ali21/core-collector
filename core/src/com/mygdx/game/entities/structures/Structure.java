@@ -2,13 +2,15 @@ package com.mygdx.game.entities.structures;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Selectable;
 import com.mygdx.game.entities.others.Entity;
 import com.mygdx.game.entities.others.HealthPoints;
 import com.mygdx.game.world.Game;
 
-public abstract class Structure extends Entity {
+public abstract class Structure extends Entity implements Selectable {
     protected final Array<StructurePart> parts;
     protected final Bounds bounds;
     protected final HealthPoints health;
@@ -31,6 +33,16 @@ public abstract class Structure extends Entity {
 
     public Bounds getBounds() {
         return bounds;
+    }
+
+    @Override
+    public Rectangle getSelectableBounds() {
+        return bounds.toRectangle();
+    }
+
+    @Override
+    public void setTargetPosition(float x, float y) {
+        // nothing for now (maybe prioritize a target in turret? or face a certain direction?)
     }
 
     public Vector2 getCenter() {
