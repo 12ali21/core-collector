@@ -5,8 +5,10 @@ import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.ai.agents.BotAgent;
 import com.mygdx.game.audio.SpatialSoundLooping;
 import com.mygdx.game.audio.SpatialSoundNonLooping;
 import com.mygdx.game.entities.enemies.Enemy;
@@ -30,6 +32,7 @@ public class Turret extends Structure {
     private final Scheduler fireScheduler;
     private float headRotation = 0;
     private Enemy target;
+    private BotAgent pilot;
 
     protected Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
@@ -169,6 +172,15 @@ public class Turret extends Structure {
         Vector2 offsetVector = new Vector2(-1, 0).rotateDeg(headRotation).scl(offset);
         headPos.add(offsetVector);
         head.sprite.setOriginBasedPosition(headPos.x, headPos.y);
+
+        if (pilot != null) {
+            pilot.setSeatLocation(headPos,
+                    head.sprite.getRotation() * MathUtils.degreesToRadians + MathUtils.HALF_PI);
+        }
+    }
+
+    public void setPilot(BotAgent pilot) {
+        this.pilot = pilot;
     }
 
     @Override

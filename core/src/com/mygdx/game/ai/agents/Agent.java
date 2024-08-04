@@ -139,6 +139,10 @@ public abstract class Agent implements Steerable<Vector2> {
         return body.getPosition();
     }
 
+    public void setTransform(Vector2 position, float orientation) {
+        body.setTransform(position, orientation);
+    }
+
     public GridPoint2 getGridPosition() {
         gridPos.set((int) getPosition().x, (int) getPosition().y);
         return gridPos;

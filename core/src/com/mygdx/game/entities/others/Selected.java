@@ -22,7 +22,7 @@ public class Selected extends Entity {
 
         selectNinePatch = new NinePatch(
                 TextureAssets.get(TextureAssets.SELECTED_TILE_TEXTURE),
-                4, 4, 4, 4);
+                6, 6, 6, 6);
 
         selectNinePatch.scale(1f / Constants.TILE_SIZE, 1f / Constants.TILE_SIZE);
         Color color = new Color(1, 1, 1, 0.2f);

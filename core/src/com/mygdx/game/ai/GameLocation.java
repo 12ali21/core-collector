@@ -16,6 +16,11 @@ public class GameLocation implements Location<Vector2> {
         this.orientation = 0;
     }
 
+    public GameLocation(Vector2 position, float orientation) {
+        this.position = position;
+        this.orientation = orientation;
+    }
+
     @Override
     public Vector2 getPosition() {
         return position;

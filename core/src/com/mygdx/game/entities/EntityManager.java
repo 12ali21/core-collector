@@ -104,7 +104,7 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
             selectedEntity.setEntity(entity);
             return entity != null;
         } else if (button == Input.Buttons.RIGHT) {
-            if (selectedEntity != null) {
+            if (selectedEntity.getEntity() != null) {
                 selectedEntity.getEntity().setTargetPosition(selectedPosition.x, selectedPosition.y);
                 return true;
             }

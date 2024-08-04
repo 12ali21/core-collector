@@ -230,6 +230,13 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
         structures.removeValue(structure, true);
     }
 
+    public Structure getStructureAt(int x, int y) {
+        if (isWithinBoundary(x, y) && nodes[x][y] != null && nodes[x][y].hasStructure()) {
+            return nodes[x][y].getStructure();
+        }
+        return null;
+    }
+
     public Array<Structure> getStructures() {
         return structures;
     }
