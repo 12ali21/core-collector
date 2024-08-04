@@ -225,4 +225,8 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
         isSorted = false;
         entitiesToAdd.clear();
     }
+
+    public void updateRenderingPriorities() {
+        isSorted = false;
+    }
 }

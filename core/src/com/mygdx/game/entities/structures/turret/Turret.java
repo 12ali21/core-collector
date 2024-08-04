@@ -30,6 +30,7 @@ public class Turret extends Structure {
     private final SpatialSoundNonLooping shootSound;
     private final SpatialSoundLooping rotateSound;
     private final Scheduler fireScheduler;
+    private final Vector2 seatingOffset = new Vector2();
     private float headRotation = 0;
     private Enemy target;
     private BotAgent pilot;
@@ -174,9 +175,16 @@ public class Turret extends Structure {
         head.sprite.setOriginBasedPosition(headPos.x, headPos.y);
 
         if (pilot != null) {
-            pilot.setSeatLocation(headPos,
+            calculateSeatingOffset();
+            pilot.setSeatLocation(headPos.add(seatingOffset),
                     head.sprite.getRotation() * MathUtils.degreesToRadians + MathUtils.HALF_PI);
         }
+    }
+
+
+    private void calculateSeatingOffset() {
+        seatingOffset.set(-0.08f, 0);
+        seatingOffset.rotateDeg(head.sprite.getRotation());
     }
 
     public void setPilot(BotAgent pilot) {

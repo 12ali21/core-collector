@@ -16,7 +16,6 @@ public class Bot extends EntityObj implements Selectable {
     private final static float SEATED_SCALE = 0.8f;
     private final BotAgent agent;
     private Rectangle bounds;
-    private final Vector2 seatingOffset = new Vector2();
 
     public Bot(Game game, Vector2 position) {
         super(game);
@@ -51,21 +50,13 @@ public class Bot extends EntityObj implements Selectable {
 
         if (agent.isSeated()) {
             sprite.setScale(SEATED_SCALE);
-            calculateSeatingOffset();
-            sprite.setOriginBasedPosition(agent.getPosition().x + seatingOffset.x,
-                    agent.getPosition().y + seatingOffset.y);
         } else {
             sprite.setScale(1f);
-            sprite.setOriginBasedPosition(agent.getPosition().x, agent.getPosition().y);
         }
+        sprite.setOriginBasedPosition(agent.getPosition().x, agent.getPosition().y);
         sprite.setRotation(MathUtils.radiansToDegrees * agent.getOrientation() - 90);
 
         updateBounds(agent.getPosition());
-    }
-
-    private void calculateSeatingOffset() {
-        seatingOffset.set(0, -0.08f);
-        seatingOffset.rotateDeg(sprite.getRotation());
     }
 
     @Override

@@ -25,6 +25,7 @@ public abstract class Entity implements Renderable, Updatable, Disposable {
 
     public void setRenderPriority(int renderPriority) {
         this.renderPriority = renderPriority;
+        game.entities.updateRenderingPriorities();
     }
 
     public boolean isAlive() {
