@@ -31,9 +31,11 @@ public class Turret extends Structure {
     private final SpatialSoundLooping rotateSound;
     private final Scheduler fireScheduler;
     private final Vector2 seatingOffset = new Vector2();
+    private final Scheduler wanderScheduler;
     private float headRotation = 0;
     private Enemy target;
     private BotAgent pilot;
+    private float wanderingTargetAngle = 0f;
 
     protected Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
@@ -48,7 +50,7 @@ public class Turret extends Structure {
                 builder.recoilMaxDistance,
                 builder.recoilReturnVelocity);
 
-        stateMachine = new DefaultStateMachine<>(this, TurretState.SEARCHING);
+        stateMachine = new DefaultStateMachine<>(this, TurretState.IDLE, TurretState.GLOBAL);
         health.setWidth(1.5f);
         health.setOffset(new Vector2(0, -1));
 
@@ -64,6 +66,13 @@ public class Turret extends Structure {
             }
         }, builder.cooldown, false, true);
         fireScheduler.start();
+
+        wanderScheduler = new Scheduler(() -> wanderingTargetAngle += MathUtils.random(90, 270),
+                1f,
+                false,
+                true);
+        wanderScheduler.start();
+
     }
 
     /**
@@ -116,15 +125,16 @@ public class Turret extends Structure {
         target = closest;
     }
 
-    private boolean faceTarget(float delta) {
+    private void wander() {
+        if (rotateTo(Gdx.graphics.getDeltaTime(), wanderingTargetAngle, rotationSpeed / 4f)) {
+            wanderScheduler.update(Gdx.graphics.getDeltaTime());
+        }
+    }
+
+    private boolean rotateTo(float delta, float angle, float speed) {
         final float targetEpsilon = 1f; // for target inaccuracy
         final float rotationEpsilon = 0.01f; // for floating point inaccuracy
 
-        Vector2 targetPos = target.getCenter();
-
-        Vector2 position = getCenter();
-        Vector2 direction = targetPos.cpy().sub(position);
-        float angle = direction.angleDeg();
         float diff = (angle - headRotation) % 360;
         if (diff > 180) {
             diff -= 360;
@@ -133,13 +143,22 @@ public class Turret extends Structure {
         }
 
         if (Math.abs(diff) > rotationEpsilon) {
-            float rotation = Math.min(rotationSpeed * delta, Math.abs(diff)) * Math.signum(diff);
+            float rotation = Math.min(speed * delta, Math.abs(diff)) * Math.signum(diff);
             head.sprite.rotate(rotation);
             headRotation = head.sprite.getRotation();
         }
 
         // finding target
         return Math.abs(diff) < targetEpsilon; // on target
+    }
+
+    private boolean faceTarget(float delta) {
+        Vector2 targetPos = target.getCenter();
+
+        Vector2 position = getCenter();
+        Vector2 direction = targetPos.cpy().sub(position);
+        float angle = direction.angleDeg();
+        return rotateTo(delta, angle, rotationSpeed);
     }
 
     private Vector2 getFiringPosition() {
@@ -199,12 +218,28 @@ public class Turret extends Structure {
     }
 
     private enum TurretState implements State<Turret> {
+        IDLE() {
+            @Override
+            public void enter(Turret entity) {
+                entity.wanderScheduler.reset();
+            }
+
+            @Override
+            public void update(Turret entity) {
+                if (entity.pilot != null) {
+                    entity.stateMachine.changeState(SEARCHING);
+                }
+            }
+        },
+
         SEARCHING() {
             @Override
             public void update(Turret entity) {
                 entity.searchForTarget();
                 if (entity.target != null) {
                     entity.stateMachine.changeState(ATTACKING);
+                } else {
+                    entity.wander();
                 }
             }
         },
@@ -232,6 +267,14 @@ public class Turret extends Structure {
             @Override
             public void exit(Turret entity) {
                 entity.rotateSound.stop();
+            }
+        },
+        GLOBAL() {
+            @Override
+            public void update(Turret entity) {
+                if (entity.pilot == null) {
+                    entity.stateMachine.changeState(IDLE);
+                }
             }
         };
 

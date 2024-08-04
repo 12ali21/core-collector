@@ -29,6 +29,10 @@ public class Scheduler {
         accumulator = 0;
     }
 
+    public void reset() {
+        accumulator = 0;
+    }
+
     public boolean isRunning() {
         return running;
     }

@@ -64,6 +64,7 @@ public class BotAgent extends Agent {
     }
 
     public void setMoveToTarget(float x, float y) {
+        stateMachine.changeState(BotState.MOVING);
         movingToTarget.set(x, y);
         nextState = BotState.IDLE;
 
@@ -72,12 +73,8 @@ public class BotAgent extends Agent {
             pilotTurret = (Turret) s;
             movingToTarget.set(s.getCenter());
             nextState = BotState.PILOT;
-        } else {
-            pilotTurret = null;
         }
         makePath(movingToTarget);
-
-        stateMachine.changeState(BotState.MOVING);
     }
 
     private void makePath(Vector2 target) {
@@ -147,6 +144,15 @@ public class BotAgent extends Agent {
                     entity.stateMachine.changeState(IDLE);
                     entity.seated = false;
                 }
+            }
+
+            @Override
+            public void exit(BotAgent entity) {
+                if (entity.pilotTurret != null) {
+                    entity.pilotTurret.setPilot(null);
+                    entity.pilotTurret = null;
+                }
+                System.out.println("exited");
             }
         };
 
