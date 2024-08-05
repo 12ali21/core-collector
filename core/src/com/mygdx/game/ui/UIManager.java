@@ -15,8 +15,10 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
+import com.mygdx.game.audio.NonSpatialSound;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.entities.structures.Structures;
+import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
@@ -25,23 +27,35 @@ public class UIManager implements Renderable, Updatable, Disposable {
     private final Stage stage;
     private final Table uiTable;
     private TextButton shipButton;
-    private Button buildButton;
     private final Table pauseMenu;
-    private Label pausedLabel;
+    private final Label pausedLabel;
     private final Game game;
     private final Table optionsMenu;
     private final Table builderTable;
     private TextureRegionDrawable pauseBackgroundDrawable;
 
-    public UIManager(Game game, PauseMenuListener menuListener) {
+    private boolean menuPaused;
+    private boolean paused;
+    private final NonSpatialSound pauseSound;
+
+    public UIManager(Game game) {
         this.game = game;
         Skin skin = Constants.SKIN;
+        pauseSound = game.audio.newNonSpatialSoundEffect(AudioAssets.PAUSE_SOUND, .5f);
+
 
         stage = new Stage(new ScreenViewport());
         stage.setDebugAll(false);
         stage.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.SPACE) {
+                    if (!menuPaused) {
+                        paused = !paused;
+                        pauseSound.play();
+                        return true;
+                    }
+                }
                 if (keycode == Input.Keys.ESCAPE) {
                     handleEscape();
                     return true;
@@ -55,6 +69,10 @@ public class UIManager implements Renderable, Updatable, Disposable {
         root.pad(20f);
         stage.addActor(root);
 
+        pausedLabel = new Label("PAUSED", skin);
+        pausedLabel.setVisible(false);
+        root.add(pausedLabel).center().colspan(2).row();
+
         // Main UI
         uiTable = new Table();
         root.addActor(uiTable);
@@ -66,24 +84,19 @@ public class UIManager implements Renderable, Updatable, Disposable {
         buildStructureBuilderTable(root, skin);
 
         // Pause Menu UI
-        pauseMenu = buildPauseMenuTable(menuListener, skin);
+        pauseMenu = buildPauseMenuTable(skin);
         optionsMenu = buildOptionsMenuTable(skin);
     }
 
     private void fillUITable(Table root, Skin skin) {
-        pausedLabel = new Label("PAUSED", skin);
-        pausedLabel.setVisible(false);
-        root.add(pausedLabel).center().colspan(2).row();
-
-        // Structure Builder UI
-        buildButton = new Button(skin);
+        Button buildButton = new Button(skin);
         root.add(buildButton)
                 .expand()
                 .bottom()
                 .left();
 
         Image image = new Image(TextureAssets.get(TextureAssets.BUILDING_ICON));
-        buildButton.add(image).expand().pad(4f);
+        buildButton.add(image).maxSize(100f, 100f).expand().pad(4f);
         buildButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -133,7 +146,7 @@ public class UIManager implements Renderable, Updatable, Disposable {
         return button;
     }
 
-    private Table buildPauseMenuTable(PauseMenuListener menuListener, Skin skin) {
+    private Table buildPauseMenuTable(Skin skin) {
         final Table pauseMenu;
         pauseMenu = new Table(skin);
         pauseMenu.setFillParent(true);
@@ -152,7 +165,9 @@ public class UIManager implements Renderable, Updatable, Disposable {
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                menuListener.onResume();
+                menuPaused = false;
+                paused = false;
+                pauseSound.play();
                 setPauseMenuVisible(false);
             }
         });
@@ -171,7 +186,7 @@ public class UIManager implements Renderable, Updatable, Disposable {
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                menuListener.onExit();
+                Gdx.app.exit();
             }
         });
         pauseMenu.add(exitButton).row();
@@ -276,10 +291,21 @@ public class UIManager implements Renderable, Updatable, Disposable {
     }
 
     private void handleEscape() {
-        //TODO: show and hide pause menu
         if (builderTable.isVisible()) {
             hideBuilder();
+            return;
         }
+
+        if (!menuPaused) {
+            menuPaused = true;
+            paused = true;
+            setPauseMenuVisible(true);
+        } else {
+            menuPaused = false;
+            paused = false;
+            setPauseMenuVisible(false);
+        }
+        pauseSound.play();
     }
 
     private TextureRegionDrawable getPauseMenuBackground() {
@@ -307,10 +333,6 @@ public class UIManager implements Renderable, Updatable, Disposable {
         shipButton.addListener(listener);
     }
 
-    public void setBuildButtonListener(EventListener listener) {
-        buildButton.addListener(listener);
-    }
-
     @Override
     public void render() {
         stage.draw();
@@ -319,6 +341,7 @@ public class UIManager implements Renderable, Updatable, Disposable {
     @Override
     public void update(float delta) {
         stage.act(delta);
+        setPauseLabelVisible(paused);
     }
 
     public void resize(int width, int height) {
@@ -333,9 +356,11 @@ public class UIManager implements Renderable, Updatable, Disposable {
         return stage;
     }
 
-    public interface PauseMenuListener {
-        void onResume();
+    public boolean isPaused() {
+        return paused;
+    }
 
-        void onExit();
+    public boolean isMenuPaused() {
+        return menuPaused;
     }
 }
