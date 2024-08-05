@@ -16,6 +16,7 @@ import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.structures.Structure;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Debug;
+import com.mygdx.game.utils.Padding;
 import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapManager;
@@ -39,7 +40,7 @@ public class Turret extends Structure {
 
     protected Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
-        this.head = builder.head;
+        this.head = builder.getParts().get(Builder.head);
         this.rangeRadius = builder.rangeRadius;
         this.rotationSpeed = builder.rotationSpeed;
         this.bulletSpeed = builder.bulletSpeed;
@@ -302,8 +303,8 @@ public class Turret extends Structure {
 
     public static class Builder extends Structure.Builder {
 
-        private StructurePart head;
-        private StructurePart base;
+        private final static String head = "head";
+        private final static String base = "base";
         private float rangeRadius = 10f;
         private float rotationSpeed = 50f;
         private float bulletSpeed = 30f;
@@ -318,18 +319,17 @@ public class Turret extends Structure {
             this.width = 2;
             this.height = 2;
             this.maxHp = hitPoints;
+            this.GHOST_SIZE_OFFSET = new Padding(0, 0, 0, 32);
         }
 
-        public void setBase(StructurePart base) {
-            this.base = base;
-            base.setRenderPriority(1);
-            addPart(base);
+        public void setBase(StructurePart part) {
+            part.setRenderPriority(1);
+            addPart(base, part);
         }
 
-        public void setHead(StructurePart head) {
-            this.head = head;
-            head.setRenderPriority(3);
-            addPart(head);
+        public void setHead(StructurePart part) {
+            part.setRenderPriority(3);
+            addPart(head, part);
         }
 
         public void setRangeRadius(float rangeRadius) {
@@ -366,7 +366,7 @@ public class Turret extends Structure {
 
         @Override
         public Turret build() {
-            if (head == null || base == null) {
+            if (getParts().get(head) == null || getParts().get(base) == null) {
                 throw new IllegalStateException("Can't build a turret without a base or head");
             }
             return new Turret(this);

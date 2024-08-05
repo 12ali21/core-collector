@@ -1,13 +1,12 @@
 package com.mygdx.game.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -16,18 +15,22 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
+import com.mygdx.game.entities.structures.Structure;
+import com.mygdx.game.entities.structures.Structures;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
 public class UIManager implements Renderable, Updatable, Disposable {
     private final Stage stage;
-    private final TextButton shipButton;
-    private final Button buildButton;
+    private final Table uiTable;
+    private TextButton shipButton;
+    private Button buildButton;
     private final Table pauseMenu;
-    private final Label pausedLabel;
+    private Label pausedLabel;
     private final Game game;
     private final Table optionsMenu;
+    private final Table builderTable;
     private TextureRegionDrawable pauseBackgroundDrawable;
 
     public UIManager(Game game, PauseMenuListener menuListener) {
@@ -36,17 +39,43 @@ public class UIManager implements Renderable, Updatable, Disposable {
 
         stage = new Stage(new ScreenViewport());
         stage.setDebugAll(false);
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.ESCAPE) {
+                    handleEscape();
+                    return true;
+                }
+                return super.keyDown(event, keycode);
+            }
+        });
 
         Table root = new Table();
         root.setFillParent(true);
         root.pad(20f);
         stage.addActor(root);
 
+        // Main UI
+        uiTable = new Table();
+        root.addActor(uiTable);
+        uiTable.setFillParent(true);
+        fillUITable(uiTable, skin);
+
+        // Structure Builder Menu UI
+        builderTable = new Table(skin);
+        buildStructureBuilderTable(root, skin);
+
+        // Pause Menu UI
+        pauseMenu = buildPauseMenuTable(menuListener, skin);
+        optionsMenu = buildOptionsMenuTable(skin);
+    }
+
+    private void fillUITable(Table root, Skin skin) {
         pausedLabel = new Label("PAUSED", skin);
         pausedLabel.setVisible(false);
         root.add(pausedLabel).center().colspan(2).row();
 
-        // Structure Builder Button
+        // Structure Builder UI
         buildButton = new Button(skin);
         root.add(buildButton)
                 .expand()
@@ -55,6 +84,12 @@ public class UIManager implements Renderable, Updatable, Disposable {
 
         Image image = new Image(TextureAssets.get(TextureAssets.BUILDING_ICON));
         buildButton.add(image).expand().pad(4f);
+        buildButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                showBuilder();
+            }
+        });
 
 
         // Ship Button
@@ -65,11 +100,37 @@ public class UIManager implements Renderable, Updatable, Disposable {
                 .bottom()
                 .right();
         shipButton.getLabel().setFontScale(1.2f);
+    }
 
-        // Pause Menu
+    private void buildStructureBuilderTable(Table root, Skin skin) {
+        builderTable.setBackground("window-special");
+        builderTable.setVisible(false);
+        root.add(builderTable).expand().growX().bottom();
 
-        pauseMenu = buildPauseMenuTable(menuListener, skin);
-        optionsMenu = buildOptionsMenuTable(skin);
+//        button.setDebug(true, true);
+        builderTable.add(getStructureButton(skin, Structures.basicTurret(game, 0, 0),
+                () -> game.builder.setBuild(Structures.basicTurret(game, 0, 0))));
+        builderTable.add(getStructureButton(skin, Structures.burstTurret(game, 0, 0),
+                () -> game.builder.setBuild(Structures.burstTurret(game, 0, 0))));
+
+    }
+
+    private Button getStructureButton(Skin skin, Structure.Builder build, Runnable runnable) {
+        Texture basicTexture = build.getIconTexture();
+        Image image = new Image(basicTexture);
+        image.setOrigin(Align.center);
+        image.setRotation(90);
+        image.setSize(128f, 128f);
+
+        Button button = new Button(skin);
+        button.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                runnable.run();
+            }
+        });
+        button.add(image).pad(32f, 16f, 32f, 16f);
+        return button;
     }
 
     private Table buildPauseMenuTable(PauseMenuListener menuListener, Skin skin) {
@@ -77,7 +138,7 @@ public class UIManager implements Renderable, Updatable, Disposable {
         pauseMenu = new Table(skin);
         pauseMenu.setFillParent(true);
         pauseMenu.setVisible(false);
-        pauseMenu.setBackground(getBackground());
+        pauseMenu.setBackground(getPauseMenuBackground());
         stage.addActor(pauseMenu);
 
         pauseMenu.defaults()
@@ -204,7 +265,24 @@ public class UIManager implements Renderable, Updatable, Disposable {
         return buttons;
     }
 
-    private TextureRegionDrawable getBackground() {
+    private void showBuilder() {
+        builderTable.setVisible(true);
+        uiTable.setVisible(false);
+    }
+
+    private void hideBuilder() {
+        builderTable.setVisible(false);
+        uiTable.setVisible(true);
+    }
+
+    private void handleEscape() {
+        //TODO: show and hide pause menu
+        if (builderTable.isVisible()) {
+            hideBuilder();
+        }
+    }
+
+    private TextureRegionDrawable getPauseMenuBackground() {
         if (pauseBackgroundDrawable != null) {
             return pauseBackgroundDrawable;
         }

@@ -26,6 +26,7 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.others.HoveredTile;
 import com.mygdx.game.entities.structures.Ship;
+import com.mygdx.game.entities.structures.StructureBuilder;
 import com.mygdx.game.entities.structures.Structures;
 import com.mygdx.game.screens.ScreenInputProcessor;
 import com.mygdx.game.ui.UIManager;
@@ -39,6 +40,7 @@ public class Game implements Renderable, Updatable, Disposable {
     public final AudioManager audio;
     public final UIManager ui;
     public final EntityManager entities;
+    public final StructureBuilder builder = new StructureBuilder(this);
     private final EnemiesManager enemies;
 
     private final World world;
@@ -46,7 +48,6 @@ public class Game implements Renderable, Updatable, Disposable {
     private final OrthographicCamera camera;
 
     private final Box2DDebugRenderer debugRenderer;
-    private final StructureBuilder structureBuilder = new StructureBuilder(this);
     private final HoveredTile hoveredTile;
     private final MyContactListener contactListener;
     private final NonSpatialSound pauseSound;
@@ -62,6 +63,7 @@ public class Game implements Renderable, Updatable, Disposable {
         this.debugRenderer = new Box2DDebugRenderer();
         this.batch = batch;
         this.camera = camera;
+        entities = new EntityManager(this);
 
         ui = new UIManager(this, new UIManager.PauseMenuListener() {
             @Override
@@ -77,7 +79,6 @@ public class Game implements Renderable, Updatable, Disposable {
             }
         });
 
-        entities = new EntityManager(this);
 
         // setup input processors
         inputProcessor = new ScreenInputProcessor();
@@ -133,7 +134,7 @@ public class Game implements Renderable, Updatable, Disposable {
     }
 
     private void updateManagers(float delta) {
-        structureBuilder.update(delta);
+        builder.update(delta);
         enemies.update(delta);
         MessageManager.getInstance().update();
         audio.update(delta);
@@ -198,7 +199,7 @@ public class Game implements Renderable, Updatable, Disposable {
         map.render();
         batch.begin();
 
-        structureBuilder.render();
+        builder.render();
         hoveredTile.render();
         entities.render();
         batch.end();

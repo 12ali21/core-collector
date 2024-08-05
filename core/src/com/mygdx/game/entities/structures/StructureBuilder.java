@@ -1,4 +1,4 @@
-package com.mygdx.game.world;
+package com.mygdx.game.entities.structures;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -6,9 +6,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.Renderable;
 import com.mygdx.game.Updatable;
-import com.mygdx.game.entities.structures.Bounds;
-import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.entities.structures.Structures;
+import com.mygdx.game.world.Game;
 
 public class StructureBuilder implements Updatable, Renderable {
     private final Game game;
@@ -26,19 +24,16 @@ public class StructureBuilder implements Updatable, Renderable {
         return new GridPoint2((int) mousePos.x, (int) mousePos.y);
     }
 
+    public void setBuild(Structure.Builder builder) {
+        currentStructure = builder;
+        GridPoint2 mousePos = getGridMousePosition();
+        builder.setGhostPosition(mousePos.x, mousePos.y);
+        inBuildMode = true;
+    }
+
     @Override
     public void update(float deltaTime) {
-        if (!inBuildMode) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-                inBuildMode = true;
-                GridPoint2 mousePos = getGridMousePosition();
-                currentStructure = Structures.basicTurret(game, mousePos.x, mousePos.y);
-            } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-                inBuildMode = true;
-                GridPoint2 mousePos = getGridMousePosition();
-                currentStructure = Structures.burstTurret(game, mousePos.x, mousePos.y);
-            }
-        } else {
+        if (inBuildMode) {
             GridPoint2 mousePos = getGridMousePosition();
 
             currentStructure.setBounds(mousePos.x, mousePos.y);
@@ -61,6 +56,17 @@ public class StructureBuilder implements Updatable, Renderable {
             }
             if (currentStructure != null) {
                 currentStructure.setGhostPosition(mousePos.x, mousePos.y);
+            }
+        } else { // Quick builds
+            // TODO: in input processor
+            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+                inBuildMode = true;
+                GridPoint2 mousePos = getGridMousePosition();
+                currentStructure = Structures.basicTurret(game, mousePos.x, mousePos.y);
+            } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+                inBuildMode = true;
+                GridPoint2 mousePos = getGridMousePosition();
+                currentStructure = Structures.burstTurret(game, mousePos.x, mousePos.y);
             }
         }
     }

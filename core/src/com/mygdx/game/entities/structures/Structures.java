@@ -20,7 +20,6 @@ public class Structures {
         baseSprite.setSize(2f, 2f);
         baseSprite.setOrigin(baseSprite.getWidth() / 2, baseSprite.getHeight() / 2);
         baseSprite.setOriginBasedPosition(x, y);
-        baseSprite.setScale(0.75f);
         return new Structure.StructurePart(game, baseSprite);
     }
 

@@ -61,7 +61,7 @@ public class Ship extends Structure {
     }
 
     public static class Builder extends Structure.Builder {
-        private StructurePart mainPart;
+        private final static String MAIN_PART = "main";
 
         public Builder(Game game) {
             super(game);
@@ -73,13 +73,12 @@ public class Ship extends Structure {
         public void setMainPart(StructurePart part) {
             part.sprite.setSize(this.width, this.height);
             part.sprite.setOriginCenter();
-            this.mainPart = part;
-            addPart(mainPart);
+            addPart(MAIN_PART, part);
         }
 
         @Override
         public Structure build() {
-            if (mainPart == null) {
+            if (getParts().get(MAIN_PART) == null) {
                 throw new IllegalArgumentException("need main ship part");
             }
             return new Ship(this);
