@@ -38,6 +38,8 @@ public class UIManager implements Renderable, Updatable, Disposable {
     private boolean paused;
     private final NonSpatialSound pauseSound;
 
+    private boolean building = false;
+
     public UIManager(Game game) {
         this.game = game;
         Skin skin = Constants.SKIN;
@@ -61,6 +63,15 @@ public class UIManager implements Renderable, Updatable, Disposable {
                     return true;
                 }
                 return super.keyDown(event, keycode);
+            }
+        });
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (building && !builderTable.isVisible()) {
+                    showBuilder();
+                }
+                return super.touchDown(event, x, y, pointer, button);
             }
         });
 
@@ -116,7 +127,7 @@ public class UIManager implements Renderable, Updatable, Disposable {
     }
 
     private void buildStructureBuilderTable(Table root, Skin skin) {
-        builderTable.setBackground("window-special");
+        builderTable.setBackground("progress-bar-back");
         builderTable.setVisible(false);
         root.add(builderTable).expand().growX().bottom();
 
@@ -139,6 +150,7 @@ public class UIManager implements Renderable, Updatable, Disposable {
         button.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                hideBuilder();
                 runnable.run();
             }
         });
@@ -283,16 +295,22 @@ public class UIManager implements Renderable, Updatable, Disposable {
     private void showBuilder() {
         builderTable.setVisible(true);
         uiTable.setVisible(false);
+        building = true;
     }
 
     private void hideBuilder() {
         builderTable.setVisible(false);
+    }
+
+    private void closeBuilder() {
+        hideBuilder();
         uiTable.setVisible(true);
+        building = false;
     }
 
     private void handleEscape() {
-        if (builderTable.isVisible()) {
-            hideBuilder();
+        if (building) {
+            closeBuilder();
             return;
         }
 

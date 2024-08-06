@@ -36,7 +36,9 @@ public class Turret extends Structure {
     private float headRotation = 0;
     private Enemy target;
     private BotAgent pilot;
+    private boolean reservedForPilot = false;
     private float wanderingTargetAngle = 0f;
+
 
     protected Turret(Builder builder) {
         super(builder); // position is center, but bounds are bottom left
@@ -68,7 +70,10 @@ public class Turret extends Structure {
         }, builder.cooldown, false, true);
         fireScheduler.start();
 
-        wanderScheduler = new Scheduler(() -> wanderingTargetAngle += MathUtils.random(90, 270),
+        wanderScheduler = new Scheduler(() -> {
+            float rand = MathUtils.random(30f);
+            wanderingTargetAngle += (rand + 15f) * MathUtils.randomSign();
+        },
                 1f,
                 false,
                 true);
@@ -207,7 +212,18 @@ public class Turret extends Structure {
         seatingOffset.rotateDeg(head.sprite.getRotation());
     }
 
+    public boolean isReservedForPilot() {
+        return reservedForPilot;
+    }
+
+    public void reservePilot() {
+        reservedForPilot = true;
+    }
+
     public void setPilot(BotAgent pilot) {
+        if (pilot == null) {
+            reservedForPilot = false;
+        }
         this.pilot = pilot;
     }
 

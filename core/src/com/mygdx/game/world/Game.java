@@ -18,7 +18,7 @@ import com.mygdx.game.Updatable;
 import com.mygdx.game.audio.AudioManager;
 import com.mygdx.game.audio.BackgroundMusic;
 import com.mygdx.game.entities.EntityManager;
-import com.mygdx.game.entities.bots.Bot;
+import com.mygdx.game.entities.bots.BotManager;
 import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.others.Bullet;
@@ -49,6 +49,8 @@ public class Game implements Renderable, Updatable, Disposable {
     private final MyContactListener contactListener;
     private final BackgroundMusic backgroundMusic;
     private final ScreenInputProcessor inputProcessor;
+    private final Ship ship;
+    private final BotManager bots;
 
 
     public Game(Batch batch, OrthographicCamera camera) {
@@ -85,13 +87,12 @@ public class Game implements Renderable, Updatable, Disposable {
 
         enemies = new EnemiesManager(this);
 
-        Ship ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
+        ship = (Ship) Structures.ship(this, mapCenter.x, mapCenter.y).build();
         entities.addStructure(ship);
 
         backgroundMusic = new BackgroundMusic(this);
 
-        Bot bot = new Bot(this, new Vector2(2, 2));
-        entities.addEntity(bot);
+        bots = new BotManager(this, 8);
 
         updatePreferences();
     }
@@ -120,6 +121,7 @@ public class Game implements Renderable, Updatable, Disposable {
         MessageManager.getInstance().update();
         audio.update(delta);
         backgroundMusic.update(delta);
+        bots.update(delta);
     }
 
     private boolean handlePause(float delta) {
@@ -214,5 +216,9 @@ public class Game implements Renderable, Updatable, Disposable {
         Preferences prefs = Gdx.app.getPreferences(Constants.PREFS_NAME);
         audio.setMusicVolume(prefs.getFloat(Constants.PREFS_BGM_VOLUME, 0.2f));
         audio.setSoundEffectsVolume(prefs.getFloat(Constants.PREFS_SFX_VOLUME, 0.1f));
+    }
+
+    public Ship getShip() {
+        return ship;
     }
 }

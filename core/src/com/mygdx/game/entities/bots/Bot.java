@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.Selectable;
 import com.mygdx.game.ai.agents.BotAgent;
 import com.mygdx.game.entities.others.EntityObj;
+import com.mygdx.game.entities.structures.Ship;
 import com.mygdx.game.utils.TextureAssets;
 import com.mygdx.game.world.Game;
 
@@ -16,8 +17,9 @@ public class Bot extends EntityObj implements Selectable {
     private final static float SEATED_SCALE = 0.8f;
     private final BotAgent agent;
     private Rectangle bounds;
+    private boolean insideShip;
 
-    public Bot(Game game, Vector2 position) {
+    public Bot(Game game, Vector2 position, Ship ship) {
         super(game);
         setRenderPriority(10);
         sprite = new Sprite(TextureAssets.get(TextureAssets.BOT_TEXTURE));
@@ -25,7 +27,7 @@ public class Bot extends EntityObj implements Selectable {
         sprite.setOriginCenter();
         sprite.setPosition(position.x, position.y);
 
-        agent = new BotAgent(game, position);
+        agent = new BotAgent(game, this, position, ship);
         updateBounds(position);
     }
 
@@ -41,7 +43,7 @@ public class Bot extends EntityObj implements Selectable {
 
     @Override
     public void render() {
-        sprite.draw(batch);
+        if (!insideShip) sprite.draw(batch);
     }
 
     @Override
@@ -57,6 +59,10 @@ public class Bot extends EntityObj implements Selectable {
         sprite.setRotation(MathUtils.radiansToDegrees * agent.getOrientation() - 90);
 
         updateBounds(agent.getPosition());
+    }
+
+    public void setInsideShip(boolean insideShip) {
+        this.insideShip = insideShip;
     }
 
     @Override

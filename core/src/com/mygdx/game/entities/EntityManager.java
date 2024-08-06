@@ -190,8 +190,9 @@ public class EntityManager extends InputAdapter implements Updatable, Renderable
     /**
      * Add an entity to the world
      */
-    public void addEntity(Entity entity) {
+    public Entity addEntity(Entity entity) {
         entitiesToAdd.add(entity);
+        return entity;
     }
 
     /**
