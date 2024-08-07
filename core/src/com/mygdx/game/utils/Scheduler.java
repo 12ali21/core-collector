@@ -5,6 +5,8 @@ public class Scheduler {
     public final float interval;
     public final boolean continuous;
     public final boolean repeat;
+    public int repeatCount = -1; // infinite
+    public int currRepeatCount;
 
     private float accumulator;
     private boolean running;
@@ -20,6 +22,11 @@ public class Scheduler {
         this.repeat = repeat;
     }
 
+    public void setRepeatCount(int repeatCount) {
+        this.repeatCount = repeatCount;
+        currRepeatCount = repeatCount;
+    }
+
     public void start() {
         running = true;
     }
@@ -27,9 +34,12 @@ public class Scheduler {
     public void stop() {
         running = false;
         accumulator = 0;
+        if (repeatCount != -1) {
+            currRepeatCount = repeatCount;
+        }
     }
 
-    public void reset() {
+    public void resetAccumulator() {
         accumulator = 0;
     }
 
@@ -46,7 +56,16 @@ public class Scheduler {
         if (accumulator >= interval) {
             callback.run();
             if (repeat) {
-                accumulator -= interval;
+                if (repeatCount != -1) {
+                    currRepeatCount--;
+                    if (currRepeatCount > 0) {
+                        accumulator -= interval;
+                    } else {
+                        stop();
+                    }
+                } else {
+                    accumulator -= interval;
+                }
             } else {
                 stop();
             }

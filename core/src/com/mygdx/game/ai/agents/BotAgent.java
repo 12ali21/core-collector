@@ -171,6 +171,12 @@ public class BotAgent extends Agent {
         MOVING() {
             @Override
             public void update(BotAgent entity) {
+                if (entity.nextState == PILOT) {
+                    if (!entity.pilotTurret.isAlive()) {
+                        entity.stateMachine.changeState(IDLE);
+                        return;
+                    }
+                }
                 if (entity.followPath()) {
                     entity.stateMachine.changeState(entity.nextState);
                 }

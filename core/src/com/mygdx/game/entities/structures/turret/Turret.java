@@ -23,21 +23,29 @@ import com.mygdx.game.world.map.MapManager;
 
 public class Turret extends Structure {
     private final StructurePart head;
+    private float headRotation = 0;
+
     private final float rangeRadius;
     private final float rotationSpeed;
     private final float bulletSpeed;
     private final Recoil recoil;
+
     private final StateMachine<Turret, TurretState> stateMachine;
+
     private final SpatialSoundNonLooping shootSound;
     private final SpatialSoundLooping rotateSound;
-    private final Scheduler fireScheduler;
-    private final Vector2 seatingOffset = new Vector2();
+
+    protected boolean reloaded = true;
+    private final Scheduler reloadScheduler;
     private final Scheduler wanderScheduler;
-    private float headRotation = 0;
+
     private Enemy target;
+    private float wanderingTargetAngle = 0f;
+
+    private final static boolean FIRE_WITHOUT_PILOT = false;
+    private final Vector2 seatingOffset = new Vector2();
     private BotAgent pilot;
     private boolean reservedForPilot = false;
-    private float wanderingTargetAngle = 0f;
 
 
     protected Turret(Builder builder) {
@@ -63,12 +71,8 @@ public class Turret extends Structure {
         rotateSound = game.audio.newLoopingSpatialSoundEffect(AudioAssets.TURRET_ROTATE, 0.3f);
         rotateSound.setPosition(getCenter());
 
-        fireScheduler = new Scheduler(() -> {
-            if (target != null) {
-                fire();
-            }
-        }, builder.cooldown, false, true);
-        fireScheduler.start();
+        reloadScheduler = new Scheduler(() -> reloaded = true, builder.cooldown, false, false);
+        reloadScheduler.start();
 
         wanderScheduler = new Scheduler(() -> {
             float rand = MathUtils.random(30f);
@@ -78,7 +82,6 @@ public class Turret extends Structure {
                 false,
                 true);
         wanderScheduler.start();
-
     }
 
     /**
@@ -173,20 +176,31 @@ public class Turret extends Structure {
         return getCenter().add(offset);
     }
 
-    private void fire() {
+    protected void fire() {
         Bullet bullet = new Bullet(game, this, headRotation, bulletSpeed, getFiringPosition());
         shootSound.play();
         game.entities.addEntity(bullet);
         recoil.fire();
     }
 
-    protected boolean shoot(float delta) {
-        return fireScheduler.update(delta);
+    protected void shoot(float delta) {
+        if (reloaded) {
+            fire();
+            reload();
+        }
+    }
+
+    protected void reload() {
+        reloaded = false;
+        reloadScheduler.start();
     }
 
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
+        if (!reloaded) {
+            reloadScheduler.update(deltaTime);
+        }
         Debug.log("Turret state: ", "" + stateMachine.getCurrentState());
         stateMachine.update();
         updateHead(deltaTime);
@@ -238,12 +252,12 @@ public class Turret extends Structure {
         IDLE() {
             @Override
             public void enter(Turret entity) {
-                entity.wanderScheduler.reset();
+                entity.wanderScheduler.resetAccumulator();
             }
 
             @Override
             public void update(Turret entity) {
-                if (entity.pilot != null) {
+                if (entity.pilot != null || FIRE_WITHOUT_PILOT) {
                     entity.stateMachine.changeState(SEARCHING);
                 }
             }
@@ -289,7 +303,7 @@ public class Turret extends Structure {
         GLOBAL() {
             @Override
             public void update(Turret entity) {
-                if (entity.pilot == null) {
+                if (entity.pilot == null && !FIRE_WITHOUT_PILOT) {
                     entity.stateMachine.changeState(IDLE);
                 }
             }
@@ -360,8 +374,8 @@ public class Turret extends Structure {
             this.bulletSpeed = bulletSpeed;
         }
 
-        public void setFireRate(float rate) {
-            this.cooldown = 60f / rate;
+        public void setCooldown(float cooldown) {
+            this.cooldown = cooldown;
         }
 
         public void setRecoilImpulse(float impulse) {

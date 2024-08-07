@@ -4,35 +4,25 @@ import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
 
 public class BurstTurret extends Turret {
-    private final int burstCount;
-    private final Scheduler burstScheduler;
-    private int currentBurst;
-    private boolean onBurst;
+    private final Scheduler burstFireScheduler;
 
-    //TODO: Reload burst when lost sight of target
     protected BurstTurret(Builder builder) {
         super(builder);
-        this.burstCount = builder.burstCount;
-        currentBurst = burstCount;
-        burstScheduler = new Scheduler(() -> onBurst = true, builder.burstCooldown, false, true);
-        burstScheduler.start();
+        burstFireScheduler = new Scheduler(super::fire, builder.burstCooldown, false, true);
+        burstFireScheduler.setRepeatCount(builder.burstCount);
     }
 
     @Override
-    protected boolean shoot(float delta) {
-        if (onBurst) {
-            if (super.shoot(delta)) {
-                currentBurst--;
-                if (currentBurst <= 0) {
-                    onBurst = false;
-                    currentBurst = burstCount;
-                }
-                return true;
-            }
-        } else {
-            burstScheduler.update(delta);
+    protected void fire() {
+        if (!burstFireScheduler.isRunning()) {
+            burstFireScheduler.start();
         }
-        return false;
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        burstFireScheduler.update(deltaTime);
     }
 
     public static class Builder extends Turret.Builder {
