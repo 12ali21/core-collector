@@ -14,8 +14,7 @@ public class SpatialSoundNonLooping extends SpatialSoundEffect {
 
     @Override
     public void play() {
-        long id = sound.play();
-        sound.setVolume(id, this.volume);
+        long id = sound.play(calculateVolume());
         ids.add(id);
         accumulators.add(0f);
     }
@@ -46,7 +45,7 @@ public class SpatialSoundNonLooping extends SpatialSoundEffect {
     public void update(float deltaTime) {
         updateAccumulators(deltaTime);
         for (int i = 0; i < ids.size; i++) {
-            sound.setPan(ids.get(i), calculatePan(), calculateVolume());
+            sound.setVolume(ids.get(i), calculateVolume());
         }
     }
 

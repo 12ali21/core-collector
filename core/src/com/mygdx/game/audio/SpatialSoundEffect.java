@@ -16,15 +16,11 @@ public abstract class SpatialSoundEffect extends SoundEffect implements Updatabl
     }
 
     protected float calculatePan() {
-        float pan = (position.x - cameraPosition.x) / AudioManager.SOUND_DISTANCE_THRESHOLD;
-        return Math.min(1, Math.max(-1, pan));
+        return AudioUtils.calculatePan(position, cameraPosition);
     }
 
     protected float calculateVolume() {
-        float distance = position.dst(cameraPosition);
-        float volume = 1 - distance / AudioManager.SOUND_DISTANCE_THRESHOLD;
-        volume *= 1f / cameraZoom;
-        return Math.min(1, Math.max(0, volume)) * this.volume;
+        return AudioUtils.calculateVolume(position, cameraPosition, cameraZoom, volume);
     }
 
     public void setPosition(Vector2 position) {
