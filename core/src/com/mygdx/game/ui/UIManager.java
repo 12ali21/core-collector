@@ -40,6 +40,8 @@ public class UIManager implements Renderable, Updatable, Disposable {
 
     private boolean building = false;
 
+    private Label counterLabel;
+
     public UIManager(Game game) {
         this.game = game;
         Skin skin = Constants.SKIN;
@@ -100,6 +102,17 @@ public class UIManager implements Renderable, Updatable, Disposable {
     }
 
     private void fillUITable(Table root, Skin skin) {
+        counterLabel = new Label("", skin);
+        root.add(counterLabel)
+                .colspan(2)
+                .expand()
+                .pad(10f)
+                .top()
+                .left()
+                .row();
+        updateCounter(0);
+
+
         Button buildButton = new Button(skin);
         root.add(buildButton)
                 .expand()
@@ -124,6 +137,7 @@ public class UIManager implements Renderable, Updatable, Disposable {
                 .bottom()
                 .right();
         shipButton.getLabel().setFontScale(1.2f);
+
     }
 
     private void buildStructureBuilderTable(Table root, Skin skin) {
@@ -290,6 +304,12 @@ public class UIManager implements Renderable, Updatable, Disposable {
         buttons.add(acceptButton).expand().right();
         buttons.defaults().reset();
         return buttons;
+    }
+
+    public void updateCounter(int counter) {
+        int minutes = counter / 60;
+        int seconds = counter % 60;
+        counterLabel.setText(String.format("%02d:%02d", minutes, seconds));
     }
 
     private void showBuilder() {

@@ -9,6 +9,7 @@ import com.mygdx.game.audio.SpatialMusic;
 import com.mygdx.game.audio.SpatialSoundLooping;
 import com.mygdx.game.utils.AudioAssets;
 import com.mygdx.game.utils.Constants;
+import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
 
 public class Ship extends Structure {
@@ -16,6 +17,9 @@ public class Ship extends Structure {
     private boolean isStarting = false;
     private boolean started = false;
     private SpatialMusic startingSFX;
+
+    private final Scheduler counterScheduler;
+    private int counter = 0;
 
     public Ship(Builder builder) {
         super(builder);
@@ -30,6 +34,11 @@ public class Ship extends Structure {
                 }
             }
         });
+
+        counterScheduler = game.registerScheduler(new Scheduler(() -> {
+            counter++;
+            game.ui.updateCounter(counter);
+        }, 1f, false, true));
     }
 
     private void start() {
@@ -48,6 +57,7 @@ public class Ship extends Structure {
             music.setPosition(getCenter());
             music.play();
             MessageManager.getInstance().dispatchMessage(MessageType.SHIP_STARTED.ordinal());
+            counterScheduler.start();
         }
     }
 

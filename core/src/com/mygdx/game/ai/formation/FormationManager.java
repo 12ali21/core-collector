@@ -41,9 +41,10 @@ public class FormationManager implements Updatable, Telegraph {
     public void addMember(FormationMembership membership) {
         if (!isValid)
             throw new IllegalStateException("This formation doesn't exist");
-        membership.registerTelegraph(this);
-        members.add(membership);
-        formation.addMember(membership);
+        if (formation.addMember(membership)) {
+            membership.registerTelegraph(this);
+            members.add(membership);
+        }
     }
 
     public Vector2 getPosition() {

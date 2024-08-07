@@ -17,8 +17,12 @@ import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.Game;
 
 public class EnemiesManager implements Updatable, Telegraph {
-    private static final float MEAN = 10;
-    private static final float DEVIATION = 2f;
+    private static final float SPAWN_INTERVAL_MEAN = 10;
+    private static final float SPAWN_INTERVAL_DEVIATION = 2f;
+    private static final float DIFFICULTY_INCREASE = 0.1f;
+    private static final float DIFFICULTY_INCREASE_INTERVAL = 10f;
+    private static final float COUNT_PER_WAVE_LOW = 2;
+    private static final float COUNT_PER_WAVE_HIGH = 4;
 
     private final Game game;
     private final Array<Enemy> enemies = new Array<>();
@@ -28,6 +32,7 @@ public class EnemiesManager implements Updatable, Telegraph {
     private boolean shipStarted = false;
     private Phase currentPhase = Phase.WAITING;
     private Scheduler waveScheduler;
+    private float difficulty = 1;
 
     public EnemiesManager(Game game) {
         this.game = game;
@@ -42,6 +47,10 @@ public class EnemiesManager implements Updatable, Telegraph {
 
         MessageManager.getInstance().addListener(this, MessageType.SHIP_STARTED.ordinal());
         random = new RandomXS128();
+
+        game.registerScheduler(new Scheduler(() -> difficulty += DIFFICULTY_INCREASE,
+                DIFFICULTY_INCREASE_INTERVAL, false, true
+        )).start();
     }
 
     public static Structure getClosestStructure(Game game, Vector2 position) {
@@ -149,7 +158,7 @@ public class EnemiesManager implements Updatable, Telegraph {
 
     private float getRandomSpawnTime() {
         // return a random number between 1 and 3 in gaussian distribution
-        float rand = (float) (random.nextGaussian() * DEVIATION + MEAN);
+        float rand = (float) (random.nextGaussian() * SPAWN_INTERVAL_DEVIATION + SPAWN_INTERVAL_MEAN);
         rand = MathUtils.clamp(rand, 5f, 15f);
         return rand;
     }
@@ -180,7 +189,7 @@ public class EnemiesManager implements Updatable, Telegraph {
     }
 
     private void spawnWave() {
-        int waveSize = MathUtils.random(4, 6);
+        int waveSize = (int) (MathUtils.random(COUNT_PER_WAVE_LOW, COUNT_PER_WAVE_HIGH) * difficulty);
         Vector2 position = getRandomSpawnPosition();
 
         for (int i = 0; i < waveSize; i++) {

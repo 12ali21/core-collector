@@ -30,6 +30,7 @@ import com.mygdx.game.screens.ScreenInputProcessor;
 import com.mygdx.game.ui.UIManager;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Debug;
+import com.mygdx.game.utils.Scheduler;
 import com.mygdx.game.world.map.MapManager;
 
 public class Game implements Renderable, Updatable, Disposable {
@@ -51,6 +52,8 @@ public class Game implements Renderable, Updatable, Disposable {
     private final ScreenInputProcessor inputProcessor;
     private final Ship ship;
     private final BotManager bots;
+
+    Array<Scheduler> schedulers = new Array<>();
 
 
     public Game(Batch batch, OrthographicCamera camera) {
@@ -112,6 +115,7 @@ public class Game implements Renderable, Updatable, Disposable {
         world.step(1 / 60f, 6, 2);
 
         updateManagers(delta);
+        tickSchedulers(delta);
         entities.update(delta);
     }
 
@@ -122,6 +126,12 @@ public class Game implements Renderable, Updatable, Disposable {
         audio.update(delta);
         backgroundMusic.update(delta);
         bots.update(delta);
+    }
+
+    private void tickSchedulers(float delta) {
+        for (Scheduler s : schedulers) {
+            s.update(delta);
+        }
     }
 
     private boolean handlePause(float delta) {
@@ -184,6 +194,14 @@ public class Game implements Renderable, Updatable, Disposable {
             }
         }
         return false;
+    }
+
+    /**
+     * Registers a scheduler to be updated automatically
+     */
+    public Scheduler registerScheduler(Scheduler scheduler) {
+        schedulers.add(scheduler);
+        return scheduler;
     }
 
 
