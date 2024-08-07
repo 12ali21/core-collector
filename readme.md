@@ -17,19 +17,16 @@ the planet before the difficulty spikes, you get to keep the rewards you've coll
   overwhelming.
 
 ## Installation
+The game is still in development so no releases yet. You can clone the repository. Also, I am planning to work on 
+the android version, one day hopefully.
 
-1. **Clone the repository**:
+**Clone the repository**:
     ```bash
     git clone https://github.com/your-username/core-collectors.git
     ```
-2. **Navigate to the project directory**:
-    ```bash
-    cd core-collectors
-    ```
-3. **Import the project into your preferred IDE**. Make sure you have the necessary LibGDX setup.
-4. **Run the game** from your IDE.
 
 ## Contact
 
 For any questions or support, please open an issue on the GitHub repository or
 contact [hethestormblessed@gmail.com](mailto:hethestormblessed@gmail.com).
+Any contribution is welcomed.
