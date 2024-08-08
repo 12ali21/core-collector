@@ -1,6 +1,7 @@
 package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ai.msg.MessageManager;
@@ -54,6 +55,7 @@ public class Game implements Renderable, Updatable, Disposable {
     private final BotManager bots;
 
     Array<Scheduler> schedulers = new Array<>();
+    private float timeStep = 1 / 60f;
 
 
     public Game(Batch batch, OrthographicCamera camera) {
@@ -107,12 +109,20 @@ public class Game implements Renderable, Updatable, Disposable {
 
     @Override
     public void update(float delta) {
+        // increase game speed (for debugging)
+        if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
+            delta = delta * 2;
+            timeStep = 1 / 30f;
+        } else {
+            timeStep = 1 / 60f;
+        }
+
         ui.update(delta);
 
         // handle pause
         if (handlePause(delta)) return;
 
-        world.step(1 / 60f, 6, 2);
+        world.step(timeStep, 6, 2);
 
         updateManagers(delta);
         tickSchedulers(delta);

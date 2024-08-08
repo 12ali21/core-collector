@@ -18,6 +18,7 @@ public abstract class Structure extends Entity implements Selectable {
     protected final Array<StructurePart> parts;
     protected final Bounds bounds;
     protected final HealthPoints health;
+    private Vector2 center = new Vector2();
 
     public Structure(Builder builder) {
         super(builder.game);
@@ -55,7 +56,8 @@ public abstract class Structure extends Entity implements Selectable {
     }
 
     public Vector2 getCenter() {
-        return new Vector2(bounds.x + (float) bounds.width / 2, bounds.y + (float) bounds.height / 2);
+        center.set(bounds.x + (float) bounds.width / 2, bounds.y + (float) bounds.height / 2);
+        return center;
     }
 
     public HealthPoints getHealth() {

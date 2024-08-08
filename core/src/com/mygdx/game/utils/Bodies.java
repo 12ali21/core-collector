@@ -42,7 +42,7 @@ public class Bodies {
 
     private static FixtureDef getTemplateFixtureDef() {
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.density = 2f;
+        fixtureDef.density = 0.5f;
         fixtureDef.friction = 0.2f;
         fixtureDef.restitution = 0f;
         return fixtureDef;

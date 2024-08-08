@@ -225,7 +225,6 @@ public class EnemyAgent extends Agent implements Disposable {
             }
         },
 
-        //TODO
         AGGRO() {
             @Override
             public void enter(EnemyAgent entity) {
@@ -282,7 +281,7 @@ public class EnemyAgent extends Agent implements Disposable {
 
         @Override
         public void update(EnemyAgent entity) {
-            // TODO: go back to land if out of border
+            // TODO: go back to land if out of border (kinda handled in Membership)
 
         }
 
@@ -308,6 +307,14 @@ public class EnemyAgent extends Agent implements Disposable {
                 entity.owner.damage(bullet.getDamage());
                 if (entity.stateMachine.getCurrentState() == FOLLOW_FORMATION) {
                     entity.membership.requestFormationBreak(bullet.getOwner());
+                } else if (entity.stateMachine.getCurrentState() == MOVING) {
+                    try {
+                        entity.setTarget(bullet.getOwner());
+                        entity.stateMachine.changeState(AGGRO);
+                    } catch (Utils.SingleNodePathException e) {
+                        entity.target = bullet.getOwner();
+                        entity.stateMachine.changeState(ATTACKING);
+                    }
                 }
             }
             return false;

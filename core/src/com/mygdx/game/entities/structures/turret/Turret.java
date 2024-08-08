@@ -42,7 +42,7 @@ public class Turret extends Structure {
     private Enemy target;
     private float wanderingTargetAngle = 0f;
 
-    private final static boolean FIRE_WITHOUT_PILOT = false;
+    private final static boolean FIRE_WITHOUT_PILOT = true;
     private final Vector2 seatingOffset = new Vector2();
     private BotAgent pilot;
     private boolean reservedForPilot = false;
@@ -162,7 +162,10 @@ public class Turret extends Structure {
     }
 
     private boolean faceTarget(float delta) {
-        Vector2 targetPos = target.getCenter();
+        Vector2 targetPos = new Vector2(target.getAgent().getPosition());
+        // predict position
+        float time = getCenter().dst(targetPos) / bulletSpeed;
+        targetPos.mulAdd(target.getAgent().getLinearVelocity(), time);
 
         Vector2 position = getCenter();
         Vector2 direction = targetPos.cpy().sub(position);

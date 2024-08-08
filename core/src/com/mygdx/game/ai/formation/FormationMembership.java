@@ -59,7 +59,7 @@ public class FormationMembership implements com.badlogic.gdx.ai.fma.FormationMem
         GridPoint2 curPoint = new GridPoint2((int) tmp.x, (int) tmp.y);
         tmp = getTargetLocation().getPosition();
         GridPoint2 targetPoint = new GridPoint2((int) tmp.x, (int) tmp.y);
-        // if the target is adjacent or diagonally adjacent arrive at it
+        // if the target is adjacent or diagonally adjacent arrive at it or the agent is outside the borders
         if (targetPoint.dst(curPoint) <= 1f + 0.05f
                 || canReachDiagonal(curPoint.x, curPoint.y, targetPoint.x, targetPoint.y)
                 || !game.map.isWithinBoundary(curPoint.x, curPoint.y)) {
