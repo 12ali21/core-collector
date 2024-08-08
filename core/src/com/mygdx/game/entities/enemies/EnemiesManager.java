@@ -6,6 +6,7 @@ import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Updatable;
 import com.mygdx.game.ai.MessageType;
@@ -36,8 +37,10 @@ public class EnemiesManager implements Updatable, Telegraph {
 
     public EnemiesManager(Game game) {
         this.game = game;
-        Debug.addButton("Spawn Enemy", () -> {
-            Enemy enemy = new RedCreep(game, new Vector2(1.5f, 1.5f));
+
+        Debug.addSpawnButton("Spawn Enemy", (x, y) -> {
+            Vector3 worldPos = game.unproject(x, y);
+            Enemy enemy = new RedCreep(game, new Vector2(worldPos.x, worldPos.y));
             game.entities.addEntity(enemy);
             enemies.add(enemy);
         });

@@ -1,10 +1,7 @@
 package com.mygdx.game.utils;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
@@ -42,6 +39,9 @@ public class Debug {
     private static float timeBuffer = 0;
     private static Camera gameCamera;
     private static int frames;
+
+    private static boolean isSpawning;
+    private static SpawnRunnable currentSpawnRunnable;
 
 
     static {
@@ -88,6 +88,20 @@ public class Debug {
         log(DRAWS_TAG, "");
 
         stage.addActor(table);
+
+        stage.addListener(new ClickListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (isSpawning) {
+                    isSpawning = false;
+                    // scene2d has different coordinates system for some reason
+                    currentSpawnRunnable.spawn(x, Gdx.graphics.getHeight() - y);
+                    Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     public static void drawPoint(String tag, Vector2 v) {
@@ -148,6 +162,20 @@ public class Debug {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 runnable.run();
+            }
+        });
+        table.add(button).left();
+        table.row();
+    }
+
+    public static void addSpawnButton(String tag, SpawnRunnable runnable) {
+        TextButton button = new TextButton(tag, skin);
+        button.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                currentSpawnRunnable = runnable;
+                isSpawning = true;
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Crosshair);
             }
         });
         table.add(button).left();
@@ -256,5 +284,9 @@ public class Debug {
             this.start = start;
             this.end = end;
         }
+    }
+
+    public interface SpawnRunnable {
+        void spawn(float x, float y);
     }
 }

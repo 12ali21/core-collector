@@ -66,14 +66,13 @@ public class UIManager implements Renderable, Updatable, Disposable {
                 }
                 return super.keyDown(event, keycode);
             }
-        });
-        stage.addListener(new InputListener() {
-            @Override
+
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if (building && !builderTable.isVisible()) {
                     showBuilder();
+                    return true;
                 }
-                return super.touchDown(event, x, y, pointer, button);
+                return false;
             }
         });
 

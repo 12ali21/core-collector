@@ -111,8 +111,8 @@ public class Game implements Renderable, Updatable, Disposable {
     public void update(float delta) {
         // increase game speed (for debugging)
         if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
-            delta = delta * 2;
-            timeStep = 1 / 30f;
+            delta = delta * 6;
+            timeStep = 1 / 10f;
         } else {
             timeStep = 1 / 60f;
         }

@@ -11,6 +11,7 @@ import com.badlogic.gdx.ai.steer.behaviors.Arrive;
 import com.badlogic.gdx.ai.steer.behaviors.FollowPath;
 import com.badlogic.gdx.ai.steer.limiters.LinearLimiter;
 import com.badlogic.gdx.ai.steer.utils.paths.LinePath;
+import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
@@ -21,10 +22,7 @@ import com.mygdx.game.entities.enemies.EnemiesManager;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.entities.others.Bullet;
 import com.mygdx.game.entities.structures.Structure;
-import com.mygdx.game.utils.Bodies;
-import com.mygdx.game.utils.Constants;
-import com.mygdx.game.utils.Scheduler;
-import com.mygdx.game.utils.Utils;
+import com.mygdx.game.utils.*;
 import com.mygdx.game.world.Game;
 import com.mygdx.game.world.map.MapNode;
 
@@ -53,7 +51,7 @@ public class EnemyAgent extends Agent implements Disposable {
         this.attackingRange = attackingRange;
         this.damage = damage;
         this.damageCooldown = damageCooldown;
-        stateMachine = new DefaultStateMachine<>(this, EnemyState.IDLE);
+        stateMachine = new DefaultStateMachine<>(this, EnemyState.IDLE, EnemyState.GLOBAL);
         membership = new FormationMembership(game, this);
 
         setMaxLinearAcceleration(2f);
@@ -64,7 +62,7 @@ public class EnemyAgent extends Agent implements Disposable {
                 getMaxLinearSpeed() * 2);
         currentLimiter = walkLimiter;
 
-        arriveTarget = new Arrive<>(this); // staying in position next to target when attacking
+        arriveTarget = new Arrive<>(this);
     }
 
     public boolean setTarget(Structure target) throws Utils.SingleNodePathException {
@@ -133,6 +131,10 @@ public class EnemyAgent extends Agent implements Disposable {
                 timer = damageCooldown;
             }
         }
+        applyArrive();
+    }
+
+    private void applyArrive() {
         arriveTarget.calculateSteering(steering);
         applySteering();
     }
@@ -150,10 +152,23 @@ public class EnemyAgent extends Agent implements Disposable {
 
         super.update();
         stateMachine.update();
+        Debug.log(this + " state", stateMachine.getCurrentState());
     }
 
     public Telegraph getTelegraph() {
         return stateMachine;
+    }
+
+    private Location<Vector2> getBorderLocation() {
+        Location<Vector2> location = new GameLocation();
+        Vector2 locVec = location.getPosition();
+        locVec.set(getPosition());
+        if (locVec.x < 0) locVec.x = 0;
+        else if (locVec.x >= Constants.MAP_WIDTH) locVec.x = Constants.MAP_WIDTH - 1;
+        if (locVec.y < 0) locVec.y = 0;
+        else if (locVec.y >= Constants.MAP_HEIGHT) locVec.y = Constants.MAP_HEIGHT - 1;
+
+        return location;
     }
 
     private void walk() {
@@ -272,6 +287,31 @@ public class EnemyAgent extends Agent implements Disposable {
             public void update(EnemyAgent entity) {
                 entity.followFormation();
             }
+        },
+
+        RETURN_TO_MAP() {
+            @Override
+            public void enter(EnemyAgent entity) {
+                entity.arriveTarget.setTarget(entity.getBorderLocation());
+            }
+
+            @Override
+            public void update(EnemyAgent entity) {
+                if (entity.game.map.isWithinBoundary((int) entity.getPosition().x, (int) entity.getPosition().y)) {
+                    entity.stateMachine.changeState(IDLE);
+                } else {
+                    entity.applyArrive();
+                }
+            }
+        },
+
+        GLOBAL() {
+            @Override
+            public void update(EnemyAgent entity) {
+                if (!entity.game.map.isWithinBoundary((int) entity.getPosition().x, (int) entity.getPosition().y)) {
+                    entity.stateMachine.changeState(RETURN_TO_MAP);
+                }
+            }
         };
 
         @Override
@@ -281,7 +321,6 @@ public class EnemyAgent extends Agent implements Disposable {
 
         @Override
         public void update(EnemyAgent entity) {
-            // TODO: go back to land if out of border (kinda handled in Membership)
 
         }
 
