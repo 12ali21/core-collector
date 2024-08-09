@@ -42,7 +42,6 @@ public class Turret extends Structure {
     private Enemy target;
     private float wanderingTargetAngle = 0f;
 
-    private final static boolean FIRE_WITHOUT_PILOT = true;
     private final Vector2 seatingOffset = new Vector2();
     private BotAgent pilot;
     private boolean reservedForPilot = false;
@@ -260,7 +259,7 @@ public class Turret extends Structure {
 
             @Override
             public void update(Turret entity) {
-                if (entity.pilot != null || FIRE_WITHOUT_PILOT) {
+                if (entity.pilot != null || Debug.isDebugging()) {
                     entity.stateMachine.changeState(SEARCHING);
                 }
             }
@@ -306,7 +305,7 @@ public class Turret extends Structure {
         GLOBAL() {
             @Override
             public void update(Turret entity) {
-                if (entity.pilot == null && !FIRE_WITHOUT_PILOT) {
+                if (entity.pilot == null && !Debug.isDebugging()) {
                     entity.stateMachine.changeState(IDLE);
                 }
             }
