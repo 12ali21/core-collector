@@ -42,7 +42,7 @@ public class MainMenuScreen extends ScreenAdapter {
                 .uniform()
                 .fill()
                 .maxWidth(300f)
-                .height(40f)
+                .height(80f)
                 .growX();
         TextButton newGameButton = new TextButton("New Game", skin);
         root.add(newGameButton);

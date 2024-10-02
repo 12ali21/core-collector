@@ -27,7 +27,7 @@ public class CoreGame extends ApplicationAdapter {
             gameScreen.show();
             currentScreen = gameScreen;
         });
-        currentScreen = gameScreen = new GameScreen(); // FIXME: for convenience
+        currentScreen = gameScreen = mainMenuScreen;
 //        gameScreen = new GameScreen();
 //		gameScreen.show();
     }

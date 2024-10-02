@@ -41,7 +41,7 @@ public class MapManager implements IndexedGraph<MapNode>, Disposable {
     private IndexedAStarPathFinder<MapNode> pathFinder;
     private int nodeIndex;
 
-    public MapManager(Game game, String mapName) {
+    public MapManager(Game game) {
         this.game = game;
         // Load the map
         generator = new MapGenerator(12345);

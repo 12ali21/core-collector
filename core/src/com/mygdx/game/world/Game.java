@@ -81,7 +81,7 @@ public class Game implements Renderable, Updatable, Disposable {
         contactListener = new MyContactListener();
         setContactListeners();
 
-        map = new MapManager(this, "maze");
+        map = new MapManager(this);
         GridPoint2 mapCenter = new GridPoint2((int) (map.getWidth() / 2f), (int) (map.getHeight() / 2f));
         map.emptySpace(mapCenter.x, mapCenter.y, 10, 10);
 

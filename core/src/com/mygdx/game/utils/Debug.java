@@ -9,10 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -44,6 +41,10 @@ public class Debug {
     private static SpawnRunnable currentSpawnRunnable;
 
 
+    private static Table showDebugTable;
+
+    private static Stack stack;
+
     static {
         runtime = Runtime.getRuntime();
 
@@ -73,9 +74,13 @@ public class Debug {
         BUTTON_STYLE.font = skin.getFont("default");
         skin.add("default", BUTTON_STYLE);
 
+        stack = new Stack();
+        stack.setFillParent(true);
+        stage.addActor(stack);
+
         table = new Table();
         table.top().left();
-        table.setFillParent(true);
+        stack.add(table);
 
         logs = new HashMap<>();
         rects = new HashMap<>();
@@ -87,7 +92,6 @@ public class Debug {
         log(BINDS_TAG, "");
         log(DRAWS_TAG, "");
 
-        stage.addActor(table);
 
         stage.addListener(new ClickListener() {
             @Override
@@ -102,6 +106,12 @@ public class Debug {
                 return false;
             }
         });
+
+        showDebugTable = new Table(skin);
+        showDebugTable.setFillParent(true);
+        Label showDebugLabel = new Label("Press f3 for debug mode", LABEL_STYLE);
+        showDebugTable.add(showDebugLabel).expand().left().top().row();
+        stack.add(showDebugTable);
     }
 
     public static void drawPoint(String tag, Vector2 v) {
@@ -195,7 +205,17 @@ public class Debug {
     }
 
     public static void render(float delta) {
-        if (!doDebugging) return;
+
+        stage.act(delta);
+        stage.draw();
+        if (doDebugging) {
+            table.setVisible(true);
+            showDebugTable.setVisible(false);
+        } else {
+            table.setVisible(false);
+            showDebugTable.setVisible(true);
+            return;
+        }
 
         frames++;
         timeBuffer += delta;
@@ -210,9 +230,6 @@ public class Debug {
             log(DRAWS_TAG, "" + profiler.getDrawCalls());
             profiler.reset();
         }
-
-        stage.act(delta);
-        stage.draw();
 
         if (gameCamera != null) {
             shapeRenderer.setProjectionMatrix(gameCamera.combined);
